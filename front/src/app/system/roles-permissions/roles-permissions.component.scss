@@ -1,0 +1,198 @@
+/* src/app/system/roles-permissions/roles-permissions.component.scss */
+
+.roles-permissions-container {
+  max-width: 1400px;
+  margin: 20px auto;
+  padding: 20px;
+  min-height: 100vh;
+  color: var(--text-primary, rgba(0, 0, 0, 0.87));
+  background: var(--background, #fafafa);
+  
+  &.theme-dark {
+    background: var(--background, #121212);
+    color: var(--text-primary, rgba(255, 255, 255, 0.87));
+  }
+}
+
+.roles-permissions-card {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+  background: var(--surface, #ffffff);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  
+  .theme-dark & {
+    background: var(--surface, #1e1e1e);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.card-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+  
+  .theme-dark & {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+  }
+  
+  h2 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-primary);
+    font-size: 1.75em;
+    font-weight: 600;
+    
+    mat-icon {
+      color: var(--primary-blue, #2196f3);
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+    }
+  }
+}
+
+.tab-content {
+  padding: 20px 0;
+}
+
+.actions-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.form-card {
+  margin-bottom: 20px;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.permissions-section {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  
+  .theme-dark & {
+    border-top-color: rgba(255, 255, 255, 0.08);
+  }
+  
+  h3 {
+    margin: 0 0 16px 0;
+    color: var(--text-primary);
+    font-size: 1.1em;
+    font-weight: 600;
+  }
+}
+
+.permissions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+  
+  .theme-dark & {
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.permission-meta {
+  font-size: 0.85em;
+  color: var(--text-secondary);
+  margin-left: 4px;
+}
+
+.table-card {
+  margin-top: 20px;
+}
+
+.roles-table,
+.permissions-table {
+  width: 100%;
+  
+  .mat-header-cell {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  
+  .mat-cell {
+    color: var(--text-secondary);
+  }
+}
+
+.system-role-chip {
+  margin-left: 8px;
+  font-size: 0.75em;
+  background: var(--primary-blue, #2196f3) !important;
+  color: white !important;
+}
+
+.active-chip {
+  background: #4caf50 !important;
+  color: white !important;
+}
+
+.inactive-chip {
+  background: #9e9e9e !important;
+  color: white !important;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+  
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+  
+  p {
+    margin: 0;
+    font-size: 1.1em;
+  }
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 1000;
+  
+  .theme-dark & {
+    background: rgba(0, 0, 0, 0.8);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .roles-permissions-container {
+    padding: 10px;
+  }
+  
+  .permissions-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+

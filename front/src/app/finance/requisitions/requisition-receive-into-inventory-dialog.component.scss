@@ -1,0 +1,38 @@
+.full-width {
+  width: 100%;
+}
+
+.meta {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.lines {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 10px 0 12px;
+}
+
+.line {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.desc .title {
+  font-weight: 700;
+}
+
+.desc .sub {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+.qty {
+  width: 140px;
+}
+

@@ -1,0 +1,81 @@
+.calendar-container {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.calendar-header {
+  margin-bottom: 20px;
+  
+  mat-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    mat-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
+  }
+  
+  mat-card-actions {
+    padding: 16px;
+    margin: 0;
+  }
+}
+
+.calendar-card {
+  .mat-card-content {
+    padding: 20px;
+    position: relative;
+  }
+}
+
+.loading-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+}
+
+.calendar-view {
+  min-height: 600px;
+}
+
+::ng-deep {
+  .fc {
+    font-family: inherit;
+  }
+  
+  .fc-event {
+    cursor: pointer;
+  }
+  
+  .fc-daygrid-event {
+    border-radius: 4px;
+  }
+  
+  .fc-button-primary {
+    background-color: var(--primary-color, #2196f3);
+    border-color: var(--primary-color, #2196f3);
+    
+    &:hover {
+      background-color: var(--primary-color-dark, #1976d2);
+      border-color: var(--primary-color-dark, #1976d2);
+    }
+  }
+  
+  .fc-today-button {
+    background-color: var(--accent-color, #ffc107);
+    border-color: var(--accent-color, #ffc107);
+    color: #000;
+    
+    &:hover {
+      background-color: var(--accent-color-dark, #f57c00);
+      border-color: var(--accent-color-dark, #f57c00);
+    }
+  }
+}
+

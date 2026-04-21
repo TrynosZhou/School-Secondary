@@ -1,0 +1,37 @@
+<h2 mat-dialog-title>Stocktake</h2>
+
+<div mat-dialog-content>
+  <div class="context">
+    <mat-icon>fact_check</mat-icon>
+    <div>
+      <div class="context-title">{{ data.item.name }}</div>
+      <div class="context-subtitle">
+        Current: {{ data.item.quantityOnHand }}{{ data.item.unit ? ' ' + data.item.unit : '' }}
+      </div>
+    </div>
+  </div>
+
+  <form [formGroup]="form" class="dialog-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Counted quantity</mat-label>
+      <input matInput type="number" formControlName="quantityOnHand" min="0" />
+      <mat-hint>This sets the quantity to the counted amount.</mat-hint>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Reference (optional)</mat-label>
+      <input matInput formControlName="reference" placeholder="e.g. Term 2 stocktake" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Notes (optional)</mat-label>
+      <textarea matInput rows="3" formControlName="notes"></textarea>
+    </mat-form-field>
+  </form>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Cancel</button>
+  <button mat-raised-button color="primary" type="button" (click)="save()">Save</button>
+</div>
+

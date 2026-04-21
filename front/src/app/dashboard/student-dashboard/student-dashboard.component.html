@@ -1,0 +1,240 @@
+<div class="student-dashboard-main-container">
+  <div class="quick-actions">
+    <a routerLink="/student-financials" class="quick-action-card">
+      <mat-icon>account_balance_wallet</mat-icon>
+      <div>
+        <h4>Finance Overview</h4>
+        <p>Check balances, invoices, and receipts.</p>
+      </div>
+    </a>
+    <a routerLink="/reports" class="quick-action-card">
+      <mat-icon>receipt_long</mat-icon>
+      <div>
+        <h4>Progress Reports</h4>
+        <p>Open your latest reports quickly.</p>
+      </div>
+    </a>
+    <a routerLink="/messaging" class="quick-action-card">
+      <mat-icon>message</mat-icon>
+      <div>
+        <h4>Messages</h4>
+        <p>View school communications.</p>
+      </div>
+    </a>
+  </div>
+
+  <div class="summary-cards-container">
+    <ng-container *ngIf="(summaryLoading$ | async) || (enrolmentLoading$ | async)">
+      <div class="loading-spinner">Loading student data...</div>
+    </ng-container>
+
+    <ng-container *ngIf="studentDetails$ | async as student; else noStudentData">
+      <div class="summary-card student-details-card">
+        <h4>Student Details</h4>
+        <div class="data-item">
+          <label>Name:</label>
+          <span>{{ student.name }} {{ student.surname }}</span>
+        </div>
+        <div class="data-item">
+          <label>Student Number:</label>
+          <span>{{ student.studentNumber }}</span>
+        </div>
+
+        <div class="data-item">
+          <label>Gender:</label>
+          <span>{{ student.gender }}</span>
+        </div>
+
+        <div class="data-item">
+          <label>Cell:</label>
+          <span>{{ student.cell }}</span>
+        </div>
+        <div class="data-item">
+          <label>Email:</label>
+          <span>{{ student.email }}</span>
+        </div>
+        <div class="data-item">
+          <label>Address:</label>
+          <span>{{ student.address }}</span>
+        </div>
+
+      </div>
+    </ng-container>
+    <ng-template #noStudentData>
+      <div *ngIf="!(enrolmentLoading$ | async) && !(studentDetails$ | async)" class="no-data-message">
+        No student details available.
+      </div>
+    </ng-template>
+
+    <ng-container *ngIf="currentEnrolment$ | async as enrolment; else noEnrolmentData">
+      <div class="summary-card enrolment-details-card">
+        <h4>Current Enrolment</h4>
+        <div class="data-item">
+          <label>Class:</label>
+          <span>{{ enrolment.name }}</span>
+        </div>
+        <div class="data-item">
+          <label>Term Number:</label>
+          <span>{{ enrolment.num }}</span>
+        </div>
+        <div class="data-item">
+          <label>Term Year:</label>
+          <span>{{ enrolment.year }}</span>
+        </div>
+        <div class="data-item">
+          <label>Residence Type:</label>
+          <span>{{ enrolment.residence }}</span>
+        </div>
+      </div>
+    </ng-container>
+    <ng-template #noEnrolmentData>
+      <div *ngIf="!(enrolmentLoading$ | async) && !(currentEnrolment$ | async)" class="no-data-message">
+        No current enrolment data available.
+      </div>
+    </ng-template>
+
+
+    <ng-container *ngIf="dashboardSummary$ | async as summary; else noSummaryData">
+      <div class="summary-card academic-card">
+        <h4>AI Advisory Insights</h4>
+        <div class="data-item">
+          <label>Study Priority:</label>
+          <span>{{ buildStudyPriorityTip(summary) }}</span>
+        </div>
+        <div class="data-item">
+          <label>Finance Risk:</label>
+          <span>{{ buildFinanceRiskTip(summary) }}</span>
+        </div>
+      </div>
+
+      <div class="summary-card financial-card">
+        <h4>Financial Overview</h4>
+
+        <ng-container *ngIf="summary.financialSummary as financialSummary">
+          <div class="data-item">
+            <label>Total Billed:</label>
+            <span>{{ financialSummary.totalBilled | currency:'USD':'symbol':'1.2-2' }}</span>
+          </div>
+          <div class="data-item">
+            <label>Total Paid:</label>
+            <span>{{ financialSummary.totalPaid | currency:'USD':'symbol':'1.2-2' }}</span>
+          </div>
+
+          <div class="data-item amount-owed">
+            <label>Total Amount Owed:</label>
+            <span [class.positive]="financialSummary.amountOwed <= 0"
+              [class.negative]="financialSummary.amountOwed > 0">
+              {{ financialSummary.amountOwed | currency:'USD':'symbol':'1.2-2' }}
+            </span>
+          </div>
+
+          <div
+            *ngIf="financialSummary && financialSummary.outstandingBalances && financialSummary.outstandingBalances.length > 0"
+            class="outstanding-container">
+            <label class="outstanding-label">Outstanding Balances by Term:</label>
+            <div *ngFor="let balance of financialSummary.outstandingBalances" class="outstanding-item">
+              <span>{{ balance.term }} {{ balance.year }}:</span>
+              <span class="outstanding-amount">{{ balance.amount | currency:'USD':'symbol':'1.2-2' }}</span>
+            </div>
+          </div>
+          <div *ngIf="financialSummary.outstandingBalances?.length === 0 && (financialSummary.amountOwed ?? 0) > 0"
+            class="outstanding-container">
+            <label class="outstanding-label">Amount owed is not yet allocated to a term.</label>
+          </div>
+        </ng-container>
+
+      </div>
+
+      <div class="summary-card liabilities-card">
+        <h4>Outstanding liabilities (lost/damaged items)</h4>
+        <div *ngIf="liabilitiesLoading" class="loading-spinner">Loading liabilities...</div>
+        <div *ngIf="!liabilitiesLoading && !liabilities.length" class="no-data-message">
+          No outstanding liabilities.
+        </div>
+        <div *ngIf="!liabilitiesLoading && liabilities.length" class="liabilities-list">
+          <div class="liability" *ngFor="let c of liabilities">
+            <div class="desc">{{ c.description }}</div>
+            <div class="meta">
+              <span class="amount">{{ c.amount | currency:'USD':'symbol':'1.2-2' }}</span>
+              <span class="status">{{ c.status | titlecase }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="hint">
+          These charges are added to your next invoice after approvals.
+        </div>
+      </div>
+
+      <div class="summary-card academic-card">
+        <h4>Academic Overview</h4>
+        <div class="data-item">
+          <label>Report Cards:</label>
+          <span>{{ summary.academicSummary.numberOfReportCards }}</span>
+        </div>
+        <div class="data-item">
+          <label>Best Position:</label>
+          <span *ngIf="summary.academicSummary.bestPosition">
+            {{ summary.academicSummary.bestPosition.position }} ({{ summary.academicSummary.bestPosition.term }} {{
+            summary.academicSummary.bestPosition.year }}, {{ summary.academicSummary.bestPosition.class }})
+          </span>
+          <span *ngIf="!summary.academicSummary.bestPosition" class="no-data-text">N/A</span>
+        </div>
+        <div class="data-item">
+          <label>Worst Position:</label>
+          <span *ngIf="summary.academicSummary.worstPosition">
+            {{ summary.academicSummary.worstPosition.position }} ({{ summary.academicSummary.worstPosition.term }} {{
+            summary.academicSummary.worstPosition.year }}, {{ summary.academicSummary.worstPosition.class }})
+          </span>
+          <span *ngIf="!summary.academicSummary.worstPosition" class="no-data-text">N/A</span>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #noSummaryData>
+      <div *ngIf="!(summaryLoading$ | async)" class="no-data-message">
+        No academic or financial summary data available for this student.
+      </div>
+    </ng-template>
+  </div>
+
+  <div class="continuous-analytics-container">
+    <h3>Continuous Assessment Insights</h3>
+    <div *ngIf="caLoading" class="loading-spinner">
+      Loading analytics...
+    </div>
+    <ng-container *ngIf="!caLoading && caAnalytics as analytics">
+      <div class="analytics-cards">
+        <div class="analytics-card">
+          <label>Average Score</label>
+          <span>{{ analytics.averageScore | number: '1.0-1' }}%</span>
+        </div>
+        <div class="analytics-card">
+          <label>Total Assessments</label>
+          <span>{{ analytics.totalEntries }}</span>
+        </div>
+      </div>
+
+      <div class="subject-averages-card" *ngIf="analytics.subjectAverages?.length">
+        <h4>Average by Subject</h4>
+        <div class="subject-average" *ngFor="let subject of analytics.subjectAverages">
+          <span>{{ subject.subject }}</span>
+          <span>{{ subject.average | number:'1.0-1' }}%</span>
+        </div>
+      </div>
+
+      <div class="recent-assessments-card" *ngIf="analytics.recentAssessments?.length">
+        <h4>Recent Assessments</h4>
+        <div class="recent-assessment" *ngFor="let entry of analytics.recentAssessments">
+          <div>
+            <div class="topic">{{ entry.topicOrSkill }}</div>
+            <div class="meta">{{ entry.assessmentDate | date:'mediumDate' }} • {{ entry.assessmentType }}</div>
+          </div>
+          <div class="score-pill">{{ entry.score }}<span *ngIf="entry.maxScore"> / {{ entry.maxScore }}</span></div>
+        </div>
+      </div>
+    </ng-container>
+    <div *ngIf="!caLoading && !caAnalytics?.totalEntries" class="no-data-message">
+      No continuous assessment data available yet.
+    </div>
+  </div>
+</div>

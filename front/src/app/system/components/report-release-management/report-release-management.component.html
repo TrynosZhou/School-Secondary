@@ -1,0 +1,160 @@
+<div class="report-release-management">
+  <div class="header">
+    <h1>Report Release Management</h1>
+    <p class="subtitle">Manage when and how student reports are released to students and parents</p>
+  </div>
+
+  <div class="actions-toolbar">
+    <button mat-raised-button color="primary" (click)="openGenerateFromTermsDialog()">
+      <mat-icon>auto_awesome</mat-icon>
+      Generate From Terms
+    </button>
+    
+    <button mat-raised-button color="accent" (click)="openGenerateSessionsDialog()">
+      <mat-icon>add_circle</mat-icon>
+      Manual Generate
+    </button>
+    
+    <button mat-raised-button color="accent" (click)="openBulkUpdateDialog()">
+      <mat-icon>edit</mat-icon>
+      Bulk Update
+    </button>
+    
+    <button mat-raised-button color="warn" (click)="processScheduledReleases()">
+      <mat-icon>schedule</mat-icon>
+      Process Scheduled
+    </button>
+    
+    <button mat-stroked-button (click)="exportToCSV()">
+      <mat-icon>download</mat-icon>
+      Export CSV
+    </button>
+    
+    <button mat-stroked-button (click)="refreshData()">
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+  </div>
+
+  <div class="content">
+    <mat-card class="table-card">
+      <mat-card-content>
+        <div class="table-container">
+          <table mat-table [dataSource]="(reportReleases$ | async) || []" class="report-release-table">
+            <!-- Term Number Column -->
+            <ng-container matColumnDef="termNumber">
+              <th mat-header-cell *matHeaderCellDef>Term</th>
+              <td mat-cell *matCellDef="let report">
+                <span class="term-badge">Term {{ report.termNumber }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Term Year Column -->
+            <ng-container matColumnDef="termYear">
+              <th mat-header-cell *matHeaderCellDef>Year</th>
+              <td mat-cell *matCellDef="let report">{{ report.termYear }}</td>
+            </ng-container>
+
+            <!-- Exam Type Column -->
+            <ng-container matColumnDef="examType">
+              <th mat-header-cell *matHeaderCellDef>Exam Type</th>
+              <td mat-cell *matCellDef="let report">
+                <span class="exam-type-badge">{{ getExamTypeLabel(report.examType) }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Release Status Column -->
+            <ng-container matColumnDef="isReleased">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let report">
+                <mat-chip 
+                  [ngClass]="getReleaseStatusClass(report.isReleased)"
+                  selected="true">
+                  <mat-icon *ngIf="report.isReleased">check_circle</mat-icon>
+                  <mat-icon *ngIf="!report.isReleased">schedule</mat-icon>
+                  {{ getReleaseStatusLabel(report.isReleased) }}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <!-- Release Date Column -->
+            <ng-container matColumnDef="releaseDate">
+              <th mat-header-cell *matHeaderCellDef>Released Date</th>
+              <td mat-cell *matCellDef="let report">
+                <span class="date-text">{{ formatDate(report.releaseDate) }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Scheduled Release Date Column -->
+            <ng-container matColumnDef="scheduledReleaseDate">
+              <th mat-header-cell *matHeaderCellDef>Scheduled Release</th>
+              <td mat-cell *matCellDef="let report">
+                <span class="date-text">{{ formatDate(report.scheduledReleaseDate) }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Released By Column -->
+            <ng-container matColumnDef="releasedBy">
+              <th mat-header-cell *matHeaderCellDef>Released By</th>
+              <td mat-cell *matCellDef="let report">
+                <span *ngIf="report.releasedByUser" class="released-by">
+                  {{ report.releasedByUser.username }}
+                </span>
+                <span *ngIf="!report.releasedByUser" class="not-released">-</span>
+              </td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let report">
+                <button 
+                  mat-icon-button 
+                  (click)="openEditDialog(report)"
+                  matTooltip="Edit release settings">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                
+                <button 
+                  mat-icon-button 
+                  (click)="toggleReleaseStatus(report)"
+                  [color]="report.isReleased ? 'warn' : 'primary'"
+                  matTooltip="Toggle release status">
+                  <mat-icon>{{ report.isReleased ? 'lock' : 'lock_open' }}</mat-icon>
+                </button>
+                
+                <button 
+                  mat-icon-button 
+                  color="warn"
+                  (click)="deleteReportRelease(report)"
+                  matTooltip="Delete release setting">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+
+          <!-- Loading State -->
+          <div *ngIf="loading$ | async" class="loading-overlay">
+            <mat-spinner></mat-spinner>
+            <p>Loading report releases...</p>
+          </div>
+
+          <!-- Empty State -->
+          <div *ngIf="(reportReleases$ | async)?.length === 0 && !(loading$ | async)" class="empty-state">
+            <mat-icon>folder_open</mat-icon>
+            <h3>No Report Release Settings Found</h3>
+            <p>Generate exam sessions to get started with managing report releases.</p>
+            <button mat-raised-button color="primary" (click)="openGenerateSessionsDialog()">
+              <mat-icon>add_circle</mat-icon>
+              Generate Sessions
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

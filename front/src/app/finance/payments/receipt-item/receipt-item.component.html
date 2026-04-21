@@ -1,0 +1,156 @@
+<div 
+  class="receipt-container" 
+  *ngIf="receipt" 
+  [class.theme-dark]="currentTheme === 'dark'"
+  [class.voided-receipt]="receipt.isVoided"
+  [class.approved-receipt]="receipt.approved && !receipt.isVoided">
+  
+  <div class="receipt-actions">
+    <button 
+      type="button" 
+      mat-mini-fab 
+      color="accent" 
+      class="action-btn download-btn" 
+      (click)="download()"
+      matTooltip="Download Receipt">
+      <mat-icon>download</mat-icon>
+    </button>
+    <button 
+      type="button" 
+      mat-mini-fab 
+      color="accent" 
+      class="action-btn print-btn" 
+      (click)="printReceipt()"
+      matTooltip="Print Receipt">
+      <mat-icon>print</mat-icon>
+    </button>
+    <button 
+      *ngIf="!receipt.isVoided && (canVoidReceipt$ | async)" 
+      type="button" 
+      mat-mini-fab 
+      color="warn"
+      class="action-btn void-btn" 
+      (click)="voidReceipt()" 
+      matTooltip="Void Receipt">
+      <mat-icon>cancel</mat-icon>
+    </button>
+  </div>
+  <div class="receipt-header">
+    <div class="header-content">
+      <img src="../../../assets/jhs_logo.jpg" alt="School logo" class="header-logo" />
+      <div class="header-title-section">
+        <h1 class="receipt-title">RECEIPT</h1>
+        <div class="receipt-status-badge" [class.approved]="receipt.approved && !receipt.isVoided" [class.pending]="!receipt.approved && !receipt.isVoided">
+          <mat-icon *ngIf="receipt.approved && !receipt.isVoided">check_circle</mat-icon>
+          <mat-icon *ngIf="!receipt.approved && !receipt.isVoided">pending_actions</mat-icon>
+          <span>{{ receipt.approved ? 'Approved' : 'Pending' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="receipt-details">
+    <div class="detail-item">
+      <mat-icon class="detail-icon">receipt</mat-icon>
+      <div class="detail-content">
+        <span class="detail-label">Receipt #</span>
+        <span class="detail-value">{{ receipt.receiptNumber }}</span>
+      </div>
+    </div>
+    <div class="detail-item">
+      <mat-icon class="detail-icon">event</mat-icon>
+      <div class="detail-content">
+        <span class="detail-label">Payment Date</span>
+        <span class="detail-value">{{ receipt.paymentDate | date:'shortDate' }}</span>
+      </div>
+    </div>
+    <div class="detail-item">
+      <mat-icon class="detail-icon">payment</mat-icon>
+      <div class="detail-content">
+        <span class="detail-label">Payment Method</span>
+        <span class="detail-value">{{ receipt.paymentMethod }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="receipt-body-content">
+    <div *ngIf="receipt.isVoided" class="void-overlay">
+      <span class="void-text">VOIDED</span>
+      <span class="void-reason" *ngIf="receipt.voidedBy">By: {{ receipt.voidedBy }}</span>
+      <span class="void-date" *ngIf="receipt.voidedAt">On: {{ receipt.voidedAt | date:'short' }}</span>
+    </div>
+
+    <div class="section from-to-section">
+      <div class="party-block from-block">
+        <div class="section-header">
+          <mat-icon class="section-icon">person</mat-icon>
+          <h3 class="section-heading">From</h3>
+        </div>
+        <div class="party-details">
+          <p class="party-name" *ngIf="receipt.student">{{ receipt.student.name }} {{ receipt.student.surname }} ({{ receipt.student.studentNumber }})</p>
+          <p *ngIf="receipt.enrol"><mat-icon class="inline-icon">school</mat-icon>Enrolled in {{ receipt.enrol.name }} Term {{ receipt.enrol.num }}, {{ receipt.enrol.year }}</p>
+          <p *ngIf="receipt.student?.address"><mat-icon class="inline-icon">location_on</mat-icon>{{ receipt.student.address }}</p>
+          <p *ngIf="receipt.student?.cell"><mat-icon class="inline-icon">phone</mat-icon>{{ receipt.student.cell }}</p>
+          <p *ngIf="receipt.student?.email"><mat-icon class="inline-icon">email</mat-icon>{{ receipt.student.email }}</p>
+        </div>
+      </div>
+      <div class="party-block to-block">
+        <div class="section-header">
+          <mat-icon class="section-icon">business</mat-icon>
+          <h3 class="section-heading">To</h3>
+        </div>
+        <div class="party-details">
+          <p class="party-name">Junior High School</p>
+          <p><mat-icon class="inline-icon">location_on</mat-icon>30588 Lundi Drive, Rhodene, Masvingo</p>
+          <p><mat-icon class="inline-icon">phone</mat-icon>+263 392 263 293</p>
+          <p><mat-icon class="inline-icon">phone</mat-icon>+263 78 223 8026</p>
+          <p><mat-icon class="inline-icon">email</mat-icon>info@juniorhighschool.ac.zw</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section summary-section">
+      <div class="section-header">
+        <mat-icon class="section-icon">attach_money</mat-icon>
+        <h3 class="section-heading">Payment Summary</h3>
+      </div>
+      <div class="summary-totals">
+        <div class="total-row invoice-row">
+          <div class="total-label">
+            <mat-icon class="total-icon">description</mat-icon>
+            <span>Invoice Paid</span>
+          </div>
+          <div class="total-value">
+            <span *ngFor="let allocation of receipt.allocations; let isLast = last">
+              {{ allocation?.invoice?.invoiceNumber }}<span *ngIf="!isLast">, </span>
+            </span>
+            <span *ngIf="!receipt.allocations || receipt.allocations.length === 0" class="no-invoice">None</span>
+          </div>
+        </div>
+        <div class="total-row amount-paid">
+          <div class="total-label">
+            <mat-icon class="total-icon">paid</mat-icon>
+            <span>Amount Paid</span>
+          </div>
+          <span class="total-value paid-amount">{{ receipt.amountPaid | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="total-row amount-outstanding">
+          <div class="total-label">
+            <mat-icon class="total-icon">account_balance_wallet</mat-icon>
+            <span>Amount Outstanding</span>
+          </div>
+          <span class="total-value outstanding-amount">{{ (balance ? balance : 0) | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-remarks">
+      <p class="section-heading">Remarks:</p>
+      <p>{{ receipt.description || 'Thank You For Your Prompt Payment, We Appreciate Your Business' }}</p>
+    </div>
+  </div>
+  <div class="footer">
+    <p class="powered-by" *ngIf="receipt.servedBy">served by : {{ receipt.servedBy }}</p>
+    <p class="thank-you">Thank you for your business!</p>
+  </div>
+</div>

@@ -1,0 +1,336 @@
+@use '@angular/material' as mat;
+@import '@angular/material/theming';
+
+// Include the common styles for Angular Material
+@include mat.core();
+
+// Custom color palettes for Junior High School
+// Primary: Blue (school identity)
+// Accent: Gold (premium touch)
+// Warn: Brown (warmth)
+
+// Light Theme Colors
+$jhs-light-primary: mat.define-palette((
+  50: #e3f2fd,
+  100: #bbdefb,
+  200: #90caf9,
+  300: #64b5f6,
+  400: #42a5f5,
+  500: #2196f3, // Primary blue
+  600: #1e88e5,
+  700: #1976d2,
+  800: #1565c0,
+  900: #0d47a1,
+  A100: #82b1ff,
+  A200: #448aff,
+  A400: #2979ff,
+  A700: #2962ff,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: rgba(black, 0.87),
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: rgba(black, 0.87),
+    A200: white,
+    A400: white,
+    A700: white,
+  )
+));
+
+$jhs-light-accent: mat.define-palette((
+  50: #fff8e1,
+  100: #ffecb3,
+  200: #ffe082,
+  300: #ffd54f,
+  400: #ffca28,
+  500: #ffc107, // Gold
+  600: #ffb300,
+  700: #ffa000,
+  800: #ff8f00,
+  900: #ff6f00,
+  A100: #ffe57f,
+  A200: #ffd740,
+  A400: #ffc400,
+  A700: #ffab00,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: rgba(black, 0.87),
+    500: rgba(black, 0.87),
+    600: rgba(black, 0.87),
+    700: rgba(black, 0.87),
+    800: white,
+    900: white,
+    A100: rgba(black, 0.87),
+    A200: rgba(black, 0.87),
+    A400: rgba(black, 0.87),
+    A700: rgba(black, 0.87),
+  )
+));
+
+$jhs-light-warn: mat.define-palette((
+  50: #efebe9,
+  100: #d7ccc8,
+  200: #bcaaa4,
+  300: #a1887f,
+  400: #8d6e63,
+  500: #795548, // Brown
+  600: #6d4c41,
+  700: #5d4037,
+  800: #4e342e,
+  900: #3e2723,
+  A100: #ff9e80,
+  A200: #ff6e40,
+  A400: #ff3d00,
+  A700: #dd2c00,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: white,
+    400: white,
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: rgba(black, 0.87),
+    A200: rgba(black, 0.87),
+    A400: white,
+    A700: white,
+  )
+));
+
+// Dark Theme Colors
+$jhs-dark-primary: mat.define-palette((
+  50: #e3f2fd,
+  100: #bbdefb,
+  200: #90caf9,
+  300: #64b5f6,
+  400: #42a5f5,
+  500: #64b5f6, // Lighter blue for dark theme
+  600: #42a5f5,
+  700: #2196f3,
+  800: #1976d2,
+  900: #1565c0,
+  A100: #82b1ff,
+  A200: #448aff,
+  A400: #2979ff,
+  A700: #2962ff,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: rgba(black, 0.87),
+    500: rgba(black, 0.87),
+    600: rgba(black, 0.87),
+    700: white,
+    800: white,
+    900: white,
+    A100: rgba(black, 0.87),
+    A200: white,
+    A400: white,
+    A700: white,
+  )
+));
+
+$jhs-dark-accent: mat.define-palette((
+  50: #fff8e1,
+  100: #ffecb3,
+  200: #ffe082,
+  300: #ffd54f,
+  400: #ffca28,
+  500: #ffc107,
+  600: #ffb300,
+  700: #ffa000,
+  800: #ff8f00,
+  900: #ff6f00,
+  A100: #ffe57f,
+  A200: #ffd740,
+  A400: #ffc400,
+  A700: #ffab00,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: rgba(black, 0.87),
+    500: rgba(black, 0.87),
+    600: rgba(black, 0.87),
+    700: rgba(black, 0.87),
+    800: white,
+    900: white,
+    A100: rgba(black, 0.87),
+    A200: rgba(black, 0.87),
+    A400: rgba(black, 0.87),
+    A700: rgba(black, 0.87),
+  )
+));
+
+$jhs-dark-warn: mat.define-palette((
+  50: #efebe9,
+  100: #d7ccc8,
+  200: #bcaaa4,
+  300: #a1887f,
+  400: #8d6e63,
+  500: #a1887f,
+  600: #8d6e63,
+  700: #795548,
+  800: #6d4c41,
+  900: #5d4037,
+  A100: #ff9e80,
+  A200: #ff6e40,
+  A400: #ff3d00,
+  A700: #dd2c00,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: white,
+    400: white,
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: rgba(black, 0.87),
+    A200: rgba(black, 0.87),
+    A400: white,
+    A700: white,
+  )
+));
+
+// Light theme
+$jhs-light-theme: mat.define-light-theme((
+  color: (
+    primary: $jhs-light-primary,
+    accent: $jhs-light-accent,
+    warn: $jhs-light-warn,
+  ),
+  typography: mat.define-typography-config(),
+  density: 0,
+));
+
+// Dark theme
+$jhs-dark-theme: mat.define-dark-theme((
+  color: (
+    primary: $jhs-dark-primary,
+    accent: $jhs-dark-accent,
+    warn: $jhs-dark-warn,
+  ),
+  typography: mat.define-typography-config(),
+  density: 0,
+));
+
+// Apply the light theme by default
+@include mat.all-component-themes($jhs-light-theme);
+
+// Dark theme class
+.dark-theme {
+  @include mat.all-component-colors($jhs-dark-theme);
+}
+
+// Global theme variables for custom CSS
+:root {
+  // Light theme colors
+  --primary-blue: #2196f3;
+  --primary-blue-dark: #1976d2;
+  --accent-gold: #ffc107;
+  --accent-gold-light: #ffd54f;
+  --warn-brown: #795548;
+  --warn-brown-light: #8d6e63;
+  --background: #fafafa;
+  --surface: #ffffff;
+  --text-primary: rgba(0, 0, 0, 0.87);
+  --text-secondary: rgba(0, 0, 0, 0.6);
+  
+  // Animated gradient backgrounds
+  --bg-gradient-light: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+  --bg-gradient-dark: linear-gradient(135deg, #0f2027 0%, #203a43 25%, #2c5364 50%, #3a3a3a 75%, #2c3e50 100%);
+}
+
+.dark-theme {
+  --primary-blue: #64b5f6;
+  --accent-gold: #ffb300;
+  --warn-brown: #a1887f;
+  --background: #121212;
+  --surface: #1e1e1e;
+  --text-primary: rgba(255, 255, 255, 0.87);
+  --text-secondary: rgba(255, 255, 255, 0.6);
+}
+
+// Animated background utilities
+.animated-bg-light {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 40% 20%, rgba(240, 147, 251, 0.3) 0%, transparent 50%);
+    animation: pulse 8s ease-in-out infinite;
+  }
+}
+
+.animated-bg-dark {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0f2027 0%, #203a43 25%, #2c5364 50%, #3a3a3a 75%, #2c3e50 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 20s ease infinite;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 30% 50%, rgba(44, 83, 100, 0.4) 0%, transparent 50%),
+      radial-gradient(circle at 70% 80%, rgba(58, 58, 58, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 50% 20%, rgba(31, 38, 49, 0.3) 0%, transparent 50%);
+    animation: pulse 10s ease-in-out infinite;
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+

@@ -1,0 +1,114 @@
+<div class="continuous-assessment-page">
+  <mat-card class="filters-card">
+    <h2>Continuous Assessment Entry</h2>
+    <form [formGroup]="filtersForm" class="filters-form">
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Select Class</mat-label>
+          <mat-select formControlName="classId">
+            <mat-option *ngFor="let clas of classes" [value]="clas.id">
+              {{ clas.name }} (Form {{ clas.form }})
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Topic / Skill</mat-label>
+          <input matInput formControlName="topic" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Date</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="assessmentDate" />
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Assessment Type</mat-label>
+          <mat-select formControlName="assessmentType">
+            <mat-option value="exercise">Exercise</mat-option>
+            <mat-option value="quiz">Quiz</mat-option>
+            <mat-option value="test">Test</mat-option>
+            <mat-option value="homework">Homework</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Out of (optional)</mat-label>
+          <input matInput type="number" formControlName="maxScore" />
+        </mat-form-field>
+
+        <div class="actions">
+          <button mat-stroked-button color="primary" type="button" (click)="applyMaxScoreToAll()">
+            Apply "Out of" to All Rows
+          </button>
+          <button mat-raised-button color="primary" type="button" (click)="loadRoster()" [disabled]="!canCreate">
+            Load Class List
+          </button>
+        </div>
+      </div>
+    </form>
+  </mat-card>
+
+  <mat-card class="roster-card" *ngIf="!isLoadingRoster && roster.length">
+    <div class="card-header">
+      <div>
+        <h3>Class List</h3>
+        <p class="subtitle">{{ selectedClassName }}</p>
+      </div>
+    </div>
+
+    <div class="roster-table">
+      <div class="roster-row header">
+        <span>Student</span>
+        <span>Score</span>
+        <span>Out of</span>
+        <span>Status</span>
+      </div>
+      <div class="roster-row" *ngFor="let row of roster">
+        <div class="student-cell">
+          <div class="name">{{ row.studentName }}</div>
+          <div class="number">{{ row.studentNumber }}</div>
+        </div>
+        <div class="score-cell">
+          <input
+            type="number"
+            min="0"
+            [(ngModel)]="row.score"
+            (ngModelChange)="onScoreChange(row)"
+            [disabled]="!canCreate"
+          />
+        </div>
+        <div class="max-cell">
+          <input
+            type="number"
+            min="0"
+            [(ngModel)]="row.maxScore"
+            (ngModelChange)="onMaxScoreChange(row)"
+            [placeholder]="filtersForm.value.maxScore || 'Optional'"
+            [disabled]="!canCreate"
+          />
+        </div>
+        <div class="status-cell">
+          <mat-icon *ngIf="row.status.state === 'saving'">sync</mat-icon>
+          <mat-icon class="saved" *ngIf="row.status.state === 'saved'">check_circle</mat-icon>
+          <mat-icon class="error" *ngIf="row.status.state === 'error'">error</mat-icon>
+          <span>{{ row.status.message }}</span>
+        </div>
+      </div>
+    </div>
+  </mat-card>
+
+  <mat-card class="roster-card" *ngIf="!isLoadingRoster && roster.length === 0">
+    <div class="empty-state">
+      <p>Select a class, topic, and date, then click "Load Class List" to start recording marks.</p>
+    </div>
+  </mat-card>
+
+  <div class="loading-overlay" *ngIf="isLoadingRoster">
+    <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
+  </div>
+</div>

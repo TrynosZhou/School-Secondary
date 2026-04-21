@@ -1,0 +1,100 @@
+<!-- Dialog Container -->
+<div class="dialog-container">
+  <!-- Header -->
+  <mat-toolbar class="dialog-toolbar">
+    <div class="toolbar-content">
+      <div class="title-section">
+        <mat-icon class="title-icon">badge</mat-icon>
+        <h2 class="dialog-title">Student ID Card</h2>
+      </div>
+      <div class="toolbar-actions">
+        <button mat-icon-button (click)="closeDialog()" matTooltip="Close" aria-label="Close dialog">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+  </mat-toolbar>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p class="loading-text">Generating ID Card...</p>
+  </div>
+
+  <!-- ID Card Content -->
+  <div class="id-card-wrapper" *ngIf="!isLoading">
+    <!-- Preview ID Card -->
+    <div class="id-card-container" id="id-card-content">
+      <div class="id-card-content">
+        <!-- Header -->
+        <div class="header">
+          <h2 class="school-name">{{ schoolName | uppercase }}</h2>
+          <p class="school-subtitle">Student Identification Card</p>
+        </div>
+
+        <!-- Student Information -->
+        <div class="student-info">
+          <div class="student-details">
+            <h3 class="student-name">{{ student.name }} {{ student.surname }}</h3>
+            <p class="student-number">Student ID: {{ student.studentNumber }}</p>
+            <p class="student-id">ID Number: {{ student.idnumber }}</p>
+            <p class="student-gender">Gender: {{ student.gender }}</p>
+            <p class="student-class">Class: Grade 8</p> <!-- You can make this dynamic -->
+          </div>
+          
+          <!-- QR Code Section -->
+          <div class="qr-section">
+            <div class="qr-code">
+              <img [src]="qrCodeDataUrl" alt="QR Code" *ngIf="qrCodeDataUrl">
+            </div>
+            <p class="qr-label">Scan for details</p>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+          <p class="valid-until">Valid until: {{ (currentDate.getFullYear() + 1) }}/{{ (currentDate.getMonth() + 1).toString().padStart(2, '0') }}/{{ currentDate.getDate().toString().padStart(2, '0') }}</p>
+          <p class="school-address">{{ schoolAddress || ' ' }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button 
+        mat-raised-button 
+        color="primary" 
+        (click)="printIDCard()"
+        class="action-button print-button">
+        <mat-icon>print</mat-icon>
+        Print ID Card
+      </button>
+      <button 
+        mat-raised-button 
+        color="accent" 
+        (click)="downloadIDCard()"
+        class="action-button download-button">
+        <mat-icon>download</mat-icon>
+        Download
+      </button>
+    </div>
+
+    <!-- Instructions -->
+    <div class="instructions">
+      <mat-card class="instructions-card">
+        <mat-card-header>
+          <mat-icon class="instructions-icon">info</mat-icon>
+          <mat-card-title>Instructions</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <ul class="instructions-list">
+            <li>Click "Print ID Card" to print the card in standard ID card size (3.375" x 2.125")</li>
+            <li>Click "Download" to save the ID card as an image file</li>
+            <li>The QR code can be scanned to view student details online</li>
+            <li>For best print quality, use high-resolution printing settings</li>
+          </ul>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

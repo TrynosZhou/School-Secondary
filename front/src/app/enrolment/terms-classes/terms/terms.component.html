@@ -1,0 +1,248 @@
+<div class="terms-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <mat-toolbar class="title-toolbar">
+      <div class="toolbar-content">
+        <div class="title-section">
+          <mat-icon class="title-icon">school</mat-icon>
+          <h1 class="page-title">{{ title.getTitle() }}</h1>
+        </div>
+        <div class="action-buttons">
+          <button 
+            mat-raised-button 
+            color="primary" 
+            class="add-button"
+            (click)="openAddEditTermDialog()"
+            matTooltip="Add New Term"
+            aria-label="Add New Term"
+          >
+            <mat-icon>add</mat-icon>
+            <span>Add Term</span>
+          </button>
+        </div>
+      </div>
+    </mat-toolbar>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <div class="filters-container">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search terms</mat-label>
+        <input 
+          matInput 
+          [formControl]="searchControl"
+          (input)="onSearchChange($event)"
+          placeholder="Search by term number, year, or dates..."
+        />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Filter by Year</mat-label>
+        <mat-select [formControl]="yearFilterControl" (selectionChange)="onFilterChange()">
+          <mat-option value="all">All Years</mat-option>
+          <mat-option *ngFor="let year of getAvailableYears()" [value]="year.toString()">
+            {{ year }}
+          </mat-option>
+        </mat-select>
+        <mat-icon matSuffix>filter_list</mat-icon>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div class="error-message" *ngIf="errorMsg$ | async as errorMsg">
+    <mat-icon>error</mat-icon>
+    <span>{{ errorMsg }}</span>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading terms...</p>
+  </div>
+
+  <!-- Table Container -->
+  <div class="table-container" *ngIf="!isLoading">
+    <mat-card class="table-card">
+      <table mat-table [dataSource]="dataSource" matSort class="terms-table" [trackBy]="trackByTermId">
+        <!-- Index Column -->
+        <ng-container matColumnDef="index">
+          <th mat-header-cell *matHeaderCellDef class="index-header">
+            <mat-icon>format_list_numbered</mat-icon>
+            <span>#</span>
+          </th>
+          <td mat-cell *matCellDef="let element; let i = index" class="index-cell">
+            <div class="index-number">{{ i + 1 }}</div>
+          </td>
+        </ng-container>
+
+        <!-- Term Number Column -->
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            <mat-icon>category</mat-icon>
+            <span>Type</span>
+          </th>
+          <td mat-cell *matCellDef="let row">
+            {{ (row.type || 'regular') | titlecase }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="label">
+          <th mat-header-cell *matHeaderCellDef>
+            <mat-icon>label</mat-icon>
+            <span>Label</span>
+          </th>
+          <td mat-cell *matCellDef="let row">
+            {{ row.label || '-' }}
+          </td>
+        </ng-container>
+
+        <!-- Term Number Column -->
+        <ng-container matColumnDef="num">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="num-header">
+            <mat-icon>looks_one</mat-icon>
+            <span>Term</span>
+          </th>
+          <td mat-cell *matCellDef="let row" class="num-cell">
+            <div class="term-info">
+              <mat-icon>school</mat-icon>
+              <span class="term-number">{{ formatTermLabel(row) }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Year Column -->
+        <ng-container matColumnDef="year">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="year-header">
+            <mat-icon>calendar_today</mat-icon>
+            <span>Year</span>
+          </th>
+          <td mat-cell *matCellDef="let row" class="year-cell">
+            <div class="year-badge">{{ row.year }}</div>
+          </td>
+        </ng-container>
+
+        <!-- Start Date Column -->
+        <ng-container matColumnDef="startDate">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="start-header">
+            <mat-icon>play_arrow</mat-icon>
+            <span>Start Date</span>
+          </th>
+          <td mat-cell *matCellDef="let row" class="start-cell">
+            <div class="date-info">
+              <mat-icon>event_available</mat-icon>
+              <span>{{ row.startDate | date:'MMM dd, yyyy' }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- End Date Column -->
+        <ng-container matColumnDef="endDate">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="end-header">
+            <mat-icon>stop</mat-icon>
+            <span>End Date</span>
+          </th>
+          <td mat-cell *matCellDef="let row" class="end-cell">
+            <div class="date-info">
+              <mat-icon>event_busy</mat-icon>
+              <span>{{ row.endDate | date:'MMM dd, yyyy' }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Duration Column -->
+        <ng-container matColumnDef="duration">
+          <th mat-header-cell *matHeaderCellDef class="duration-header">
+            <mat-icon>schedule</mat-icon>
+            <span>Duration</span>
+          </th>
+          <td mat-cell *matCellDef="let row" class="duration-cell">
+            <div class="duration-info">
+              <mat-icon>timer</mat-icon>
+              <span>{{ getTermDuration(row.startDate, row.endDate) }} days</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef class="status-header">
+            <mat-icon>info</mat-icon>
+            <span>Status</span>
+          </th>
+          <td mat-cell *matCellDef="let row" class="status-cell">
+            <div class="status-badge" [ngClass]="'status-' + getTermStatus(row)">
+              <mat-icon>{{ getTermStatus(row) === 'current' ? 'radio_button_checked' : 
+                           getTermStatus(row) === 'upcoming' ? 'schedule' : 'check_circle' }}</mat-icon>
+              <span>{{ getTermStatus(row) | titlecase }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="action">
+          <th mat-header-cell *matHeaderCellDef class="action-header">
+            <mat-icon>settings</mat-icon>
+            <span>Actions</span>
+          </th>
+          <td mat-cell *matCellDef="let row" class="action-cell">
+            <div class="action-buttons">
+              <button 
+                mat-icon-button 
+                color="primary" 
+                class="edit-button"
+                (click)="openEditTermDialog(row)" 
+                matTooltip="Edit Term"
+                aria-label="Edit Term"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button 
+                mat-icon-button 
+                color="warn" 
+                class="delete-button"
+                (click)="deleteTerm(row)" 
+                matTooltip="Delete Term"
+                aria-label="Delete Term"
+              >
+                <mat-icon>delete_forever</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns" class="header-row"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" class="data-row"></tr>
+
+        <!-- No Data Row -->
+        <tr class="no-data-row" *matNoDataRow>
+          <td class="no-data-cell" [attr.colspan]="displayedColumns.length">
+            <div class="no-data-content">
+              <mat-icon>inbox</mat-icon>
+              <h3>No Terms Found</h3>
+              <p>No terms match your current search criteria. Try adjusting your filters or add a new term.</p>
+              <button 
+                mat-raised-button 
+                color="primary" 
+                (click)="openAddEditTermDialog()"
+                class="add-first-button"
+              >
+                <mat-icon>add</mat-icon>
+                <span>Add First Term</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </table>
+
+      <mat-paginator 
+        [pageSizeOptions]="[10, 25, 50]" 
+        showFirstLastButtons
+        class="terms-paginator"
+        aria-label="Select page of terms"
+      ></mat-paginator>
+    </mat-card>
+  </div>
+</div>

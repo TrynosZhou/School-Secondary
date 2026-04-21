@@ -1,0 +1,129 @@
+<div class="user-activity-dialog" [class.theme-light]="currentTheme === 'light'" [class.theme-dark]="currentTheme === 'dark'">
+  <div class="dialog-header" [class.animated-bg-light]="currentTheme === 'light'" [class.animated-bg-dark]="currentTheme === 'dark'">
+    <h2 mat-dialog-title>
+      <mat-icon>history</mat-icon>
+      Activity Log - {{ data.userName }}
+    </h2>
+    <div class="header-actions">
+      <button mat-icon-button (click)="onRefresh()" matTooltip="Refresh">
+        <mat-icon>refresh</mat-icon>
+      </button>
+      <button mat-icon-button (click)="onClose()" class="close-button">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    <div *ngIf="loading$ | async" class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Loading activity log...</p>
+    </div>
+
+    <div *ngIf="error$ | async" class="error-container">
+      <mat-icon class="error-icon">error</mat-icon>
+      <p class="error-message">{{ error$ | async }}</p>
+    </div>
+
+    <div *ngIf="userActivity$ | async as activity" class="activity-content">
+      
+      <!-- Activity Summary -->
+      <div class="activity-summary">
+        <div class="summary-item">
+          <mat-icon class="summary-icon">history</mat-icon>
+          <div class="summary-info">
+            <span class="summary-label">Total Activities</span>
+            <span class="summary-value">{{ activity.total }}</span>
+          </div>
+        </div>
+        <div class="summary-item">
+          <mat-icon class="summary-icon">schedule</mat-icon>
+          <div class="summary-info">
+            <span class="summary-label">This Page</span>
+            <span class="summary-value">{{ activity.activities.length }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity List -->
+      <div class="activity-list">
+        <div *ngFor="let activityItem of activity.activities" class="activity-item">
+          
+          <!-- Activity Icon and Type -->
+          <div class="activity-icon-section">
+            <mat-icon 
+              [color]="getActionColor(activityItem.action)" 
+              class="activity-icon">
+              {{ getActionIcon(activityItem.action) }}
+            </mat-icon>
+            <div class="activity-type">
+              <span class="action-name">{{ getActionDisplayName(activityItem.action) }}</span>
+              <span class="action-code">{{ activityItem.action }}</span>
+            </div>
+          </div>
+
+          <!-- Activity Details -->
+          <div class="activity-details">
+            <p class="activity-description">{{ activityItem.description }}</p>
+            
+            <!-- Resource Information -->
+            <div *ngIf="activityItem.resourceType || activityItem.resourceId" class="resource-info">
+              <mat-icon class="resource-icon">{{ getResourceTypeIcon(activityItem.resourceType) }}</mat-icon>
+                  <span class="resource-text">
+                    <span *ngIf="activityItem.resourceType" class="resource-type">{{ activityItem.resourceType }}</span>
+                    <span *ngIf="activityItem.resourceId" class="resource-id">#{{ activityItem.resourceId || '' }}</span>
+                  </span>
+            </div>
+
+            <!-- Technical Details -->
+            <div class="technical-details">
+              <div *ngIf="activityItem.ipAddress" class="tech-item">
+                <mat-icon class="tech-icon">language</mat-icon>
+                <span class="tech-label">IP:</span>
+                <span class="tech-value">{{ activityItem.ipAddress }}</span>
+              </div>
+              <div *ngIf="activityItem.userAgent" class="tech-item">
+                <mat-icon class="tech-icon">devices</mat-icon>
+                <span class="tech-label">Device:</span>
+                <span class="tech-value">{{ activityItem.userAgent }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Timestamp -->
+          <div class="activity-timestamp">
+            <mat-icon class="timestamp-icon">schedule</mat-icon>
+            <span class="timestamp-text">{{ formatTimestamp(activityItem.timestamp) }}</span>
+            <span class="timestamp-full">{{ activityItem.timestamp | date:'medium' }}</span>
+          </div>
+        </div>
+
+        <!-- No Activities Message -->
+        <div *ngIf="activity.activities.length === 0" class="no-activities">
+          <mat-icon class="no-activities-icon">history</mat-icon>
+          <p class="no-activities-text">No activities found</p>
+          <p class="no-activities-subtext">This user hasn't performed any actions yet</p>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-button (click)="onClose()" class="close-button">
+      <mat-icon>close</mat-icon>
+      Close
+    </button>
+  </mat-dialog-actions>
+
+  <!-- Paginator -->
+  <div *ngIf="userActivity$ | async as activity" class="activity-paginator">
+    <mat-paginator
+      [length]="totalItems"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="[10, 20, 50, 100]"
+      [showFirstLastButtons]="true"
+      (page)="onPageChange($event)"
+      class="activity-paginator-controls">
+    </mat-paginator>
+  </div>
+</div>

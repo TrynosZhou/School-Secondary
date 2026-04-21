@@ -1,0 +1,154 @@
+<div class="add-receipt-dialog" [class.theme-dark]="currentTheme === 'dark'">
+  <!-- Loading Overlay -->
+  <div *ngIf="isLoading$ | async" class="loading-overlay">
+    <div class="loading-content">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Saving receipt...</p>
+    </div>
+  </div>
+
+  <!-- Dialog Header -->
+  <div class="dialog-header">
+    <div class="header-content">
+      <mat-icon class="header-icon">receipt_long</mat-icon>
+      <div class="header-text">
+        <h2 mat-dialog-title>Add New Receipt</h2>
+        <p class="header-subtitle">Record a payment for a student</p>
+      </div>
+    </div>
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    <!-- Student Search Section -->
+    <div class="search-section">
+      <app-student-search (studentSelected)="getSelectedStudent($event)"></app-student-search>
+    </div>
+
+    <!-- Student Info & Balance Section -->
+    <ng-container *ngIf="student">
+      <div class="student-balance-section">
+        <div class="student-info-compact">
+          <mat-icon class="student-icon">person</mat-icon>
+          <div class="student-text">
+            <span class="student-name">{{ student.surname }} {{ student.name }}</span>
+            <span class="student-number">#{{ student.studentNumber }}</span>
+          </div>
+        </div>
+
+        <!-- Balance Display Compact -->
+        <div class="balance-display-compact" *ngIf="amountDue$ | async as amountDue">
+          <div class="balance-row">
+            <mat-icon class="balance-icon-small">account_balance</mat-icon>
+            <span class="balance-label-compact">Due:</span>
+            <span class="balance-value-compact" [class.zero-balance]="amountDue === 0">
+              {{ amountDue | currency : 'USD' : 'symbol' : '1.2-2' }}
+            </span>
+          </div>
+          
+          <div class="balance-row" *ngIf="outstandingAfterPayment$ | async as outstanding">
+            <mat-icon class="balance-icon-small outstanding-icon">pending_actions</mat-icon>
+            <span class="balance-label-compact">Remaining:</span>
+            <span class="balance-value-compact" [class.has-balance]="outstanding > 0">
+              {{ outstanding | currency : 'USD' : 'symbol' : '1.2-2' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Suggestions Compact -->
+      <div class="suggestions-compact" *ngIf="suggestionMessage$ | async as suggestion">
+        <mat-icon class="suggestion-icon-small">info</mat-icon>
+        <span class="suggestion-text-compact">{{ suggestion }}</span>
+      </div>
+
+      <!-- Payment Form Compact -->
+      <form [formGroup]="addReceiptForm" class="receipt-form-compact">
+        <div class="form-row">
+          <!-- Amount Paid -->
+          <mat-form-field appearance="outline" class="form-field-compact">
+            <mat-label>Amount Paid</mat-label>
+            <mat-icon matPrefix class="prefix-icon">attach_money</mat-icon>
+            <input 
+              matInput 
+              type="number" 
+              formControlName="amountPaid" 
+              required
+              step="0.01"
+              min="0.01"
+              placeholder="0.00" />
+            <ng-container *ngIf="amountDue$ | async as amountDue">
+              <button 
+                mat-icon-button 
+                matSuffix 
+                type="button"
+                (click)="fillFullBalance()"
+                matTooltip="Fill with full balance"
+                *ngIf="amountDue > 0"
+                class="suffix-button">
+                <mat-icon>auto_fix_high</mat-icon>
+              </button>
+            </ng-container>
+            <mat-error *ngIf="amountPaidControl?.hasError('required')">Required</mat-error>
+            <mat-error *ngIf="amountPaidControl?.hasError('min')">Min: $0.01</mat-error>
+          </mat-form-field>
+
+          <!-- Payment Method -->
+          <mat-form-field appearance="outline" class="form-field-compact">
+            <mat-label>Payment Method</mat-label>
+            <mat-icon matPrefix class="prefix-icon">credit_card</mat-icon>
+            <mat-select formControlName="paymentMethod" required>
+              <mat-option *ngFor="let method of paymentMethods" [value]="method">
+                {{ method }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="paymentMethodControl?.invalid && paymentMethodControl?.touched">Required</mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Description -->
+        <mat-form-field appearance="outline" class="full-width description-compact">
+          <mat-label>Description (Optional)</mat-label>
+          <mat-icon matPrefix class="prefix-icon">description</mat-icon>
+          <textarea 
+            matInput 
+            formControlName="description"
+            rows="2"
+            placeholder="Optional notes..."></textarea>
+        </mat-form-field>
+      </form>
+    </ng-container>
+
+    <!-- Empty State -->
+    <div *ngIf="!student" class="empty-state-compact">
+      <mat-icon class="empty-icon-small">search</mat-icon>
+      <p>Select a student to begin</p>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-button type="button" (click)="onNoClick()">
+      <mat-icon>close</mat-icon>
+      Cancel
+    </button>
+    <ng-container *ngIf="isLoading$ | async as isLoading">
+      <button 
+        mat-raised-button 
+        color="primary" 
+        [disabled]="addReceiptForm.invalid || !student || isLoading"
+        (click)="onSubmit()">
+        <mat-icon *ngIf="!isLoading">save</mat-icon>
+        <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+        <span>{{ isLoading ? 'Saving...' : 'Save Receipt' }}</span>
+      </button>
+    </ng-container>
+    <button 
+      *ngIf="!(isLoading$ | async)"
+      mat-raised-button 
+      color="primary" 
+      [disabled]="addReceiptForm.invalid || !student"
+      (click)="onSubmit()">
+      <mat-icon>save</mat-icon>
+      <span>Save Receipt</span>
+    </button>
+  </mat-dialog-actions>
+</div>

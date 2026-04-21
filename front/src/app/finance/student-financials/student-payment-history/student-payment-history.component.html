@@ -1,0 +1,108 @@
+<div class="payment-history-container" [class.theme-dark]="currentTheme === 'dark'">
+  <!-- Loading State -->
+  <div *ngIf="loading$ | async" class="loading-container">
+    <mat-spinner diameter="60"></mat-spinner>
+    <p class="loading-text">Loading your payment history...</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!(loading$ | async)" class="payment-history-content">
+    <!-- Header -->
+    <div class="payment-history-header">
+      <h2 class="payment-history-title">
+        <mat-icon class="title-icon">history</mat-icon>
+        Payment History
+      </h2>
+      <p class="payment-history-subtitle">Complete transaction history and payment timeline</p>
+    </div>
+
+    <!-- Payment History List -->
+    <div *ngIf="(paymentHistory$ | async) as historyItems; else noPaymentHistory">
+      <div *ngIf="historyItems.length > 0; else noPaymentHistory" class="history-list">
+        <div class="history-timeline">
+          <div *ngFor="let item of historyItems; trackBy: trackByTransactionId; let i = index" 
+               class="timeline-item"
+               [class.recent]="isTransactionRecent(item)"
+               [class.incoming]="item.direction === 'in'"
+               [class.outgoing]="item.direction === 'out'">
+            
+            <!-- Timeline Connector -->
+            <div class="timeline-connector" *ngIf="i < historyItems.length - 1"></div>
+            
+            <!-- Timeline Dot -->
+            <div class="timeline-dot" 
+                 [style.background-color]="getTransactionTypeColor(item.type)">
+              <mat-icon class="timeline-icon">{{ getTransactionIcon(item.type) }}</mat-icon>
+            </div>
+
+            <!-- Transaction Card -->
+            <div class="transaction-card">
+              <div class="transaction-header">
+                <div class="transaction-title">
+                  <h4 class="transaction-type">{{ item.type }}</h4>
+                  <div class="transaction-badges">
+                    <mat-chip *ngIf="isTransactionRecent(item)" class="recent-badge">
+                      <mat-icon class="chip-icon">schedule</mat-icon>
+                      Recent
+                    </mat-chip>
+                    <mat-chip *ngIf="item.status" [class]="getTransactionStatusClass(item.status)">
+                      {{ item.status }}
+                    </mat-chip>
+                  </div>
+                </div>
+                <div class="transaction-amount-section">
+                  <div class="transaction-amount" [class]="getTransactionDirectionClass(item.direction)">
+                    <span class="amount-symbol">{{ item.direction === 'in' ? '+' : '-' }}</span>
+                    {{ item.amount | currency:'USD':'symbol':'1.2-2' }}
+                  </div>
+                  <div *ngIf="item.runningBalance !== undefined" class="running-balance">
+                    <span class="balance-label">Balance:</span>
+                    <span class="balance-value" [class.balance-positive]="item.runningBalance <= 0" [class.balance-negative]="item.runningBalance > 0">
+                      {{ item.runningBalance | currency:'USD':'symbol':'1.2-2' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="transaction-content">
+                <p class="transaction-description">
+                  <ng-container *ngIf="item.type === 'Allocation'">
+                    Payment of {{ item.amount | currency:'USD':'symbol':'1.2-2' }} {{ item.description }}
+                  </ng-container>
+                  <ng-container *ngIf="item.type !== 'Allocation'">
+                    {{ item.description }}
+                  </ng-container>
+                  <span *ngIf="item.relatedDocNumber" class="related-doc">
+                    (Document: {{ item.relatedDocNumber }})
+                  </span>
+                </p>
+
+                <div class="transaction-details">
+                  <div class="detail-item">
+                    <mat-icon class="detail-icon">calendar_today</mat-icon>
+                    <span class="detail-text">{{ item.date | date:'MMM dd, yyyy' }}</span>
+                  </div>
+                  
+                  <div *ngIf="item.paymentMethod" class="detail-item">
+                    <mat-icon class="detail-icon">payment</mat-icon>
+                    <span class="detail-text">{{ item.paymentMethod }}</span>
+                  </div>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Data State -->
+    <ng-template #noPaymentHistory>
+      <app-empty-state
+        icon="history"
+        title="No Payment History Found"
+        message="You don't have any payment history yet. Transactions will appear here once payments are processed.">
+      </app-empty-state>
+    </ng-template>
+  </div>
+</div>

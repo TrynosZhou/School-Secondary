@@ -1,0 +1,36 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+}
+
+.desc {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.items-table {
+  width: 100%;
+}
+
+.reject-box {
+  margin-top: 8px;
+}
+
+.reject-field {
+  width: 100%;
+}
+
+@media (max-width: 760px) {
+  .meta {
+    grid-template-columns: 1fr;
+  }
+}
+

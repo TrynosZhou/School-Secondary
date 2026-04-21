@@ -1,0 +1,263 @@
+.report {
+  width: 21cm;
+  height: 29.7cm; /* Fixed height for A4 size */
+  background-color: white;
+  margin: 2rem auto;
+  box-shadow: 0 0 0.5cm rgba(0, 0, 0, 0.5);
+  background-image: url("../../../assets/report bg.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  position: relative; /* Ensure the report card is the positioning context */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.download-btn {
+  z-index: 100;
+  position: absolute; /* Position relative to the .report parent */
+  top: 10px; /* Distance from the top */
+  left: 50%; /* Start from the middle of the parent */
+  transform: translateX(-50%); /* Shift left by half its own width to center */
+  box-shadow: 0 0 0 3px #2dc4ff;
+  /* Removed right: auto; and left: auto; as they conflict with explicit left/transform */
+}
+
+.letter-head-container {
+  height: 4cm;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.letter-head {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.mat-card-title,
+.mat-card-subtitle {
+  padding: 0 1rem;
+}
+
+.unsaved-report-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+  color: #856404;
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.unsaved-report-warning mat-icon {
+  color: #ffc107;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+h2 {
+  font-size: 24px;
+  width: 100%;
+  text-align: center;
+  padding: 0;
+  margin: 1rem 0;
+  color: #333;
+}
+
+.hr {
+  width: calc(100% - 2rem);
+  margin: 0.5rem auto;
+  border: none;
+  border-top: 1px solid #2dc2ff;
+}
+
+.accent.hr {
+  border-top-color: #ff4a95;
+}
+
+.names-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 0.3rem 0;
+  font-size: 16px;
+  align-items: center;
+}
+
+.names-row span {
+  flex-basis: 30%;
+  min-width: 150px;
+  margin-bottom: 5px;
+}
+
+.blue-text {
+  color: #2dc4ff;
+  font-weight: 500;
+}
+
+.red-text {
+  color: red;
+}
+
+.table-responsive-wrapper {
+  flex-grow: 1;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+  font-size: 14px;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.3rem;
+  border: 1px solid #ddd;
+}
+
+th {
+  background-color: #f2f2f2;
+  font-weight: 600;
+  color: #333;
+}
+
+.small-column {
+  width: 30px;
+}
+
+.average-mark-row td {
+  background-color: #e6f7ff;
+  font-weight: bold;
+}
+
+.footer {
+  height: 6cm; /* Increased height to accommodate larger text areas and gaps */
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  padding: 1rem;
+  border-top: 1px solid #eee;
+  margin-top: auto;
+}
+
+.comment-section {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch; /* Ensure full width */
+}
+
+.comment-section > * {
+  align-self: stretch; /* Make all children take full width */
+}
+
+.comment-section h3 {
+  margin-bottom: 0.5rem;
+  font-size: 16px;
+  color: #555;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.comment-section p {
+  flex-grow: 1;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #444;
+}
+
+.underline {
+  text-decoration: underline;
+}
+
+.ai-source-badge {
+  font-size: 11px;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 12px;
+  background: #e6f7ff;
+  color: #046d9a;
+  border: 1px solid #9bdcff;
+  text-decoration: none;
+}
+
+.ai-source-badge.fallback {
+  background: #fff7e6;
+  color: #9a6800;
+  border-color: #ffd08a;
+}
+
+.head-comment-form {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  align-items: stretch; /* Ensure full width */
+}
+
+.full-width-textarea {
+  width: 100%; /* Ensure textarea takes full available width */
+}
+
+/* Style for the displayed head comment */
+.displayed-head-comment {
+  display: flex;
+  align-items: flex-start; /* Top-align content instead of center */
+  justify-content: space-between; /* To push edit button to the right */
+  font-size: 14px;
+  line-height: 1.4;
+  color: #444;
+  flex-grow: 1;
+  border: 1px solid #eee; /* A subtle border to show it's a content box */
+  padding: 10px; /* Padding for readability */
+  min-height: 50px; /* Ensure some height even if content is short */
+  word-break: break-word; /* Allow long words to break */
+}
+
+.displayed-head-comment button {
+  margin-left: 10px;
+  flex-shrink: 0;
+}
+
+/* New: Visual cue for missing comment */
+.missing-comment-cue {
+  font-style: italic;
+  color: #999;
+  text-align: center;
+  padding: 10px;
+  border: 1px dashed #ccc;
+  background-color: #f9f9f9;
+  min-height: 50px; /* Match min-height of displayed comment */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Specific styling for student view of head comment (read-only) */
+.student-view-head-comment {
+  font-style: italic;
+  color: #666;
+  text-align: left;
+  padding: 10px;
+  border: 1px solid #eee;
+  min-height: 50px;
+  display: flex;
+  align-items: flex-start; /* Top-align instead of center */
+  justify-content: flex-start;
+  word-break: break-word;
+}

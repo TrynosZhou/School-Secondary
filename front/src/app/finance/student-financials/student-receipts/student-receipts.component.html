@@ -1,0 +1,169 @@
+<div class="receipts-container" [class.theme-dark]="currentTheme === 'dark'">
+  <!-- Loading State -->
+  <div *ngIf="loading$ | async" class="loading-container">
+    <mat-spinner diameter="60"></mat-spinner>
+    <p class="loading-text">Loading your receipts...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="(error$ | async) && !(loading$ | async)" class="error-container" role="alert" aria-live="assertive">
+    <mat-icon class="error-icon" aria-hidden="true">error_outline</mat-icon>
+    <h3 class="error-title">Unable to load receipts</h3>
+    <p class="error-message">{{ error$ | async }}</p>
+    <button mat-raised-button color="primary" (click)="loadReceipts()" type="button">
+      <mat-icon aria-hidden="true">refresh</mat-icon>
+      Retry
+    </button>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!(loading$ | async) && !(error$ | async)" class="receipts-content">
+    <!-- Header -->
+    <div class="receipts-header">
+      <h2 class="receipts-title">
+        <mat-icon class="title-icon">payment</mat-icon>
+        Your Receipts
+      </h2>
+      <p class="receipts-subtitle">View and download all your payment confirmations</p>
+    </div>
+
+    <!-- Receipts List -->
+    <div *ngIf="(receipts$ | async)?.length; else noReceipts" class="receipts-list">
+        <mat-accordion multi="true" class="receipts-accordion">
+          <mat-expansion-panel *ngFor="let receipt of receipts$ | async; trackBy: trackByReceiptId" 
+                               class="receipt-panel"
+                               [class.approved]="isReceiptApproved(receipt)"
+                               [class.recent]="isReceiptRecent(receipt)">
+            
+            <mat-expansion-panel-header class="receipt-header">
+              <mat-panel-title class="receipt-title">
+                <div class="receipt-number">
+                  <mat-icon class="receipt-icon">receipt</mat-icon>
+                  <span class="receipt-number-text">Receipt #{{ receipt.receiptNumber }}</span>
+                  <mat-chip *ngIf="isReceiptRecent(receipt)" class="recent-chip">
+                    <mat-icon class="chip-icon">schedule</mat-icon>
+                    Recent
+                  </mat-chip>
+                </div>
+                <div class="receipt-status">
+                  <mat-chip [class]="getApprovalClass(receipt.approved)">
+                    <mat-icon class="chip-icon">{{ receipt.approved ? 'check_circle' : 'schedule' }}</mat-icon>
+                    {{ receipt.approved ? 'Approved' : 'Pending' }}
+                  </mat-chip>
+                </div>
+              </mat-panel-title>
+
+              <mat-panel-description class="receipt-description">
+                <div class="receipt-summary">
+                  <div class="summary-row">
+                    <span class="summary-item">
+                      <mat-icon class="summary-icon">calendar_today</mat-icon>
+                      {{ receipt.paymentDate | date:'MMM dd, yyyy' }}
+                    </span>
+                    <span class="summary-item">
+                      <mat-icon class="summary-icon">{{ getPaymentMethodIcon(receipt.paymentMethod) }}</mat-icon>
+                      {{ receipt.paymentMethod }}
+                    </span>
+                  </div>
+                  <div class="summary-row">
+                    <span class="summary-item amount-paid">
+                      <mat-icon class="summary-icon">attach_money</mat-icon>
+                      {{ receipt.amountPaid | currency:'USD':'symbol':'1.2-2' }}
+                    </span>
+                    <span class="summary-item">
+                      <mat-icon class="summary-icon">person</mat-icon>
+                      {{ receipt.servedBy }}
+                    </span>
+                  </div>
+                </div>
+              </mat-panel-description>
+
+              <div class="receipt-actions">
+                <button mat-icon-button 
+                        (click)="downloadReceipt(receipt.receiptNumber); $event.stopPropagation()"
+                        matTooltip="Download Receipt PDF" 
+                        aria-label="Download receipt PDF"
+                        class="download-button">
+                  <mat-icon>file_download</mat-icon>
+                </button>
+              </div>
+            </mat-expansion-panel-header>
+
+            <div class="receipt-details">
+              <!-- Description Section -->
+              <div class="description-section">
+                <h4 class="section-title">
+                  <mat-icon class="section-icon">description</mat-icon>
+                  Payment Details
+                </h4>
+                <div class="description-content">
+                  <p class="description-text">
+                    {{ receipt.description || 'No detailed description provided for this payment.' }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Allocations Section -->
+              <div *ngIf="receipt.allocations && receipt.allocations.length > 0" class="allocations-section">
+                <h4 class="section-title">
+                  <mat-icon class="section-icon">assignment</mat-icon>
+                  Invoice Allocations
+                </h4>
+                <div class="allocations-list">
+                  <div *ngFor="let allocation of receipt.allocations; trackBy: trackByAllocationId" 
+                       class="allocation-item">
+                    <!-- Skip allocations with null invoices (deleted invoices) -->
+                    <ng-container *ngIf="allocation.invoice; else deletedInvoice">
+                      <div class="allocation-content">
+                        <div class="allocation-info">
+                          <mat-icon class="allocation-icon">receipt_long</mat-icon>
+                          <div class="allocation-details">
+                            <span class="allocation-invoice">Invoice #{{ allocation.invoice.invoiceNumber }}</span>
+                            <span class="allocation-date">{{ allocation.allocationDate | date:'MMM dd, yyyy' }}</span>
+                          </div>
+                        </div>
+                        <div class="allocation-amount">
+                          {{ allocation.amountApplied | currency:'USD':'symbol':'1.2-2' }}
+                        </div>
+                      </div>
+                    </ng-container>
+                    <ng-template #deletedInvoice>
+                      <div class="allocation-content allocation-deleted">
+                        <div class="allocation-info">
+                          <mat-icon class="allocation-icon">warning</mat-icon>
+                          <div class="allocation-details">
+                            <span class="allocation-invoice">Invoice (Deleted)</span>
+                            <span class="allocation-date">{{ allocation.allocationDate | date:'MMM dd, yyyy' }}</span>
+                          </div>
+                        </div>
+                        <div class="allocation-amount">
+                          {{ allocation.amountApplied | currency:'USD':'symbol':'1.2-2' }}
+                        </div>
+                      </div>
+                    </ng-template>
+                  </div>
+                </div>
+              </div>
+
+              <!-- No Allocations Message -->
+              <div *ngIf="!receipt.allocations || receipt.allocations.length === 0" class="no-allocations">
+                <div class="no-allocations-content">
+                  <mat-icon class="no-allocations-icon">info_outline</mat-icon>
+                  <p class="no-allocations-text">No specific invoice allocations recorded for this receipt.</p>
+                </div>
+              </div>
+            </div>
+          </mat-expansion-panel>
+        </mat-accordion>
+    </div>
+
+    <!-- No Data State -->
+    <ng-template #noReceipts>
+      <app-empty-state
+        icon="payment"
+        title="No Receipts Found"
+        message="You don't have any payment receipts yet. Receipts will appear here once payments are processed.">
+      </app-empty-state>
+    </ng-template>
+  </div>
+</div>

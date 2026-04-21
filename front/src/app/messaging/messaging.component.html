@@ -1,0 +1,59 @@
+<div class="messaging-container">
+  <div class="conversations-sidebar">
+    <mat-card class="sidebar-header">
+      <div class="header-content">
+        <h2>
+          <mat-icon>message</mat-icon>
+          Messages
+        </h2>
+        <button mat-icon-button (click)="openNewConversationDialog()" matTooltip="New Conversation">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+    </mat-card>
+
+    <mat-card class="conversations-list">
+      <mat-list *ngIf="!isLoading">
+        <mat-list-item
+          *ngFor="let conversation of conversations"
+          [class.selected]="selectedConversationId === conversation.id"
+          (click)="selectConversation(conversation.id)"
+          class="conversation-item">
+          <mat-icon matListItemIcon class="conversation-icon">
+            {{ conversation.type === 'school_wide' ? 'campaign' : 
+               conversation.type === 'class' ? 'class' : 
+               conversation.type === 'group' ? 'group' : 'person' }}
+          </mat-icon>
+          <div matListItemTitle class="conversation-title">
+            {{ getConversationDisplayName(conversation) }}
+          </div>
+          <div matListItemLine class="conversation-meta">
+            <mat-chip class="type-chip">{{ getConversationTypeLabel(conversation.type) }}</mat-chip>
+            <span *ngIf="conversation.unreadCount && conversation.unreadCount > 0" class="unread-badge">
+              {{ conversation.unreadCount }}
+            </span>
+          </div>
+        </mat-list-item>
+        <mat-list-item *ngIf="conversations.length === 0" class="empty-state">
+          <p>No conversations yet. Start a new conversation!</p>
+        </mat-list-item>
+      </mat-list>
+      <div *ngIf="isLoading" class="loading-spinner">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    </mat-card>
+  </div>
+
+  <div class="conversation-view-container">
+    <app-conversation-view
+      *ngIf="selectedConversationId"
+      [conversationId]="selectedConversationId"
+      (close)="selectedConversationId = null; router.navigate(['/messaging'])">
+    </app-conversation-view>
+    <div *ngIf="!selectedConversationId" class="empty-conversation">
+      <mat-icon>message</mat-icon>
+      <p>Select a conversation to start messaging</p>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,237 @@
+<div class="reports-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="title-toolbar">
+      <div class="toolbar-content">
+        <div class="title-section">
+          <mat-icon class="title-icon">assessment</mat-icon>
+          <h1 class="page-title">{{ title.getTitle() }}</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Selection Section -->
+  <div class="selection-section">
+    <div class="selection-card">
+      <div class="card-header">
+        <div class="header-content">
+          <mat-icon class="section-icon">filter_list</mat-icon>
+          <div class="header-text">
+            <h2 class="section-title">Generate Reports</h2>
+            <p class="section-subtitle">Select class and term to generate attendance reports</p>
+          </div>
+        </div>
+      </div>
+      <div class="card-content">
+        <form [formGroup]="reportsForm" (ngSubmit)="generateReports()">
+          <div class="form-fields">
+            <div class="form-field">
+              <mat-form-field appearance="outline">
+                <mat-label>Choose Term</mat-label>
+                <mat-select formControlName="term">
+                  <mat-option *ngFor="let term of terms$ | async" [value]="term">
+                    Term {{ term.num }} {{ term.year }}
+                  </mat-option>
+                </mat-select>
+                <mat-icon matSuffix>calendar_today</mat-icon>
+                <mat-hint>Select the academic term</mat-hint>
+                <mat-error *ngIf="term?.invalid && term?.touched">
+                  {{ getFormErrorMessage('term') }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+            <div class="form-field">
+              <mat-form-field appearance="outline">
+                <mat-label>Choose Class</mat-label>
+                <mat-select formControlName="clas">
+                  <mat-option *ngFor="let clas of classes$ | async" [value]="clas.name">
+                    {{ clas.name }}
+                  </mat-option>
+                </mat-select>
+                <mat-icon matSuffix>class</mat-icon>
+                <mat-hint>Select the class</mat-hint>
+                <mat-error *ngIf="clas?.invalid && clas?.touched">
+                  {{ getFormErrorMessage('clas') }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+            <div class="form-field">
+              <button
+                mat-raised-button
+                type="submit"
+                color="primary"
+                [disabled]="reportsForm.invalid"
+                class="generate-button"
+              >
+                <mat-icon>assessment</mat-icon>
+                Generate Reports
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Section -->
+  <div class="summary-section" *ngIf="attendanceSummary$ | async as summary">
+    <div class="summary-card">
+      <div class="card-header">
+        <div class="header-content">
+          <mat-icon class="section-icon">analytics</mat-icon>
+          <div class="header-text">
+            <h2 class="section-title">Attendance Summary</h2>
+            <p class="section-subtitle">Overall attendance statistics for {{ summary.className }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="summary-grid">
+          <div class="summary-item total">
+            <mat-icon class="summary-icon">group</mat-icon>
+            <div class="summary-content">
+              <div class="summary-label">Total Records</div>
+              <div class="summary-value">{{ summary.totalRecords }}</div>
+            </div>
+          </div>
+          <div class="summary-item present">
+            <mat-icon class="summary-icon">check_circle</mat-icon>
+            <div class="summary-content">
+              <div class="summary-label">Present</div>
+              <div class="summary-value">{{ summary.presentCount }}</div>
+            </div>
+          </div>
+          <div class="summary-item absent">
+            <mat-icon class="summary-icon">cancel</mat-icon>
+            <div class="summary-content">
+              <div class="summary-label">Absent</div>
+              <div class="summary-value">{{ summary.absentCount }}</div>
+            </div>
+          </div>
+          <div class="summary-item rate">
+            <mat-icon class="summary-icon">trending_up</mat-icon>
+            <div class="summary-content">
+              <div class="summary-label">Attendance Rate</div>
+              <div class="summary-value">{{ calculateAttendanceRate(summary) }}%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reports Section -->
+  <div class="reports-section" *ngIf="attendanceReports$ | async as reports">
+    <div class="reports-card">
+      <div class="card-header">
+        <div class="header-content">
+          <mat-icon class="section-icon">table_chart</mat-icon>
+          <div class="header-text">
+            <h2 class="section-title">Attendance Reports</h2>
+            <p class="section-subtitle">Detailed attendance records by date</p>
+          </div>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="export-button-container" *ngIf="attendanceReports$ | async">
+          <button
+            mat-raised-button
+            color="accent"
+            (click)="exportToPDF()"
+            class="export-button"
+          >
+            <mat-icon>picture_as_pdf</mat-icon>
+            Export to PDF
+          </button>
+        </div>
+        <div class="reports-container-inner">
+          <div class="date-section" *ngFor="let date of getSortedDates(reports)">
+            <div class="date-header">
+              <mat-icon class="date-icon">event</mat-icon>
+              <h3 class="date-title">{{ formatDate(date) }}</h3>
+            </div>
+            <div class="attendance-table-container">
+              <table class="attendance-table">
+                <thead>
+                  <tr class="table-header">
+                    <th class="index-header">
+                      <mat-icon>format_list_numbered</mat-icon>
+                      <span>#</span>
+                    </th>
+                    <th class="student-number-header">
+                      <mat-icon>badge</mat-icon>
+                      <span>Student Number</span>
+                    </th>
+                    <th class="surname-header">
+                      <mat-icon>person</mat-icon>
+                      <span>Surname</span>
+                    </th>
+                    <th class="name-header">
+                      <mat-icon>person_outline</mat-icon>
+                      <span>Name</span>
+                    </th>
+                    <th class="gender-header">
+                      <mat-icon>wc</mat-icon>
+                      <span>Gender</span>
+                    </th>
+                    <th class="status-header">
+                      <mat-icon>check_circle</mat-icon>
+                      <span>Status</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="table-row" *ngFor="let record of reports[date]; let i = index">
+                    <td class="index-cell">
+                      <div class="index-number">{{ i + 1 }}</div>
+                    </td>
+                    <td class="student-number-cell">
+                      <div class="student-number">{{ record.studentNumber }}</div>
+                    </td>
+                    <td class="surname-cell">
+                      <div class="student-name">{{ record.surname }}</div>
+                    </td>
+                    <td class="name-cell">
+                      <div class="student-name">{{ record.name }}</div>
+                    </td>
+                    <td class="gender-cell">
+                      <div class="gender-badge" [ngClass]="'gender-' + getGenderColor(record.gender)">
+                        <mat-icon>{{ getGenderIcon(record.gender) }}</mat-icon>
+                        <span>{{ record.gender }}</span>
+                      </div>
+                    </td>
+                    <td class="status-cell">
+                      <div class="status-badge" [ngClass]="'status-' + getAttendanceStatusColor(record.present)">
+                        <mat-icon>{{ getAttendanceStatusIcon(record.present) }}</mat-icon>
+                        <span>{{ getAttendanceStatusText(record.present) }}</span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!(attendanceReports$ | async) && !(isLoading$ | async)">
+    <div class="empty-card">
+      <div class="empty-content">
+        <mat-icon class="empty-icon">assessment</mat-icon>
+        <h2>No Reports Generated</h2>
+        <p>Select a class and term to generate attendance reports.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading$ | async">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Generating reports...</p>
+  </div>
+</div>
+

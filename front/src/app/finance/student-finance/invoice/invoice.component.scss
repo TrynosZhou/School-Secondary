@@ -1,0 +1,209 @@
+// Theme Variables
+$primary-blue: #2196f3;
+$primary-blue-dark: #1976d2;
+$accent-gold: #ffc107;
+$warn-brown: #795548;
+
+$text-primary-light: #2c3e50;
+$text-secondary-light: #7f8c8d;
+$bg-light: #f5f7fa;
+$surface-light: #ffffff;
+$border-light: #e0e0e0;
+
+$text-primary-dark: #e0e0e0;
+$text-secondary-dark: #b0b0b0;
+$bg-dark: #121212;
+$surface-dark: #1e1e1e;
+$border-dark: #424242;
+
+// Main Container
+.invoice-container-wrapper {
+  padding: 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
+  min-height: calc(100vh - 64px);
+  background: var(--background, $bg-light);
+  color: var(--text-primary, $text-primary-light);
+  transition: background-color 0.3s ease, color 0.3s ease;
+
+  &.theme-dark {
+    background: var(--background, $bg-dark);
+    color: var(--text-primary, $text-primary-dark);
+  }
+}
+
+// Header Section
+.header-section {
+  background: linear-gradient(135deg, $primary-blue 0%, $primary-blue-dark 100%);
+  border-radius: 20px;
+  padding: 2rem;
+  color: white;
+  box-shadow: 0 8px 32px rgba(33, 150, 243, 0.3);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 2rem;
+
+  .theme-dark & {
+    background: linear-gradient(135deg, #2c3e50 0%, #1a2a3a 100%);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.header-content {
+  position: relative;
+  z-index: 1;
+}
+
+.page-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: white;
+}
+
+.title-icon {
+  font-size: 2.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.page-subtitle {
+  font-size: 1.2rem;
+  margin: 0;
+  opacity: 0.95;
+}
+
+// Term Selection Card
+.term-select-card {
+  background: var(--surface, $surface-light);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color, $border-light);
+  margin-bottom: 2rem;
+  transition: all 0.3s ease;
+
+  .theme-dark & {
+    background: var(--surface, $surface-dark);
+    border-color: $border-dark;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  &:hover {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+  }
+}
+
+.term-select {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+// Main Content Layout
+.invoices-container {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 2rem;
+  align-items: start;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: 350px 1fr;
+  }
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Invoice Selection Panel
+.invoice-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: var(--surface, $surface-light);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color, $border-light);
+  position: sticky;
+  top: 2rem;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+
+  .theme-dark & {
+    background: var(--surface, $surface-dark);
+    border-color: $border-dark;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.search-invoice {
+  width: 100%;
+}
+
+// Invoice Container
+.invoice-container {
+  position: relative;
+  background: var(--surface, $surface-light);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color, $border-light);
+  padding: 2rem;
+  min-height: 600px;
+
+  .theme-dark & {
+    background: var(--surface, $surface-dark);
+    border-color: $border-dark;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+}
+
+// Empty State
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  min-height: 400px;
+
+  .empty-icon {
+    font-size: 5rem;
+    color: var(--text-secondary, $text-secondary-light);
+    margin-bottom: 1.5rem;
+    opacity: 0.5;
+
+    .theme-dark & {
+      color: var(--text-secondary, $text-secondary-dark);
+    }
+  }
+
+  .empty-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary, $text-primary-light);
+    margin: 0 0 0.5rem 0;
+
+    .theme-dark & {
+      color: var(--text-primary, $text-primary-dark);
+    }
+  }
+
+  .empty-message {
+    font-size: 1rem;
+    color: var(--text-secondary, $text-secondary-light);
+    margin: 0;
+    max-width: 400px;
+
+    .theme-dark & {
+      color: var(--text-secondary, $text-secondary-dark);
+    }
+  }
+}
+

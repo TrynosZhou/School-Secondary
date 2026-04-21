@@ -1,0 +1,162 @@
+<div class="bulk-operations-dialog">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <mat-icon [color]="getOperationColor()">{{ getOperationIcon() }}</mat-icon>
+      {{ getOperationTitle() }}
+    </h2>
+    <button mat-icon-button (click)="onCancel()" class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    <form [formGroup]="bulkOperationForm" (ngSubmit)="onSubmit()" class="bulk-operation-form">
+      
+      <!-- Operation Description -->
+      <div class="operation-description">
+        <p class="description-text">{{ getOperationDescription() }}</p>
+        <div class="selected-users-summary">
+          <mat-icon class="users-icon">people</mat-icon>
+          <span class="users-text">{{ getSelectedUsersSummary() }}</span>
+        </div>
+      </div>
+
+      <!-- Operation Configuration -->
+      <div class="operation-config">
+        
+        <!-- Role Update Configuration -->
+        <div *ngIf="bulkOperationForm.get('operation')?.value === 'update_role'" class="config-section">
+          <h3 class="config-title">
+            <mat-icon>admin_panel_settings</mat-icon>
+            Select New Role
+          </h3>
+          <mat-form-field appearance="outline" class="config-field">
+            <mat-label>New Role *</mat-label>
+            <mat-select formControlName="newRole">
+              <mat-option *ngFor="let role of roles" [value]="role">
+                {{ getRoleDisplayName(role) }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="bulkOperationForm.get('newRole')?.hasError('required') && bulkOperationForm.get('newRole')?.touched">
+              Role is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Status Update Configuration -->
+        <div *ngIf="bulkOperationForm.get('operation')?.value === 'update_status'" class="config-section">
+          <h3 class="config-title">
+            <mat-icon>toggle_on</mat-icon>
+            Select New Status
+          </h3>
+          <mat-form-field appearance="outline" class="config-field">
+            <mat-label>New Status *</mat-label>
+            <mat-select formControlName="newStatus">
+              <mat-option *ngFor="let status of statuses" [value]="status">
+                {{ getStatusDisplayName(status) }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="bulkOperationForm.get('newStatus')?.hasError('required') && bulkOperationForm.get('newStatus')?.touched">
+              Status is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Export Configuration -->
+        <div *ngIf="bulkOperationForm.get('operation')?.value === 'export'" class="config-section">
+          <h3 class="config-title">
+            <mat-icon>download</mat-icon>
+            Export Options
+          </h3>
+          <div class="export-options">
+            <mat-checkbox formControlName="includePersonalInfo" class="export-option">
+              Include Personal Information
+            </mat-checkbox>
+            <mat-checkbox formControlName="includeActivityLog" class="export-option">
+              Include Activity Log
+            </mat-checkbox>
+            <mat-checkbox formControlName="includeSessions" class="export-option">
+              Include Session Information
+            </mat-checkbox>
+          </div>
+        </div>
+
+        <!-- Password Reset Configuration -->
+        <div *ngIf="bulkOperationForm.get('operation')?.value === 'reset_password'" class="config-section">
+          <h3 class="config-title">
+            <mat-icon>lock_reset</mat-icon>
+            Password Reset Options
+          </h3>
+          <div class="password-reset-options">
+            <mat-radio-group formControlName="passwordResetType" class="reset-type-group">
+              <mat-radio-button value="temporary" class="reset-option">
+                Generate Temporary Passwords
+              </mat-radio-button>
+              <mat-radio-button value="email" class="reset-option">
+                Send Reset Links via Email
+              </mat-radio-button>
+            </mat-radio-group>
+          </div>
+        </div>
+      </div>
+
+      <!-- Selected Users List -->
+      <div class="selected-users-section">
+        <h3 class="section-title">
+          <mat-icon>people</mat-icon>
+          Selected Users ({{ selectedUsers.length }})
+        </h3>
+        <div class="users-list">
+          <div *ngFor="let user of selectedUsers" class="user-item">
+            <div class="user-info">
+              <mat-icon class="user-icon">person</mat-icon>
+              <div class="user-details">
+                <span class="user-name">{{ user.name }}</span>
+                <span class="user-username">@{{ user.username }}</span>
+              </div>
+            </div>
+            <div class="user-badges">
+              <mat-chip [color]="getOperationColor()" class="user-role-chip">
+                {{ getRoleDisplayName(user.role) }}
+              </mat-chip>
+              <mat-chip class="user-status-chip">
+                {{ getStatusDisplayName(user.status) }}
+              </mat-chip>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Confirmation -->
+      <div class="confirmation-section">
+        <mat-checkbox formControlName="confirmAction" class="confirmation-checkbox">
+          <span class="confirmation-text">
+            I understand that this action will affect {{ selectedUsers.length }} user(s) and cannot be undone.
+          </span>
+        </mat-checkbox>
+        <mat-error *ngIf="bulkOperationForm.get('confirmAction')?.hasError('required') && bulkOperationForm.get('confirmAction')?.touched">
+          You must confirm this action to proceed
+        </mat-error>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-button (click)="onCancel()" class="cancel-button">
+      <mat-icon>cancel</mat-icon>
+      Cancel
+    </button>
+    <button 
+      mat-raised-button 
+      [color]="getOperationColor()" 
+      (click)="onSubmit()" 
+      [disabled]="bulkOperationForm.invalid || (loading$ | async)"
+      class="submit-button">
+      <mat-icon *ngIf="!(loading$ | async)">{{ getOperationIcon() }}</mat-icon>
+      <mat-spinner *ngIf="loading$ | async" diameter="20"></mat-spinner>
+      {{ (loading$ | async) ? 'Processing...' : 'Execute Operation' }}
+    </button>
+  </mat-dialog-actions>
+</div>
+
+

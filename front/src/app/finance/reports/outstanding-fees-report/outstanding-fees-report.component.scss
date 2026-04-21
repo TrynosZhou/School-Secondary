@@ -1,0 +1,1041 @@
+/* src/app/finance/reports/outstanding-fees-report/outstanding-fees-report.component.scss */
+
+.outstanding-fees-container {
+  max-width: 1600px;
+  margin: 20px auto;
+  padding: 20px;
+  min-height: 100vh;
+  color: var(--text-primary, rgba(0, 0, 0, 0.87));
+  background: var(--background, #fafafa);
+  
+  &.theme-dark {
+    background: var(--background, #121212);
+    color: var(--text-primary, rgba(255, 255, 255, 0.87));
+  }
+}
+
+.outstanding-fees-card {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+  background: var(--surface, #ffffff);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  transition: box-shadow 0.3s ease;
+  animation: fadeIn 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  }
+  
+  .theme-dark & {
+    background: var(--surface, #1e1e1e);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    
+    &:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
+    }
+  }
+}
+
+// Header Section
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+  
+  .theme-dark & {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.title-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  
+  h2 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 1.75em;
+    font-weight: 600;
+    
+    mat-icon {
+      vertical-align: middle;
+      margin-right: 8px;
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+      color: var(--primary-blue, #2196f3);
+    }
+  }
+}
+
+// Summary Cards
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.summary-card {
+  background: var(--surface);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  mat-card-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px !important;
+  }
+}
+
+.summary-icon {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+}
+
+.summary-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  
+  .summary-label {
+    font-size: 0.85em;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+  }
+  
+  .summary-value {
+    font-size: 1.6em;
+    font-weight: 700;
+    color: var(--text-primary);
+    
+    &.outstanding {
+      color: #f44336;
+      
+      .theme-dark & {
+        color: #ef5350;
+      }
+    }
+    
+    &.students {
+      color: var(--primary-blue, #2196f3);
+    }
+    
+    &.average {
+      color: #ff9800;
+      
+      .theme-dark & {
+        color: #ffb74d;
+      }
+    }
+  }
+}
+
+.high-outstanding {
+  color: #d32f2f;
+  font-weight: 700;
+  
+  .theme-dark & {
+    color: #e57373;
+  }
+}
+
+.medium-outstanding {
+  color: #f57c00;
+  font-weight: 600;
+  
+  .theme-dark & {
+    color: #ffb74d;
+  }
+}
+
+.low-outstanding {
+  color: #388e3c;
+  font-weight: 500;
+  
+  .theme-dark & {
+    color: #66bb6a;
+  }
+}
+
+// Filter Section
+.filter-section {
+  margin-bottom: 24px;
+  animation: slideDown 0.3s ease;
+}
+
+.filter-form-print {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.05) 0%, rgba(33, 150, 243, 0.02) 100%);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  align-items: flex-end;
+  
+  .theme-dark & {
+    background: linear-gradient(135deg, rgba(100, 181, 246, 0.1) 0%, rgba(100, 181, 246, 0.05) 100%);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.filter-field {
+  flex: 1 1 250px;
+  min-width: 200px;
+  
+  &:first-of-type {
+    flex-grow: 2;
+    min-width: 280px;
+  }
+}
+
+.filter-actions-print {
+  margin-left: auto;
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+// Total Outstanding
+.total-outstanding {
+  text-align: center;
+  padding: 24px;
+  margin: 24px 0;
+  background: linear-gradient(135deg, rgba(244, 67, 54, 0.1) 0%, rgba(244, 67, 54, 0.05) 100%);
+  border-left: 6px solid #f44336;
+  border-radius: 8px;
+  animation: pulse 2s ease-in-out infinite;
+  
+  .theme-dark & {
+    background: linear-gradient(135deg, rgba(239, 83, 80, 0.2) 0%, rgba(239, 83, 80, 0.1) 100%);
+    border-left-color: #ef5350;
+  }
+  
+  h2 {
+    margin: 0;
+    font-size: 2em;
+    font-weight: 700;
+    color: #f44336;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    
+    .theme-dark & {
+      color: #ef5350;
+    }
+    
+    mat-icon {
+      font-size: 36px;
+      width: 36px;
+      height: 36px;
+    }
+  }
+}
+
+// Section Headers
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 32px 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.12);
+  
+  .theme-dark & {
+    border-bottom-color: rgba(255, 255, 255, 0.12);
+  }
+  
+  h4 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 1.3em;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      color: var(--primary-blue, #2196f3);
+    }
+  }
+  
+  .section-count {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 4px 12px;
+    border-radius: 12px;
+    
+    .theme-dark & {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+}
+
+// Table Containers
+.table-container {
+  overflow-x: auto;
+  margin-bottom: 24px;
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  
+  .theme-dark & {
+    background: var(--surface, #1e1e1e);
+  }
+}
+
+.student-details-table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 20px;
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  
+  .theme-dark & {
+    background: var(--surface, #1e1e1e);
+  }
+}
+
+// Table Styling
+.full-width-table {
+  width: 100%;
+  min-width: 800px;
+  border-collapse: collapse;
+}
+
+.mat-header-cell,
+.table-header-cell {
+  font-weight: 600;
+  background-color: rgba(0, 0, 0, 0.02);
+  color: var(--text-primary);
+  padding: 16px;
+  font-size: 0.9em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.12);
+  text-align: left;
+  
+  &:last-child {
+    text-align: right;
+  }
+  
+  .theme-dark & {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    border-bottom-color: rgba(255, 255, 255, 0.12);
+  }
+}
+
+.mat-cell,
+.table-cell {
+  font-size: 0.95em;
+  color: var(--text-secondary);
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  
+  &:last-child {
+    text-align: right;
+    font-weight: 600;
+  }
+  
+  .theme-dark & {
+    color: var(--text-secondary);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.mat-row,
+.table-row {
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+    
+    .theme-dark & {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+  }
+  
+  &:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.02);
+    
+    .theme-dark & {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+  }
+}
+
+// Loading State
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--text-secondary);
+  animation: fadeIn 0.3s ease;
+  
+  p {
+    margin: 16px 0 8px 0;
+    font-size: 1.1em;
+    font-weight: 500;
+  }
+  
+  .loading-hint {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    opacity: 0.7;
+  }
+}
+
+// Error State
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-secondary);
+  animation: fadeIn 0.3s ease;
+}
+
+.error-card {
+  background: linear-gradient(135deg, rgba(244, 67, 54, 0.1) 0%, rgba(244, 67, 54, 0.05) 100%);
+  border-left: 4px solid #f44336;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  width: 100%;
+  
+  .theme-dark & {
+    background: linear-gradient(135deg, rgba(239, 83, 80, 0.2) 0%, rgba(239, 83, 80, 0.1) 100%);
+    border-left-color: #ef5350;
+  }
+}
+
+.error-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  color: #f44336;
+}
+
+.error-content {
+  h3 {
+    margin: 0 0 8px 0;
+    color: #f44336;
+    font-weight: 600;
+  }
+  
+  p {
+    margin: 0 0 16px 0;
+    color: var(--text-secondary);
+  }
+}
+
+.error-details {
+  font-size: 0.85em;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-width: 80%;
+  text-align: left;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 12px;
+  border-radius: 4px;
+  
+  .theme-dark & {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+// No Data State
+.no-data-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--text-secondary);
+  animation: fadeIn 0.3s ease;
+  
+  .empty-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+  
+  h3 {
+    margin: 0 0 8px 0;
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  
+  p {
+    margin: 0 0 8px 0;
+    max-width: 500px;
+  }
+  
+  .suggestion-text {
+    margin-top: 16px;
+    font-size: 0.9em;
+    font-style: italic;
+    opacity: 0.7;
+  }
+}
+
+// Suggestion Box
+.suggestion-box {
+  margin-top: 24px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%);
+  border-radius: 8px;
+  border-left: 4px solid var(--accent-gold, #ffc107);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: 600px;
+  
+  mat-icon {
+    color: var(--accent-gold, #ffc107);
+    margin-top: 2px;
+  }
+  
+  p {
+    margin: 0;
+    text-align: left;
+    color: var(--text-primary);
+  }
+  
+  .theme-dark & {
+    background: linear-gradient(135deg, rgba(255, 179, 0, 0.15) 0%, rgba(255, 179, 0, 0.08) 100%);
+    border-left-color: var(--accent-gold, #ffb300);
+  }
+}
+
+// Divider
+mat-divider {
+  margin: 24px 0;
+  border-color: rgba(0, 0, 0, 0.12);
+  
+  .theme-dark & {
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 500px;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+// Print-only elements (hidden on screen)
+.print-only {
+  display: none;
+}
+
+// Print Styles
+@media print {
+  // Hide screen-only elements
+  .header-actions,
+  .filter-section,
+  .filter-actions-print,
+  .print-hide,
+  .suggestion-box,
+  mat-paginator,
+  .error-state,
+  .loading-state,
+  .no-data-state:not(.print-include) {
+    display: none !important;
+  }
+  
+  // Show print-only elements
+  .print-only {
+    display: block !important;
+  }
+  
+  // Page setup
+  @page {
+    size: A4;
+    margin: 15mm 10mm 20mm 10mm;
+    
+    @top-center {
+      content: "Outstanding Fees Report";
+      font-size: 10pt;
+      color: #666;
+    }
+    
+    @bottom-center {
+      content: "Page " counter(page) " of " counter(pages);
+      font-size: 10pt;
+      color: #666;
+    }
+  }
+  
+  // Reset container - allow full height for multi-page printing
+  html,
+  body {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: white !important;
+    color: black !important;
+  }
+  
+  .outstanding-fees-container {
+    padding: 0;
+    margin: 0;
+    max-width: 100%;
+    min-height: auto !important;
+    height: auto !important;
+    background: white !important;
+    color: black !important;
+    overflow: visible !important;
+  }
+  
+  .outstanding-fees-card {
+    box-shadow: none;
+    padding: 0;
+    border: none;
+    background: white !important;
+    page-break-inside: auto; // Allow card to break across pages
+    min-height: auto !important;
+    height: auto !important;
+  }
+  
+  // Print Header
+  .print-header {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #000;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+  
+  .print-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  
+  .print-logo-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+  }
+  
+  .print-logo {
+    max-width: 80px;
+    max-height: 80px;
+    object-fit: contain;
+  }
+  
+  .print-school-info {
+    flex: 1;
+  }
+  
+  .print-school-name {
+    margin: 0 0 5px 0;
+    font-size: 18pt;
+    font-weight: 700;
+    color: #000;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  .print-school-address {
+    margin: 0;
+    font-size: 9pt;
+    color: #333;
+  }
+  
+  .print-report-info {
+    text-align: right;
+    flex: 1;
+  }
+  
+  .print-report-title {
+    margin: 0 0 8px 0;
+    font-size: 20pt;
+    font-weight: 700;
+    color: #000;
+    text-transform: uppercase;
+  }
+  
+  .print-report-date,
+  .print-report-filters {
+    margin: 4px 0;
+    font-size: 9pt;
+    color: #333;
+  }
+  
+  // Card Header
+  .card-header {
+    border-bottom: 2px solid #000;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    page-break-after: avoid;
+    
+    .title-section h2 {
+      font-size: 16pt;
+      color: #000;
+      
+      mat-icon {
+        display: none;
+      }
+    }
+  }
+  
+  // Summary Cards - Stack vertically in print
+  .summary-cards {
+    display: block;
+    margin-bottom: 15px;
+    page-break-inside: avoid;
+  }
+  
+  .summary-card {
+    margin-bottom: 10px;
+    page-break-inside: avoid;
+    border: 1px solid #ccc;
+    background: #f9f9f9 !important;
+    
+    mat-card-content {
+      padding: 10px !important;
+    }
+  }
+  
+  .summary-icon {
+    display: none;
+  }
+  
+  .summary-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    .summary-label {
+      font-weight: 600;
+      color: #000;
+    }
+    
+    .summary-value {
+      font-size: 12pt;
+      color: #000;
+      
+      &.outstanding {
+        color: #000;
+        font-weight: 700;
+      }
+    }
+  }
+  
+  // Total Outstanding
+  .total-outstanding {
+    background: #f0f0f0 !important;
+    border: 2px solid #000;
+    padding: 15px;
+    margin: 15px 0;
+    page-break-inside: avoid;
+    page-break-after: avoid;
+    
+    h2 {
+      font-size: 16pt;
+      color: #000 !important;
+      margin: 0;
+      
+      mat-icon {
+        display: none;
+      }
+    }
+  }
+  
+  // Section Headers
+  .section-header {
+    border-bottom: 1px solid #000;
+    padding-bottom: 8px;
+    margin: 20px 0 10px 0;
+    page-break-after: avoid;
+    
+    h4 {
+      font-size: 12pt;
+      font-weight: 700;
+      color: #000;
+      margin: 0;
+      
+      mat-icon {
+        display: none;
+      }
+    }
+    
+    .section-count {
+      display: inline-block;
+      margin-left: 10px;
+      font-size: 10pt;
+      color: #333;
+      font-weight: normal;
+    }
+  }
+  
+  // Tables - allow page breaks
+  .table-container,
+  .student-details-table-container {
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    margin-bottom: 15px;
+    page-break-inside: auto; // Allow tables to break across pages
+    display: block; // Ensure proper flow
+  }
+  
+  .full-width-table {
+    width: 100%;
+    border-collapse: collapse;
+    display: table !important; // Ensure table display
+    page-break-inside: auto; // Allow table to break across pages
+  }
+  
+  // Ensure mat-table elements don't restrict height
+  mat-table {
+    display: table !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    page-break-inside: auto !important;
+  }
+  
+  .mat-header-cell,
+  .table-header-cell {
+    background: #000 !important;
+    color: white !important;
+    font-weight: 700;
+    padding: 10px 8px;
+    font-size: 10pt;
+    text-transform: uppercase;
+    border: 1px solid #000;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  .mat-cell,
+  .table-cell {
+    padding: 8px;
+    font-size: 9pt;
+    color: #000 !important;
+    border: 1px solid #ccc;
+    background: white !important;
+    
+    &:last-child {
+      text-align: right;
+      font-weight: 600;
+    }
+  }
+  
+  .mat-row,
+  .table-row {
+    page-break-inside: avoid;
+    border-bottom: 1px solid #ccc;
+    
+    &:nth-child(even) {
+      background: #f9f9f9 !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+  
+  // Remove colors for print
+  .high-outstanding,
+  .medium-outstanding,
+  .low-outstanding,
+  .outstanding,
+  .amount-in,
+  .amount-out {
+    color: #000 !important;
+  }
+  
+  // Dividers
+  mat-divider {
+    border-color: #000;
+    margin: 15px 0;
+  }
+  
+  // Print Footer - use relative positioning to allow content flow
+  .print-footer {
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid #000;
+    page-break-inside: avoid;
+    position: relative; // Changed from fixed to allow content flow
+    background: white;
+  }
+  
+  .print-footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 8pt;
+    color: #666;
+    padding: 5px 10mm;
+  }
+  
+  .print-footer-text {
+    margin: 0;
+  }
+  
+  .page-number::after {
+    content: counter(page);
+  }
+  
+  // Prevent page breaks inside important sections
+  .card-header,
+  .total-outstanding,
+  .section-header {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+  
+  // Allow page breaks between table rows if needed
+  .student-details-table-container {
+    page-break-inside: auto;
+    
+    .mat-row,
+    .table-row {
+      page-break-inside: avoid; // Don't break inside a single row
+      page-break-after: auto; // Allow breaks after rows
+      
+      &:nth-child(20n) {
+        page-break-after: auto;
+      }
+    }
+  }
+  
+  // Hide icons in print (replace with text where needed)
+  mat-icon {
+    display: none !important;
+  }
+  
+  // Ensure tables don't break awkwardly - but allow multi-page flow
+  table {
+    page-break-inside: auto; // Allow table to break across pages
+    
+    thead {
+      display: table-header-group;
+      page-break-after: avoid;
+    }
+    
+    tfoot {
+      display: table-footer-group;
+      page-break-inside: avoid;
+    }
+    
+    tbody {
+      display: table-row-group;
+    }
+    
+    tr {
+      page-break-inside: avoid; // Don't break inside a row
+      page-break-after: auto; // Allow breaks after rows
+    }
+  }
+  
+  // Summary tables
+  .table-container table {
+    margin-bottom: 20px;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .filter-field {
+    min-width: unset;
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .filter-actions-print {
+    width: 100%;
+    margin-left: 0;
+    justify-content: space-between;
+  }
+  
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .total-outstanding h2 {
+    font-size: 1.5em;
+  }
+}

@@ -1,0 +1,288 @@
+<!-- Loading Overlay -->
+<div class="loading-overlay" *ngIf="isLoading$ | async">
+  <div class="loading-spinner">
+    <mat-spinner diameter="60"></mat-spinner>
+    <p>Loading fees structure...</p>
+  </div>
+</div>
+
+<!-- Background Elements -->
+<div class="background-elements">
+  <div class="floating-circle circle-1"></div>
+  <div class="floating-circle circle-2"></div>
+  <div class="floating-circle circle-3"></div>
+</div>
+
+<!-- Main Container -->
+<div class="main-container" [class.theme-light]="currentTheme === 'light'" [class.theme-dark]="currentTheme === 'dark'" [class.animated-bg-light]="currentTheme === 'light'" [class.animated-bg-dark]="currentTheme === 'dark'">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="title-section">
+        <mat-icon class="header-icon">account_balance</mat-icon>
+        <div class="page-title">School Fees Structure</div>
+        <div class="page-subtitle">Comprehensive fee breakdown for all student categories</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Card -->
+  <div class="main-card">
+    <!-- Management Section -->
+    <div class="management-section" *ngIf="canManageFees$ | async">
+      <div class="section-header">
+        <mat-icon class="section-icon">settings</mat-icon>
+        <h3>Fee Management</h3>
+      </div>
+      <div class="management-actions">
+        <button mat-raised-button color="primary" (click)="openAddFeesDialog()" class="action-button">
+          <mat-icon>add</mat-icon>
+          Add New Fee
+        </button>
+      </div>
+    </div>
+
+    <!-- Fees Structure -->
+    <div class="fees-structure">
+      <!-- O Level Fees -->
+      <div class="fee-category">
+        <div class="category-header">
+          <mat-icon class="category-icon">school</mat-icon>
+          <h2>O Level Fees</h2>
+          <div class="category-subtitle">Ordinary Level Student Fees</div>
+        </div>
+
+        <!-- O Level Day Scholars -->
+        <div class="fee-group">
+          <div class="group-header">
+            <mat-icon class="group-icon">home</mat-icon>
+            <h3>Day Scholars</h3>
+          </div>
+          <div class="fee-items">
+            <div class="fee-item" *ngFor="let fee of oLevelDayFees">
+              <div class="fee-info">
+                <div class="fee-name">{{ getFeeDisplayName(fee.name) }}</div>
+                <div class="fee-description">{{ fee.description }}</div>
+              </div>
+              <div class="fee-amount">${{ fee.amount }}</div>
+              <div class="fee-actions" *ngIf="canManageFees$ | async">
+                <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- O Level Boarders -->
+        <div class="fee-group">
+          <div class="group-header">
+            <mat-icon class="group-icon">hotel</mat-icon>
+            <h3>Boarders</h3>
+          </div>
+          <div class="fee-items">
+            <div class="fee-item" *ngFor="let fee of oLevelBoarderFees">
+              <div class="fee-info">
+                <div class="fee-name">{{ getFeeDisplayName(fee.name) }}</div>
+                <div class="fee-description">{{ fee.description }}</div>
+              </div>
+              <div class="fee-amount">${{ fee.amount }}</div>
+              <div class="fee-actions" *ngIf="canManageFees$ | async">
+                <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- O Level Additional Services -->
+        <div class="fee-group">
+          <div class="group-header">
+            <mat-icon class="group-icon">add_circle</mat-icon>
+            <h3>Additional Services</h3>
+          </div>
+          <div class="fee-items">
+            <div class="fee-item" *ngFor="let fee of oLevelAdditionalFees">
+              <div class="fee-info">
+                <div class="fee-name">{{ getFeeDisplayName(fee.name) }}</div>
+                <div class="fee-description">{{ fee.description }}</div>
+              </div>
+              <div class="fee-amount">${{ fee.amount }}</div>
+              <div class="fee-actions" *ngIf="canManageFees$ | async">
+                <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- A Level Fees -->
+      <div class="fee-category">
+        <div class="category-header">
+          <mat-icon class="category-icon">college</mat-icon>
+          <h2>A Level Fees</h2>
+          <div class="category-subtitle">Advanced Level Student Fees</div>
+        </div>
+
+        <!-- A Level Day Scholars -->
+        <div class="fee-group">
+          <div class="group-header">
+            <mat-icon class="group-icon">home</mat-icon>
+            <h3>Day Scholars</h3>
+          </div>
+          <div class="fee-items">
+            <div class="fee-item" *ngFor="let fee of aLevelDayFees">
+              <div class="fee-info">
+                <div class="fee-name">{{ getFeeDisplayName(fee.name) }}</div>
+                <div class="fee-description">{{ fee.description }}</div>
+              </div>
+              <div class="fee-amount">${{ fee.amount }}</div>
+              <div class="fee-actions" *ngIf="canManageFees$ | async">
+                <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- A Level Boarders -->
+        <div class="fee-group">
+          <div class="group-header">
+            <mat-icon class="group-icon">hotel</mat-icon>
+            <h3>Boarders</h3>
+          </div>
+          <div class="fee-items">
+            <div class="fee-item" *ngFor="let fee of aLevelBoarderFees">
+              <div class="fee-info">
+                <div class="fee-name">{{ getFeeDisplayName(fee.name) }}</div>
+                <div class="fee-description">{{ fee.description }}</div>
+              </div>
+              <div class="fee-amount">${{ fee.amount }}</div>
+              <div class="fee-actions" *ngIf="canManageFees$ | async">
+                <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- A Level Science Fees -->
+        <div class="fee-group">
+          <div class="group-header">
+            <mat-icon class="group-icon">science</mat-icon>
+            <h3>Science Subjects</h3>
+          </div>
+          <div class="fee-items">
+            <div class="fee-item" *ngFor="let fee of aLevelScienceFees">
+              <div class="fee-info">
+                <div class="fee-name">{{ getFeeDisplayName(fee.name) }}</div>
+                <div class="fee-description">{{ fee.description }}</div>
+              </div>
+              <div class="fee-amount">${{ fee.amount }}</div>
+              <div class="fee-actions" *ngIf="canManageFees$ | async">
+                <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- New Student Fees -->
+      <div class="fee-category">
+        <div class="category-header">
+          <mat-icon class="category-icon">person_add</mat-icon>
+          <h2>New Student Fees</h2>
+          <div class="category-subtitle">One-time fees for new students</div>
+        </div>
+
+        <div class="fee-group">
+          <div class="group-header">
+            <mat-icon class="group-icon">assignment</mat-icon>
+            <h3>Application & Setup</h3>
+          </div>
+          <div class="fee-items">
+            <div class="fee-item" *ngFor="let fee of newStudentFees">
+              <div class="fee-info">
+                <div class="fee-name">{{ getFeeDisplayName(fee.name) }}</div>
+                <div class="fee-description">{{ fee.description }}</div>
+              </div>
+              <div class="fee-amount">${{ fee.amount }}</div>
+              <div class="fee-actions" *ngIf="canManageFees$ | async">
+                <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Optional Services -->
+      <div class="fee-category">
+        <div class="category-header">
+          <mat-icon class="category-icon">more_horiz</mat-icon>
+          <h2>Optional Services</h2>
+          <div class="category-subtitle">Additional services for day scholars</div>
+        </div>
+
+        <div class="fee-group">
+          <div class="group-header">
+            <mat-icon class="group-icon">restaurant</mat-icon>
+            <h3>Meals & Transport</h3>
+          </div>
+          <div class="fee-items">
+            <div class="fee-item" *ngFor="let fee of optionalServiceFees">
+              <div class="fee-info">
+                <div class="fee-name">{{ getFeeDisplayName(fee.name) }}</div>
+                <div class="fee-description">{{ fee.description }}</div>
+              </div>
+              <div class="fee-amount">${{ fee.amount }}</div>
+              <div class="fee-actions" *ngIf="canManageFees$ | async">
+                <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vacation Fees -->
+      <div class="fee-category">
+        <div class="category-header">
+          <mat-icon class="category-icon">wb_sunny</mat-icon>
+          <h2>Vacation Fees</h2>
+          <div class="category-subtitle">Fees used for vacation term billing</div>
+        </div>
+
+        <div class="fee-group">
+          <div class="group-header">
+            <mat-icon class="group-icon">holiday_village</mat-icon>
+            <h3>Vacation Term Charges</h3>
+          </div>
+          <div class="fee-items">
+            <div class="fee-item" *ngFor="let fee of vacationFees">
+              <div class="fee-info">
+                <div class="fee-name">{{ getFeeDisplayName(fee.name) }}</div>
+                <div class="fee-description">{{ fee.description }}</div>
+              </div>
+              <div class="fee-amount">${{ fee.amount }}</div>
+              <div class="fee-actions" *ngIf="canManageFees$ | async">
+                <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

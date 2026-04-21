@@ -1,0 +1,180 @@
+<!-- Dialog Container -->
+<div class="dialog-container">
+  <mat-card class="main-card">
+    <!-- Header -->
+    <mat-card-header class="card-header">
+      <div class="header-content">
+        <div class="title-section">
+          <mat-icon class="header-icon">school</mat-icon>
+          <div class="title-text">
+            <h2 class="card-title">{{ data ? 'Edit Student' : 'Add New Student' }}</h2>
+            <p class="card-subtitle">{{ data ? 'Update student information' : 'Fill in the student details below' }}</p>
+          </div>
+        </div>
+      </div>
+    </mat-card-header>
+
+    <!-- Error Message -->
+    <div class="error-message" *ngIf="errorMsg$ | async as errorMsg">
+      <mat-icon class="error-icon">error</mat-icon>
+      <span class="error-text">{{ errorMsg }}</span>
+    </div>
+
+    <!-- Form Content -->
+    <mat-card-content class="card-content" [formGroup]="addStudentForm">
+      <!-- Personal Information Section -->
+      <div class="form-section personal-section">
+        <div class="section-header">
+          <mat-icon class="section-icon">person</mat-icon>
+          <h3 class="section-title">Personal Information</h3>
+        </div>
+        
+        <div class="form-group two-column">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>First Name *</mat-label>
+            <input matInput formControlName="name" placeholder="Enter first name" />
+            <mat-icon matSuffix>person</mat-icon>
+            <mat-error *ngIf="name?.hasError('required')">First name is required</mat-error>
+            <mat-error *ngIf="name?.hasError('minlength')">At least 2 characters required</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Last Name *</mat-label>
+            <input matInput formControlName="surname" placeholder="Enter last name" />
+            <mat-icon matSuffix>person_outline</mat-icon>
+            <mat-error *ngIf="surname?.hasError('required')">Last name is required</mat-error>
+            <mat-error *ngIf="surname?.hasError('minlength')">At least 2 characters required</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-group two-column">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>ID Number *</mat-label>
+            <input matInput formControlName="idnumber" placeholder="e.g., 02086982F22" />
+            <mat-icon matSuffix>badge</mat-icon>
+            <mat-error *ngIf="idnumber?.hasError('required')">ID number is required</mat-error>
+            <mat-error *ngIf="idnumber?.hasError('minlength')">At least 10 characters required</mat-error>
+            <mat-error *ngIf="idnumber?.hasError('pattern')">Invalid ID format</mat-error>
+            <mat-hint>Format: YYMMDDSSSAA</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Date of Birth *</mat-label>
+            <input matInput [matDatepicker]="dobPicker" formControlName="dob" placeholder="Select date" />
+            <mat-datepicker-toggle matIconSuffix [for]="dobPicker"></mat-datepicker-toggle>
+            <mat-datepicker #dobPicker></mat-datepicker>
+            <mat-error *ngIf="dob?.hasError('required')">Date of birth is required</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-group">
+          <div class="radio-group-container">
+            <label class="radio-group-label">Gender *</label>
+            <mat-radio-group formControlName="gender" class="radio-group">
+              <mat-radio-button *ngFor="let gender of genders" [value]="gender" class="radio-button">
+                <mat-icon class="radio-icon">{{ gender === 'Male' ? 'male' : 'female' }}</mat-icon>
+                {{ gender }}
+              </mat-radio-button>
+            </mat-radio-group>
+            <mat-error *ngIf="gender?.hasError('required')">Please select a gender</mat-error>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Information Section -->
+      <div class="form-section contact-section">
+        <div class="section-header">
+          <mat-icon class="section-icon">contact_phone</mat-icon>
+          <h3 class="section-title">Contact Information</h3>
+        </div>
+
+        <div class="form-group two-column">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Phone Number *</mat-label>
+            <input matInput formControlName="cell" placeholder="e.g., 263778261057" />
+            <mat-icon matSuffix>phone</mat-icon>
+            <mat-error *ngIf="cell?.hasError('required')">Phone number is required</mat-error>
+            <mat-error *ngIf="cell?.hasError('minlength')">At least 10 characters required</mat-error>
+            <mat-hint>Include country code</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Email Address *</mat-label>
+            <input matInput formControlName="email" placeholder="e.g., student@example.com" />
+            <mat-icon matSuffix>email</mat-icon>
+            <mat-error *ngIf="email?.hasError('required')">Email is required</mat-error>
+            <mat-error *ngIf="email?.hasError('email')">Invalid email format</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-group">
+          <mat-form-field appearance="outline" class="form-field full-width">
+            <mat-label>Address *</mat-label>
+            <textarea matInput formControlName="address" placeholder="Enter full address" rows="3"></textarea>
+            <mat-icon matSuffix>home</mat-icon>
+            <mat-error *ngIf="address?.hasError('required')">Address is required</mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Academic Information Section -->
+      <div class="form-section academic-section">
+        <div class="section-header">
+          <mat-icon class="section-icon">school</mat-icon>
+          <h3 class="section-title">Academic Information</h3>
+        </div>
+
+        <div class="form-group two-column">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Date of Joining *</mat-label>
+            <input matInput [matDatepicker]="dojPicker" formControlName="dateOfJoining" placeholder="Select date" />
+            <mat-datepicker-toggle matIconSuffix [for]="dojPicker"></mat-datepicker-toggle>
+            <mat-datepicker #dojPicker></mat-datepicker>
+            <mat-error *ngIf="dateOfJoining?.hasError('required')">Date of joining is required</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Previous School</mat-label>
+            <input matInput formControlName="prevSchool" placeholder="e.g., Sandon Academy" />
+            <mat-icon matSuffix>school</mat-icon>
+            <mat-hint>Optional</mat-hint>
+          </mat-form-field>
+        </div>
+
+      </div>
+    </mat-card-content>
+
+    <!-- Actions -->
+    <mat-card-actions class="card-actions">
+      <div class="button-group">
+        <button 
+          type="button" 
+          mat-raised-button 
+          color="warn" 
+          class="action-button cancel-button"
+          (click)="closeDialog()"
+          [disabled]="isLoading">
+          <mat-icon>cancel</mat-icon>
+          Cancel
+        </button>
+        <button 
+          type="submit" 
+          mat-raised-button 
+          color="primary" 
+          class="action-button save-button"
+          (click)="addStudent()"
+          [disabled]="isLoading">
+          <mat-icon *ngIf="!isLoading">{{ data ? 'save' : 'add' }}</mat-icon>
+          <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+          {{ data ? 'Update Student' : 'Add Student' }}
+        </button>
+      </div>
+    </mat-card-actions>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" *ngIf="isLoading">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p class="loading-text">Saving student...</p>
+    </div>
+  </mat-card>
+</div>

@@ -1,0 +1,358 @@
+/* eslint-disable prettier/prettier */
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  NotImplementedException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { REQUEST } from '@nestjs/core';
+import { Like, Repository } from 'typeorm';
+import { TENANT_REQUEST_KEY } from 'src/tenant/tenant.middleware';
+import { CreateStudentDto } from '../dtos/createStudents.dto';
+import { StudentsEntity } from '../entities/students.entity';
+import { UpdateStudentDto } from '../dtos/updateStudent.dto';
+import { ResourceByIdService } from 'src/resource-by-id/resource-by-id.service';
+import { TeachersEntity } from '../entities/teachers.entity';
+import { ParentsEntity } from '../entities/parents.entity';
+import { ROLES } from '../../auth/models/roles.enum';
+import { UnauthorizedException } from '@nestjs/common';
+
+@Injectable()
+export class StudentsService {
+  constructor(
+    @InjectRepository(StudentsEntity)
+    private studentsRepository: Repository<StudentsEntity>,
+    private resourceById: ResourceByIdService,
+    @Inject(REQUEST) private req: Record<string, unknown>,
+  ) {}
+
+  async getStudent(
+    studentNumber: string,
+    profile: TeachersEntity | ParentsEntity | StudentsEntity,
+  ): Promise<StudentsEntity> {
+    switch (profile.role) {
+      case ROLES.admin:
+      case ROLES.auditor:
+      case ROLES.director:
+      case ROLES.hod:
+      case ROLES.teacher:
+      case ROLES.reception:
+      case ROLES.dev: {
+        return await this.resourceById.getStudentByStudentNumber(studentNumber);
+        break;
+      }
+      case ROLES.parent: {
+        const student = await this.resourceById.getStudentByStudentNumber(
+          studentNumber,
+        );
+        if (student.parent == profile) {
+          return student;
+        } else {
+          throw new UnauthorizedException(
+            'Parents can only access records of their children',
+          );
+        }
+        break;
+      }
+      case ROLES.student: {
+        const student = await this.resourceById.getStudentByStudentNumber(
+          studentNumber,
+        );
+        if ('studentNumber' in profile) {
+          if (profile.studentNumber === student.studentNumber) {
+            return student;
+          } else {
+            throw new UnauthorizedException(
+              'you can only access your own record',
+            );
+          }
+        }
+      }
+    }
+  }
+
+  async getAllStudents(
+    profile: TeachersEntity | ParentsEntity | StudentsEntity,
+  ): Promise<StudentsEntity[]> {
+    switch (profile.role) {
+      case ROLES.parent:
+      case ROLES.student: {
+        throw new UnauthorizedException(
+          'You are not allowed to retrieve list of all students',
+        );
+      }
+    }
+    return await this.studentsRepository.find();
+  }
+
+  /**
+   * Search students with pagination for large lists and typeahead.
+   * Matches on name, surname, studentNumber, cell and email.
+   */
+  async searchStudents(
+    profile: TeachersEntity | ParentsEntity | StudentsEntity,
+    query: string,
+    page: number,
+    limit: number,
+  ): Promise<{ items: StudentsEntity[]; total: number }> {
+    switch (profile.role) {
+      case ROLES.parent:
+      case ROLES.student: {
+        throw new UnauthorizedException(
+          'You are not allowed to search across all students',
+        );
+      }
+    }
+
+    const pageNum = Math.max(page || 1, 1);
+    const take = Math.min(Math.max(limit || 50, 1), 200);
+    const skip = (pageNum - 1) * take;
+
+    const where =
+      query && query.trim()
+        ? [
+            { name: Like(`%${query}%`) },
+            { surname: Like(`%${query}%`) },
+            { studentNumber: Like(`%${query}%`) },
+            { cell: Like(`%${query}%`) },
+            { email: Like(`%${query}%`) },
+          ]
+        : {};
+
+    const [items, total] = await this.studentsRepository.findAndCount({
+      where,
+      order: { surname: 'ASC', name: 'ASC' },
+      take,
+      skip,
+    });
+
+    return { items, total };
+  }
+
+  async createStudent(
+    createStudentDto: CreateStudentDto,
+    profile: TeachersEntity | ParentsEntity | StudentsEntity,
+  ): Promise<StudentsEntity> {
+    // A more explicit way to handle roles
+    if (
+      profile.role !== ROLES.admin &&
+      profile.role !== ROLES.reception &&
+      profile.role !== ROLES.director &&
+      profile.role !== ROLES.auditor &&
+      profile.role !== ROLES.dev
+    ) {
+      throw new UnauthorizedException(
+        'Only admins, reception, director, auditor, and dev can add new students',
+      );
+    }
+
+    // Allow duplicate names/surnames; they are not unique identifiers.
+    // If ID number is provided, enforce uniqueness on that field only.
+    if (createStudentDto.idnumber?.trim()) {
+      const existingByIdNumber = await this.studentsRepository.findOne({
+        where: {
+          idnumber: createStudentDto.idnumber.trim(),
+        },
+      });
+
+      if (existingByIdNumber) {
+        throw new BadRequestException(
+          `A student with ID number '${createStudentDto.idnumber}' already exists.`,
+        );
+      }
+    }
+
+    // Proceed with save once authorization and uniqueness checks pass.
+    const newStudentNumber = await this.nextStudentNumber();
+
+    try {
+      return await this.studentsRepository.save({
+        ...createStudentDto,
+        studentNumber: newStudentNumber,
+      });
+    } catch (err) {
+      // Keep the original check for the unique idnumber database error
+      if (err.code === 'ER_DUP_ENTRY') {
+        throw new BadRequestException(
+          `Student with same ID Number already exists`,
+        );
+      } else {
+        throw new NotImplementedException('Failed to save student' + err);
+      }
+    }
+  }
+
+  async deleteStudent(
+    studentNumber: string,
+  ): Promise<{ studentNumber: string }> {
+    const student = await this.studentsRepository.findOne({
+      where: {
+        studentNumber,
+      },
+    });
+
+    if (!student) {
+      throw new NotFoundException(
+        `Student with StudentNumer ${studentNumber} not found`,
+      );
+    }
+
+    const result = await this.studentsRepository.delete(studentNumber);
+
+    if (!result.affected)
+      throw new NotImplementedException(
+        `Student with StudentNumer ${studentNumber} not deleted`,
+      );
+    // return result.affected;
+    return { studentNumber };
+  }
+
+  async updateStudent(
+    studentNumber: string,
+    updateStudentDto: UpdateStudentDto,
+    profile: TeachersEntity | ParentsEntity | StudentsEntity,
+  ): Promise<StudentsEntity> {
+    const student = await this.getStudent(studentNumber, profile);
+
+    // Never allow the primary key to be changed via PATCH.
+    // Frontend payloads may include a null or different studentNumber,
+    // which would cause TypeORM to attempt an INSERT with a null PK.
+    const { studentNumber: _ignoredStudentNumber, ...safeUpdate } =
+      updateStudentDto as unknown as Partial<StudentsEntity> & {
+        studentNumber?: string | null;
+      };
+
+    return await this.studentsRepository.save({
+      ...student,
+      ...safeUpdate,
+      studentNumber, // Always set PK from route param so save() does UPDATE, not INSERT
+    });
+  }
+
+  private async nextStudentNumber(): Promise<string> {
+    /* Student Number format
+     * LYYMMNNNC where
+     * L is a single character representing the school name eg S for Sandon Academy
+     * YY is the current year
+     * MM is the current month
+     * NNN is a sequential number
+     * C is the check digit
+     */
+
+    const tenant = this.req[TENANT_REQUEST_KEY] as { settings?: { studentNumberPrefix?: string } } | undefined;
+    const schoolPrefix = tenant?.settings?.studentNumberPrefix ?? 'S';
+    const today = new Date();
+    const YY = today.getFullYear().toString().substring(2);
+    // Use padStart for safe two-digit month formatting
+    const MM = (today.getMonth() + 1).toString().padStart(2, '0');
+
+    // Step 1: Use a more efficient query to find the max student number for the current month.
+    const searchPrefix = schoolPrefix + YY + MM;
+    const lastStudent = await this.studentsRepository.findOne({
+      where: {
+        studentNumber: Like(`${searchPrefix}%`),
+      },
+      order: { studentNumber: 'DESC' },
+    });
+
+    let sequentialNumber: number;
+
+    if (lastStudent) {
+      // Step 2: Extract and safely increment the sequential number.
+      // Use slice to get the last 3 digits, convert to a number, and increment.
+      const lastNNN = parseInt(lastStudent.studentNumber.slice(-4, -1), 10);
+      sequentialNumber = lastNNN + 1;
+    } else {
+      // Step 3: Start with 0 if no students exist for the current month.
+      sequentialNumber = 0;
+    }
+
+    // Step 4: Pad the sequential number with leading zeros to 3 digits.
+    const NNN = sequentialNumber.toString().padStart(3, '0');
+
+    // Step 5: Assemble the student number parts.
+    const rawStudentNumber = schoolPrefix + YY + MM + NNN;
+
+    // Step 6: Calculate and append the check digit.
+    const checkDigit = this.calculateCheckDigit(rawStudentNumber);
+
+    return rawStudentNumber + checkDigit;
+  }
+
+  /**
+   * Calculates a check digit using the Luhn algorithm (Mod 10).
+   * @param rawStudentNumber The student number without the check digit, including the letter prefix.
+   * @returns The calculated check digit (a single number).
+   */
+  private calculateCheckDigit(rawStudentNumber: string): number {
+    let sum = 0;
+    let isSecondDigit = false;
+
+    // --- CORRECTION: Only use the numeric part of the student number for the calculation ---
+    const numericPart = rawStudentNumber.substring(1);
+
+    // Iterate through the digits of the numeric part from right to left
+    for (let i = numericPart.length - 1; i >= 0; i--) {
+      let digit = parseInt(numericPart.charAt(i), 10);
+
+      if (isSecondDigit) {
+        digit *= 2;
+        if (digit > 9) {
+          digit -= 9;
+        }
+      }
+
+      sum += digit;
+      isSecondDigit = !isSecondDigit;
+    }
+
+    const checkDigit = (10 - (sum % 10)) % 10;
+    // console.log('check digit: ', checkDigit);
+
+    return checkDigit;
+  }
+
+  async findNewComerStudentsQueryBuilder(): Promise<StudentsEntity[]> {
+    return await this.studentsRepository
+      .createQueryBuilder('student')
+      .leftJoinAndSelect('student.enrols', 'enrol')
+      .groupBy('student.id')
+      .having('COUNT(enrol.id) = 1')
+      .getMany();
+  }
+
+  // In StudentsService
+  async getStudentByStudentNumberWithExemption(
+    studentNumber: string,
+  ): Promise<StudentsEntity | null> {
+    return this.studentsRepository.findOne({
+      where: { studentNumber },
+      relations: ['exemption'], // Ensure 'exemption' relation is loaded
+    });
+  }
+
+  // Search students by name or student number with debouncing
+  async searchStudentsByName(query: string): Promise<StudentsEntity[]> {
+    if (!query || query.trim().length < 2) {
+      return [];
+    }
+
+    const searchTerm = `%${query.trim().toLowerCase()}%`;
+    
+    return this.studentsRepository
+      .createQueryBuilder('student')
+      .leftJoinAndSelect('student.enrols', 'enrol')
+      .where(
+        '(LOWER(student.name) LIKE LOWER(:searchTerm) OR ' +
+        'LOWER(student.surname) LIKE LOWER(:searchTerm) OR ' +
+        'LOWER(student.studentNumber) LIKE LOWER(:searchTerm))'
+      )
+      .setParameter('searchTerm', searchTerm)
+      .orderBy('student.surname', 'ASC')
+      .addOrderBy('student.name', 'ASC')
+      .limit(50) // Limit results for performance
+      .getMany();
+  }
+}

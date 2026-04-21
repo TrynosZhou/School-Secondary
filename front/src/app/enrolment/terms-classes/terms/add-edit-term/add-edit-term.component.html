@@ -1,0 +1,169 @@
+<div class="dialog-container">
+  <mat-card class="main-card">
+    <!-- Header -->
+    <mat-card-header class="card-header">
+      <div class="header-content">
+        <div class="title-section">
+          <mat-icon class="header-icon">{{ isEditMode ? 'edit' : 'add' }}</mat-icon>
+          <h2 class="dialog-title">{{ isEditMode ? 'Edit Term' : 'Add New Term' }}</h2>
+        </div>
+        <p class="dialog-subtitle">
+          {{ isEditMode ? 'Update term information' : 'Enter term details to create a new academic term' }}
+        </p>
+      </div>
+    </mat-card-header>
+
+    <!-- Error Message -->
+    <div class="error-message" *ngIf="errorMsg$ | async as errorMsg">
+      <mat-icon>error</mat-icon>
+      <span>{{ errorMsg }}</span>
+    </div>
+
+    <!-- Form Content -->
+    <form [formGroup]="addTermForm" (ngSubmit)="addTerm()" class="form-container">
+      <mat-card-content class="card-content">
+        <div class="form-sections">
+          <!-- Term Information Section -->
+          <div class="form-section">
+            <div class="section-header">
+              <mat-icon class="section-icon">school</mat-icon>
+              <h3 class="section-title">Term Information</h3>
+            </div>
+            
+            <div class="form-fields">
+              <div class="field-group">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Term Number</mat-label>
+                  <mat-select formControlName="num" placeholder="Select term number">
+                    <mat-option value="1">Term 1</mat-option>
+                    <mat-option value="2">Term 2</mat-option>
+                    <mat-option value="3">Term 3</mat-option>
+                    <mat-option value="4">Term 4</mat-option>
+                    <mat-option value="5">Term 5</mat-option>
+                    <mat-option value="6">Term 6</mat-option>
+                  </mat-select>
+                  <mat-icon matSuffix>looks_one</mat-icon>
+                  <mat-hint>Select the term number (1-6)</mat-hint>
+                  <mat-error>{{ getFormErrorMessage('num') }}</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="field-group">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Period Type</mat-label>
+                  <mat-select formControlName="type">
+                    <mat-option *ngFor="let periodType of termTypes" [value]="periodType">
+                      {{ periodType | titlecase }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matSuffix>category</mat-icon>
+                  <mat-hint>Regular term or vacation school period</mat-hint>
+                </mat-form-field>
+              </div>
+
+              <div class="field-group">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Academic Year</mat-label>
+                  <mat-select formControlName="year" placeholder="Select academic year">
+                    <mat-option *ngFor="let year of getAvailableYears()" [value]="year">
+                      {{ year }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matSuffix>calendar_today</mat-icon>
+                  <mat-hint>Select the academic year</mat-hint>
+                  <mat-error>{{ getFormErrorMessage('year') }}</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="field-group" *ngIf="type?.value === 'vacation'">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Vacation Label (optional)</mat-label>
+                  <input matInput formControlName="label" placeholder="e.g. April Holiday School" />
+                  <mat-icon matSuffix>label</mat-icon>
+                  <mat-hint>Name shown in selectors and reports</mat-hint>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+
+          <!-- Date Range Section -->
+          <div class="form-section">
+            <div class="section-header">
+              <mat-icon class="section-icon">date_range</mat-icon>
+              <h3 class="section-title">Term Duration</h3>
+            </div>
+            
+            <div class="form-fields">
+              <div class="field-group">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Start Date</mat-label>
+                  <input
+                    matInput
+                    [matDatepicker]="startPicker"
+                    formControlName="startDate"
+                    placeholder="Select start date"
+                  />
+                  <mat-hint>When does this term begin?</mat-hint>
+                  <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #startPicker></mat-datepicker>
+                  <mat-error>{{ getFormErrorMessage('startDate') }}</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="field-group">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>End Date</mat-label>
+                  <input
+                    matInput
+                    [matDatepicker]="endPicker"
+                    formControlName="endDate"
+                    placeholder="Select end date"
+                  />
+                  <mat-hint>When does this term end?</mat-hint>
+                  <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #endPicker></mat-datepicker>
+                  <mat-error>{{ getFormErrorMessage('endDate') }}</mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Date Range Error -->
+            <div class="date-range-error" *ngIf="getDateRangeErrorMessage()">
+              <mat-icon>warning</mat-icon>
+              <span>{{ getDateRangeErrorMessage() }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <!-- Actions -->
+      <mat-card-actions class="card-actions">
+        <div class="action-buttons">
+          <button
+            type="button"
+            mat-raised-button
+            color="warn"
+            (click)="closeDialog()"
+            class="cancel-button"
+            [disabled]="isLoading"
+          >
+            <mat-icon>close</mat-icon>
+            <span>Cancel</span>
+          </button>
+          
+          <button
+            type="submit"
+            mat-raised-button
+            color="primary"
+            class="save-button"
+            [disabled]="addTermForm.invalid || isLoading"
+          >
+            <mat-icon *ngIf="!isLoading">{{ isEditMode ? 'update' : 'save' }}</mat-icon>
+            <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+            <span>{{ isLoading ? 'Processing...' : (isEditMode ? 'Update Term' : 'Add Term') }}</span>
+          </button>
+        </div>
+      </mat-card-actions>
+    </form>
+  </mat-card>
+</div>

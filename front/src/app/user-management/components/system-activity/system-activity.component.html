@@ -1,0 +1,181 @@
+<div class="system-activity-container" [class.theme-light]="currentTheme === 'light'" [class.theme-dark]="currentTheme === 'dark'">
+  <!-- Header -->
+  <div class="activity-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1>
+          <mat-icon>analytics</mat-icon>
+          System Activity Dashboard
+        </h1>
+        <p>Monitor all system activities and user actions</p>
+      </div>
+      <div class="header-actions">
+        <button mat-raised-button color="primary" (click)="onRefresh()">
+          <mat-icon>refresh</mat-icon>
+          Refresh
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <mat-card class="filters-card">
+      <div class="filters-content">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Action Type</mat-label>
+          <mat-select [(ngModel)]="selectedAction" (selectionChange)="onFilterChange()">
+            <mat-option value="">All Actions</mat-option>
+            <mat-option *ngFor="let action of actions" [value]="action">
+              {{ getActionDisplayName(action) }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Time Range</mat-label>
+          <mat-select [(ngModel)]="selectedTimeRange" (selectionChange)="onFilterChange()">
+            <mat-option *ngFor="let timeRange of timeRanges" [value]="timeRange.value">
+              {{ timeRange.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>User</mat-label>
+          <input matInput [(ngModel)]="selectedUser" (ngModelChange)="onFilterChange()" placeholder="Search by user...">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <button mat-stroked-button (click)="onClearFilters()" class="clear-filters-btn">
+          <mat-icon>clear</mat-icon>
+          Clear Filters
+        </button>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- Activity List -->
+  <div class="activity-section">
+    <mat-card class="activity-card">
+      <div class="activity-content">
+        <div *ngIf="loading$ | async" class="loading-container">
+          <mat-spinner diameter="50"></mat-spinner>
+          <p>Loading system activity...</p>
+        </div>
+
+        <div *ngIf="error$ | async" class="error-container">
+          <mat-icon class="error-icon">error</mat-icon>
+          <p class="error-message">{{ error$ | async }}</p>
+        </div>
+
+        <div *ngIf="systemActivity$ | async as activity" class="activity-list">
+          
+          <!-- Activity Summary -->
+          <div class="activity-summary">
+            <div class="summary-item">
+              <mat-icon class="summary-icon">history</mat-icon>
+              <div class="summary-info">
+                <span class="summary-label">Total Activities</span>
+                <span class="summary-value">{{ activity.total }}</span>
+              </div>
+            </div>
+            <div class="summary-item">
+              <mat-icon class="summary-icon">schedule</mat-icon>
+              <div class="summary-info">
+                <span class="summary-label">This Page</span>
+                <span class="summary-value">{{ activity.activities.length }}</span>
+              </div>
+            </div>
+            <div class="summary-item">
+              <mat-icon class="summary-icon">trending_up</mat-icon>
+              <div class="summary-info">
+                <span class="summary-label">Active Users</span>
+                <span class="summary-value">{{ getUniqueUsers(activity.activities) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Activity Items -->
+          <div class="activity-items">
+            <div *ngFor="let activityItem of activity.activities" class="activity-item">
+              
+              <!-- Activity Icon and Type -->
+              <div class="activity-icon-section">
+                <mat-icon 
+                  [color]="getActionColor(activityItem.action)" 
+                  class="activity-icon">
+                  {{ getActionIcon(activityItem.action) }}
+                </mat-icon>
+                <div class="activity-type">
+                  <span class="action-name">{{ getActionDisplayName(activityItem.action) }}</span>
+                  <span class="action-code">{{ activityItem.action }}</span>
+                </div>
+              </div>
+
+              <!-- Activity Details -->
+              <div class="activity-details">
+                <p class="activity-description">{{ activityItem.description }}</p>
+                
+                <!-- User Information -->
+                <div class="user-info">
+                  <mat-icon class="user-icon">person</mat-icon>
+                  <span class="user-text">User ID: {{ activityItem.userId }}</span>
+                </div>
+
+                <!-- Resource Information -->
+                <div *ngIf="activityItem.resourceType || activityItem.resourceId" class="resource-info">
+                  <mat-icon class="resource-icon">{{ getResourceTypeIcon(activityItem.resourceType) }}</mat-icon>
+                  <span class="resource-text">
+                    <span *ngIf="activityItem.resourceType" class="resource-type">{{ activityItem.resourceType }}</span>
+                    <span *ngIf="activityItem.resourceId" class="resource-id">#{{ activityItem.resourceId || '' }}</span>
+                  </span>
+                </div>
+
+                <!-- Technical Details -->
+                <div class="technical-details">
+                  <div *ngIf="activityItem.ipAddress" class="tech-item">
+                    <mat-icon class="tech-icon">language</mat-icon>
+                    <span class="tech-label">IP:</span>
+                    <span class="tech-value">{{ activityItem.ipAddress }}</span>
+                  </div>
+                  <div *ngIf="activityItem.userAgent" class="tech-item">
+                    <mat-icon class="tech-icon">devices</mat-icon>
+                    <span class="tech-label">Device:</span>
+                    <span class="tech-value">{{ activityItem.userAgent }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Timestamp -->
+              <div class="activity-timestamp">
+                <mat-icon class="timestamp-icon">schedule</mat-icon>
+                <span class="timestamp-text">{{ formatTimestamp(activityItem.timestamp) }}</span>
+                <span class="timestamp-full">{{ activityItem.timestamp | date:'medium' }}</span>
+              </div>
+            </div>
+
+            <!-- No Activities Message -->
+            <div *ngIf="activity.activities.length === 0" class="no-activities">
+              <mat-icon class="no-activities-icon">history</mat-icon>
+              <p class="no-activities-text">No activities found</p>
+              <p class="no-activities-subtext">Try adjusting your filter criteria</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paginator -->
+      <div *ngIf="systemActivity$ | async as activity" class="activity-paginator">
+        <mat-paginator
+          [length]="totalItems"
+          [pageSize]="pageSize"
+          [pageSizeOptions]="[10, 20, 50, 100]"
+          [showFirstLastButtons]="true"
+          (page)="onPageChange($event)"
+          class="activity-paginator-controls">
+        </mat-paginator>
+      </div>
+    </mat-card>
+  </div>
+</div>

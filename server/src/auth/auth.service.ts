@@ -1,0 +1,922 @@
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotImplementedException,
+  UnauthorizedException,
+} from '@nestjs/common';
+
+import { AccountsDto } from './dtos/signup.dto';
+import { ROLES } from './models/roles.enum';
+import { InjectRepository } from '@nestjs/typeorm';
+import { AccountsEntity } from './entities/accounts.entity';
+import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
+import { SignupResponse } from './dtos/signup-response.dto';
+import { SigninDto } from './dtos/signin.dto';
+import { JwtService } from '@nestjs/jwt';
+import { JwtPayload } from './models/jwt-payload.interface';
+import { ResourceByIdService } from 'src/resource-by-id/resource-by-id.service';
+import { AccountStats } from './models/acc-stats.model';
+import { ActivityService } from '../activity/activity.service';
+import { RolesPermissionsService } from './services/roles-permissions.service';
+
+@Injectable()
+export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
+  constructor(
+    @InjectRepository(AccountsEntity)
+    private accountsRepository: Repository<AccountsEntity>,
+    private jwtService: JwtService,
+    private resourceById: ResourceByIdService,
+    private activityService: ActivityService,
+    private rolesPermissionsService: RolesPermissionsService,
+  ) {}
+
+  async getAccountsStats() {
+    const accStats = new AccountStats(0, 0, 0, 0);
+
+    const res = await this.accountsRepository.find({
+      select: ['username'],
+      relations: ['student', 'teacher'],
+    });
+
+    res.map((acc) => {
+      if (acc.role === 'student') {
+        accStats.students++;
+      } else {
+        switch (acc.teacher.role) {
+          case 'admin':
+            accStats.admins++;
+            break;
+          case 'teacher':
+            accStats.teachers++;
+            break;
+          case 'reception':
+            accStats.reception++;
+            break;
+        }
+      }
+    });
+
+    return accStats;
+  }
+
+  async signup(accountsDto: AccountsDto): Promise<SignupResponse> {
+    const { role, id, username, password } = accountsDto;
+
+    this.logger.log('signup - Starting signup process', {
+      role,
+      id,
+      username,
+      roleType: typeof role,
+      roleValue: role,
+    });
+
+    // Check if user already has an account
+    const existingAccount = await this.accountsRepository.findOne({
+      where: [
+        { id }, // Check by ID (studentNumber/teacher ID/parent email)
+        { username }, // Check by username
+      ],
+    });
+
+    if (existingAccount) {
+      this.logger.warn('signup - Account already exists', { id, username });
+      throw new BadRequestException(
+        `User with ID ${id} or username ${username} already has an account`,
+      );
+    }
+
+    // Generate salt for bcrypt (bcrypt.hash will use this salt)
+    const salt = await bcrypt.genSalt();
+
+    const account = new AccountsEntity();
+    account.role = role;
+    account.id = id;
+    account.username = username;
+    // Hash password with the generated salt
+    // Note: bcrypt.hash() embeds the salt in the resulting hash
+    account.password = await this.hashPassword(password, salt);
+    // Store salt for reference (though bcrypt.compare doesn't need it)
+    account.salt = salt;
+    account.active = true; // New accounts are active by default
+    account.deletedAt = null;
+    // password = await this.hashPassword(password, salt);
+
+    this.logger.log('signup - Processing role', {
+      role,
+      roleEnumValues: Object.values(ROLES),
+      isStudent: role === ROLES.student,
+      studentEnumValue: ROLES.student,
+    });
+
+    switch (role) {
+      case ROLES.parent: {
+        const pr = await this.resourceById.getParentByEmail(id);
+
+        try {
+          const user = await this.accountsRepository.save({
+            ...account,
+          });
+          return { response: true };
+        } catch (err) {
+          if (err.code === 'ER_DUP_ENTRY') {
+            throw new BadRequestException('Username Already taken');
+          } else {
+            throw new NotImplementedException('Failed to create account');
+          }
+        }
+        break;
+      }
+
+      case ROLES.student: {
+        // Verify student exists before creating account
+        // id from DTO should be the student number
+        const st = await this.resourceById.getStudentByStudentNumber(id);
+
+        // account.id is already set to id (student number) on line 80
+        // Verify they match
+        if (account.id !== id) {
+          this.logger.error('Student signup - Account ID mismatch', {
+            accountId: account.id,
+            dtoId: id,
+            studentNumber: st.studentNumber,
+          });
+          throw new BadRequestException(
+            'Account ID mismatch during student signup',
+          );
+        }
+
+        // Verify student number matches
+        if (st.studentNumber !== id) {
+          this.logger.error('Student signup - Student number mismatch', {
+            dtoId: id,
+            studentNumber: st.studentNumber,
+          });
+          throw new BadRequestException(
+            'Student number mismatch during signup',
+          );
+        }
+
+        try {
+          // Link student entity to account (this will set the foreign key)
+          account.student = st;
+
+          this.logger.log('Student signup - Saving account to database', {
+            studentNumber: id,
+            username,
+            accountId: account.id,
+            hasStudentRelation: !!account.student,
+          });
+
+          // Save the account to database
+          const user = await this.accountsRepository.save(account);
+
+          // Verify the account was saved correctly with correct ID
+          if (!user || !user.id || user.id !== id) {
+            this.logger.error(
+              'Student signup - Account save verification failed',
+              {
+                expectedId: id,
+                actualId: user?.id,
+                studentNumber: st.studentNumber,
+                username,
+              },
+            );
+            throw new NotImplementedException(
+              'Failed to create account - account ID mismatch',
+            );
+          }
+
+          // Verify the account actually exists in the database by querying it
+          const savedAccount = await this.accountsRepository.findOne({
+            where: { id: user.id },
+            relations: ['student'],
+          });
+
+          if (!savedAccount) {
+            this.logger.error(
+              'Student signup - Account not found in database after save',
+              {
+                accountId: user.id,
+                studentNumber: id,
+                username,
+              },
+            );
+            throw new NotImplementedException(
+              'Failed to create account - account not persisted to database',
+            );
+          }
+
+          // Verify the student relation was saved correctly
+          if (
+            !savedAccount.student ||
+            savedAccount.student.studentNumber !== id
+          ) {
+            this.logger.error(
+              'Student signup - Student relation not saved correctly',
+              {
+                accountId: user.id,
+                studentNumber: id,
+                hasStudentRelation: !!savedAccount.student,
+                studentNumberFromRelation: savedAccount.student?.studentNumber,
+              },
+            );
+            throw new NotImplementedException(
+              'Failed to create account - student relation not saved',
+            );
+          }
+
+          this.logger.log(
+            'Student signup - Account successfully saved and verified',
+            {
+              accountId: user.id,
+              studentNumber: id,
+              username,
+              studentRelationExists: !!savedAccount.student,
+            },
+          );
+
+          return { response: true };
+        } catch (err) {
+          if (err.code === 'ER_DUP_ENTRY' || err.code === '23505') {
+            // PostgreSQL unique constraint violation
+            this.logger.warn('Student signup - Duplicate entry', {
+              studentNumber: id,
+              username,
+              errorCode: err.code,
+            });
+            throw new BadRequestException(
+              'Username or student number already has an account',
+            );
+          } else {
+            this.logger.error('Student signup - Error saving account', {
+              studentNumber: id,
+              username,
+              error: err instanceof Error ? err.message : String(err),
+              errorCode: (err as any)?.code,
+              errorStack: err instanceof Error ? err.stack : undefined,
+            });
+            throw new NotImplementedException('Failed to create account');
+          }
+        }
+        break;
+      }
+
+      case ROLES.teacher: {
+        const tr = await this.resourceById.getTeacherById(id);
+
+        try {
+          account.teacher = tr;
+          const user = await this.accountsRepository.save({
+            ...account,
+          });
+          return { response: true };
+        } catch (err) {
+          if (err.code === 'ER_DUP_ENTRY') {
+            throw new BadRequestException('Username Already taken');
+          } else {
+            throw new NotImplementedException('Failed to create account');
+          }
+        }
+        break;
+      }
+      case ROLES.reception:
+      case ROLES.hod:
+      case ROLES.admin:
+      case ROLES.auditor:
+      case ROLES.director:
+      case ROLES.dev: {
+        throw new BadRequestException(
+          `Role ${role} is not allowed for self-signup`,
+        );
+      }
+      default: {
+        this.logger.error('signup - Unknown role', {
+          role,
+          roleType: typeof role,
+          receivedRole: role,
+          validRoles: Object.values(ROLES),
+        });
+        throw new BadRequestException(
+          `Invalid role: ${role}. Valid roles are: ${Object.values(ROLES).join(
+            ', ',
+          )}`,
+        );
+      }
+    }
+  }
+
+  private async hashPassword(password: string, salt: string): Promise<string> {
+    return await bcrypt.hash(password, salt);
+  }
+
+  async signin(
+    signinDto: SigninDto,
+    tenant?: { id: string; slug: string },
+  ): Promise<{ accessToken: string; permissions: string[] }> {
+    this.logger.log('signin - Attempting signin', {
+      username: signinDto.username,
+    });
+
+    const result = await this.validatePassword(signinDto);
+
+    if (!result) {
+      this.logger.warn('signin - Invalid credentials', {
+        username: signinDto.username,
+      });
+      throw new UnauthorizedException('Invalid login credentials');
+    }
+
+    this.logger.log('signin - Credentials validated successfully', {
+      username: signinDto.username,
+      role: result.role,
+      id: result.id,
+    });
+
+    const payload: JwtPayload = {
+      ...result,
+      ...(tenant && { tenantSlug: tenant.slug, tenantId: tenant.id }),
+    };
+    const accessToken = await this.jwtService.sign(payload);
+
+    // Get user permissions from their role
+    let permissions: string[] = [];
+    try {
+      const account = await this.accountsRepository.findOne({
+        where: { username: signinDto.username },
+        relations: ['roleEntity', 'roleEntity.permissions'],
+      });
+
+      if (account) {
+        permissions = await this.rolesPermissionsService.getUserPermissions(
+          account.id,
+        );
+      }
+    } catch (error) {
+      // Don't fail the login if permission fetching fails
+      this.logger.warn('Failed to fetch user permissions', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+
+    // Log the login activity
+    try {
+      await this.activityService.logActivity({
+        userId: result.id,
+        action: 'LOGIN',
+        description: `User ${signinDto.username} logged in successfully`,
+        metadata: { username: signinDto.username },
+      });
+    } catch (error) {
+      // Don't fail the login if activity logging fails
+      this.logger.warn('Failed to log login activity', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+
+    return { accessToken, permissions };
+  }
+
+  private async validatePassword(signinDto: SigninDto): Promise<JwtPayload> {
+    const { username, password } = signinDto;
+
+    this.logger.debug('validatePassword - Starting validation', { username });
+
+    // Load account with student relation for students (to get student number)
+    const user = await this.accountsRepository.findOne({
+      where: { username },
+      relations: ['student'],
+    });
+
+    if (!user) {
+      this.logger.warn('validatePassword - User not found', { username });
+      return null; // User not found
+    }
+
+    this.logger.debug('validatePassword - User found', {
+      username,
+      userId: user.id,
+      role: user.role,
+      active: user.active,
+      hasPassword: !!user.password,
+      hasSalt: !!user.salt,
+    });
+
+    // Check if user account is active (not deleted)
+    // For existing users without active field, default to true (handled by entity default value)
+    // We check explicitly for false to handle cases where the field exists but is false
+    if (user.active === false || user.deletedAt) {
+      this.logger.warn('validatePassword - Account deactivated', {
+        username,
+        active: user.active,
+        deletedAt: user.deletedAt,
+      });
+      throw new UnauthorizedException(
+        'Account has been deactivated. Please contact an administrator.',
+      );
+    }
+
+    // Validate password
+    const isPasswordValid = await user.validatePassword(password);
+    this.logger.debug('validatePassword - Password validation result', {
+      username,
+      isValid: isPasswordValid,
+    });
+
+    if (isPasswordValid) {
+      const rol = user.role;
+      const id = user.id;
+
+      switch (rol) {
+        case ROLES.admin:
+        case ROLES.director:
+        case ROLES.auditor:
+        case ROLES.hod:
+        case ROLES.reception:
+        case ROLES.teacher:
+        case ROLES.dev: {
+          const usr = await this.resourceById.getTeacherById(id);
+          // Always use the role from the account record for JWT payload.
+          // Profile roles can be stale/mismatched (e.g. teacher.role) and would break permission checks.
+          return { username, role: rol, id };
+        }
+        case ROLES.parent: {
+          const usr = await this.resourceById.getParentByEmail(id);
+          return { username, role: rol, id };
+        }
+        case ROLES.student: {
+          // For students, account.id IS the student number (set during signup from DTO)
+          // During signup: account.id = id (where id is the student number from DTO)
+          // So we can use account.id directly as the student number
+          try {
+            const usr = await this.resourceById.getStudentByStudentNumber(id);
+            return { username, role: rol, id };
+          } catch (error) {
+            // If student not found, log for debugging
+            this.logger.error('Student signin - student lookup failed', {
+              accountId: id,
+              username,
+              error: error instanceof Error ? error.message : String(error),
+              studentRelationExists: !!user.student,
+              studentNumberFromRelation: user.student?.studentNumber,
+            });
+            throw new UnauthorizedException(
+              `Student profile not found. Please contact an administrator.`,
+            );
+          }
+        }
+      }
+    } else {
+      this.logger.warn('validatePassword - Invalid password', { username });
+      return null; // Invalid password
+    }
+  }
+
+  async fetchUserDetails(id: string, role: string) {
+    // First get the account to get username
+    const account = await this.accountsRepository.findOne({
+      where: { id },
+      relations: ['student', 'teacher'],
+    });
+
+    if (!account) {
+      throw new BadRequestException('Account not found');
+    }
+
+    let userDetails = null;
+
+    if (role === ROLES.student && account.student) {
+      userDetails = account.student;
+    } else if (
+      [
+        ROLES.teacher,
+        ROLES.hod,
+        ROLES.reception,
+        ROLES.admin,
+        ROLES.auditor,
+        ROLES.director,
+        ROLES.dev,
+      ].includes(role as ROLES) &&
+      account.teacher
+    ) {
+      userDetails = account.teacher;
+    } else if (role === ROLES.parent) {
+      // For parents, load with linked students so frontend can restrict finance/reports to their children
+      userDetails = await this.resourceById.getParentByEmail(id, true);
+    }
+
+    if (!userDetails) {
+      if ([ROLES.admin, ROLES.director, ROLES.dev].includes(role as ROLES)) {
+        // Allow privileged accounts to function even if teacher profile row is missing.
+        userDetails = {
+          id: account.id,
+          name: account.username,
+          surname: '',
+          title: 'Admin',
+          role: account.role,
+        };
+      } else {
+        throw new BadRequestException('User profile not found');
+      }
+    }
+
+    // Add username to the user details
+    return {
+      ...userDetails,
+      username: account.username,
+      accountId: account.id,
+      role: account.role,
+    };
+  }
+
+  async getAllAccounts() {
+    // Include ALL accounts (active and inactive/deleted) so they can be managed and reactivated
+    const accounts = await this.accountsRepository.find({
+      select: ['id', 'username', 'role', 'createdAt', 'active', 'deletedAt'],
+      relations: ['student', 'teacher'],
+      // No filtering - return all accounts so deleted ones can be reactivated
+    });
+
+    // Map accounts to include user details
+    const accountsWithDetails = await Promise.all(
+      accounts.map(async (account) => {
+        let userDetails = null;
+        let name = account.username;
+        let email = null;
+
+        try {
+          if (account.role === ROLES.student && account.student) {
+            userDetails = account.student;
+            name =
+              `${account.student.name || ''} ${
+                account.student.surname || ''
+              }`.trim() || account.username;
+            email = account.student.email || null;
+          } else if (
+            [
+              ROLES.teacher,
+              ROLES.admin,
+              ROLES.hod,
+              ROLES.reception,
+              ROLES.auditor,
+              ROLES.director,
+              ROLES.dev,
+            ].includes(account.role as ROLES) &&
+            account.teacher
+          ) {
+            userDetails = account.teacher;
+            name =
+              `${account.teacher.name || ''} ${
+                account.teacher.surname || ''
+              }`.trim() || account.username;
+            email = account.teacher.email || null;
+          } else if (account.role === ROLES.parent) {
+            const parent = await this.resourceById.getParentByEmail(account.id);
+            userDetails = parent;
+            name = `${parent.surname || ''}`.trim() || account.username;
+            email = null;
+          }
+        } catch (error) {
+          this.logger.warn('Error fetching details for account', {
+            accountId: account.id,
+            username: account.username,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+
+        return {
+          id: account.id,
+          username: account.username,
+          role: account.role,
+          name: name,
+          email: email,
+          createdAt: account.createdAt,
+          status:
+            account.active === false || account.deletedAt
+              ? 'inactive'
+              : 'active',
+          active: account.active !== false, // Treat null/undefined as true for backward compatibility
+          deletedAt: account.deletedAt || null,
+        };
+      }),
+    );
+
+    return accountsWithDetails;
+  }
+
+  async resetPassword(
+    id: string,
+  ): Promise<{ message: string; generatedPassword: string }> {
+    const account = await this.accountsRepository.findOne({ where: { id } });
+
+    if (!account) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Generate a random password
+    const generatedPassword = Math.random().toString(36).slice(-8) + 'A1!';
+    const salt = await bcrypt.genSalt();
+
+    account.password = await this.hashPassword(generatedPassword, salt);
+    account.salt = salt;
+
+    await this.accountsRepository.save(account);
+
+    // Log the password reset activity
+    try {
+      await this.activityService.logActivity({
+        userId: id,
+        action: 'PASSWORD_RESET',
+        description: `Password reset for user ${account.username}`,
+        resourceType: 'user',
+        resourceId: id,
+        metadata: { username: account.username },
+      });
+    } catch (error) {
+      this.logger.warn('Failed to log password reset activity', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+
+    return {
+      message: 'Password reset successfully',
+      generatedPassword: generatedPassword,
+    };
+  }
+
+  async setCustomPassword(
+    id: string,
+    newPassword: string,
+  ): Promise<{ message: string }> {
+    const account = await this.accountsRepository.findOne({ where: { id } });
+
+    if (!account) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Generate new salt and hash the custom password
+    const salt = await bcrypt.genSalt();
+    account.password = await this.hashPassword(newPassword, salt);
+    account.salt = salt;
+
+    await this.accountsRepository.save(account);
+
+    // Log the password change activity
+    try {
+      await this.activityService.logActivity({
+        userId: id,
+        action: 'PASSWORD_CHANGED',
+        description: `Password changed for user ${account.username}`,
+        resourceType: 'user',
+        resourceId: id,
+        metadata: { username: account.username },
+      });
+    } catch (error) {
+      this.logger.warn('Failed to log password change activity', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+
+    return {
+      message: 'Password updated successfully',
+    };
+  }
+
+  async updateAccount(
+    id: string,
+    updateData: { username?: string; role?: ROLES },
+  ): Promise<{ message: string }> {
+    const account = await this.accountsRepository.findOne({
+      where: { id },
+      relations: ['roleEntity'],
+    });
+
+    if (!account) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Update username if provided
+    if (updateData.username) {
+      account.username = updateData.username;
+    }
+
+    // Update role if provided
+    if (updateData.role) {
+      const newRole = updateData.role;
+      if (!Object.values(ROLES).includes(newRole)) {
+        throw new BadRequestException(`Invalid role: ${newRole}`);
+      }
+    }
+
+    await this.accountsRepository.save(account);
+
+    if (updateData.role) {
+      // Keep account role, roleId and teacher profile role consistent.
+      await this.rolesPermissionsService.syncAccountRoleByName(id, updateData.role);
+    }
+
+    return {
+      message: 'Account updated successfully',
+    };
+  }
+
+  async updateProfile(
+    id: string,
+    role: string,
+    updateData: any,
+  ): Promise<{ message: string }> {
+    const account = await this.accountsRepository.findOne({
+      where: { id },
+      relations: ['student', 'teacher'],
+    });
+
+    if (!account) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Handle active status change (activate/deactivate user)
+    if (updateData.active !== undefined) {
+      account.active = updateData.active;
+
+      if (updateData.active) {
+        // Reactivate: clear deletedAt and set active to true
+        account.deletedAt = null;
+        account.active = true;
+      } else {
+        // Deactivate: set active to false and set deletedAt if not already set
+        account.active = false;
+        if (!account.deletedAt) {
+          account.deletedAt = new Date();
+        }
+      }
+
+      await this.accountsRepository.save(account);
+
+      // Log the activation/deactivation activity
+      try {
+        await this.activityService.logActivity({
+          userId: id,
+          action: updateData.active ? 'USER_RESTORED' : 'USER_DELETED',
+          description: updateData.active
+            ? `User ${account.username} was reactivated`
+            : `User ${account.username} was deactivated`,
+          resourceType: 'user',
+          resourceId: id,
+          metadata: { username: account.username, active: updateData.active },
+        });
+      } catch (error) {
+        this.logger.warn('Failed to log profile activation/deactivation activity', {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+
+      // Remove active from updateData so it doesn't get passed to profile update
+      const { active, ...profileUpdateData } = updateData;
+      if (Object.keys(profileUpdateData).length === 0) {
+        return {
+          message: updateData.active
+            ? 'User reactivated successfully'
+            : 'User deactivated successfully',
+        };
+      }
+      updateData = profileUpdateData;
+    }
+
+    // Update profile based on role
+    if (account.role === 'student' && account.student) {
+      await this.resourceById.updateStudent(
+        account.student.studentNumber,
+        updateData,
+      );
+    } else if (
+      [
+        'teacher',
+        'admin',
+        'hod',
+        'reception',
+        'auditor',
+        'director',
+        'dev',
+      ].includes(account.role) &&
+      account.teacher
+    ) {
+      await this.resourceById.updateTeacher(account.teacher.id, updateData);
+    } else {
+      throw new BadRequestException('Profile not found for this user');
+    }
+
+    // Log the profile update activity
+    try {
+      await this.activityService.logActivity({
+        userId: id,
+        action: 'PROFILE_UPDATED',
+        description: `Profile updated for user ${account.username}`,
+        resourceType: account.role,
+        resourceId: id,
+        metadata: {
+          username: account.username,
+          updatedFields: Object.keys(updateData),
+        },
+      });
+    } catch (error) {
+      this.logger.warn('Failed to log profile update activity', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+
+    return {
+      message: 'Profile updated successfully',
+    };
+  }
+
+  async deleteAccount(id: string): Promise<{ message: string }> {
+    const account = await this.accountsRepository.findOne({ where: { id } });
+
+    if (!account) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Check if already deleted
+    if (!account.active || account.deletedAt) {
+      throw new BadRequestException('User is already deleted');
+    }
+
+    // Soft delete: mark as inactive and set deletedAt timestamp
+    account.active = false;
+    account.deletedAt = new Date();
+    await this.accountsRepository.save(account);
+
+    // Log the deletion activity
+    try {
+      await this.activityService.logActivity({
+        userId: id,
+        action: 'USER_DELETED',
+        description: `User account ${account.username} was deleted`,
+        resourceType: 'user',
+        resourceId: id,
+        metadata: {
+          username: account.username,
+          role: account.role,
+          deletedAt: account.deletedAt,
+        },
+      });
+    } catch (error) {
+      this.logger.warn('Failed to log user deletion activity', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+
+    return {
+      message: 'User deleted successfully',
+    };
+  }
+
+  async restoreAccount(id: string): Promise<{ message: string }> {
+    const account = await this.accountsRepository.findOne({ where: { id } });
+
+    if (!account) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (account.active) {
+      throw new BadRequestException('User is already active');
+    }
+
+    // Restore the account
+    account.active = true;
+    account.deletedAt = null;
+    await this.accountsRepository.save(account);
+
+    // Log the restoration activity
+    try {
+      await this.activityService.logActivity({
+        userId: id,
+        action: 'USER_RESTORED',
+        description: `User account ${account.username} was restored`,
+        resourceType: 'user',
+        resourceId: id,
+        metadata: { username: account.username, role: account.role },
+      });
+    } catch (error) {
+      this.logger.warn('Failed to log user restoration activity', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+
+    return {
+      message: 'User restored successfully',
+    };
+  }
+
+  async getUserActivity(
+    id: string,
+    page: number = 1,
+    limit: number = 20,
+  ): Promise<any> {
+    // Use the ActivityService to get real activity data
+    return await this.activityService.getUserActivities(id, page, limit);
+  }
+}

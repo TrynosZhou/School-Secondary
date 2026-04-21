@@ -1,0 +1,224 @@
+// Theme Variables
+$primary-blue: #2196f3;
+$primary-blue-dark: #1976d2;
+$success-green: #4caf50;
+$warn-orange: #ff9800;
+$error-red: #f44336;
+
+$text-primary-light: #2c3e50;
+$text-secondary-light: #7f8c8d;
+$bg-light: #f5f7fa;
+$surface-light: #ffffff;
+$border-light: #e0e0e0;
+
+$text-primary-dark: #e0e0e0;
+$text-secondary-dark: #b0b0b0;
+$bg-dark: #121212;
+$surface-dark: #1e1e1e;
+$border-dark: #424242;
+
+// Card Base Styles
+.receipt-summary-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 280px;
+  max-width: 320px;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  background: var(--surface, $surface-light);
+  border: 2px solid var(--border-color, $border-light);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  &.theme-dark {
+    background: var(--surface, $surface-dark);
+    border-color: $border-dark;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  &:hover:not(.voided-card) {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border-color: $primary-blue;
+
+    &.theme-dark {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      border-color: $primary-blue;
+    }
+  }
+
+  &:active:not(.voided-card) {
+    transform: translateY(-2px);
+  }
+}
+
+// Card Variants
+.approved-card {
+  border-left: 4px solid $success-green;
+}
+
+.pending-card {
+  border-left: 4px solid $warn-orange;
+}
+
+.voided-card {
+  opacity: 0.65;
+  cursor: not-allowed;
+  border-left: 4px solid $error-red;
+
+  &:hover {
+    transform: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+}
+
+// Void Overlay
+.void-overlay {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%) rotate(-25deg);
+  color: $error-red;
+  font-size: 1.75rem;
+  font-weight: 900;
+  text-align: center;
+  padding: 8px 0;
+  border: 3px dashed $error-red;
+  z-index: 10;
+  pointer-events: none;
+  background-color: rgba(255, 255, 255, 0.85);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+
+  .theme-dark & {
+    background-color: rgba(30, 30, 30, 0.9);
+    color: $error-red;
+  }
+}
+
+// Card Header
+::ng-deep .receipt-summary-card mat-card-header {
+  padding: 1.25rem 1.25rem 0.75rem 1.25rem;
+  margin: 0;
+  align-items: flex-start;
+}
+
+.amount-display {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0 0 0.5rem 0;
+  color: $primary-blue;
+  letter-spacing: -0.5px;
+
+  .strikethrough {
+    text-decoration: line-through;
+    color: $text-secondary-light;
+    opacity: 0.6;
+
+    .theme-dark & {
+      color: $text-secondary-dark;
+    }
+  }
+
+  .theme-dark & {
+    color: $primary-blue;
+  }
+}
+
+.date-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.payment-date {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary, $text-secondary-light);
+
+  .theme-dark & {
+    color: var(--text-secondary, $text-secondary-dark);
+  }
+}
+
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.status-icon {
+  font-size: 1.25rem !important;
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+}
+
+.status-approved {
+  color: $success-green;
+}
+
+.status-pending {
+  color: $warn-orange;
+}
+
+.status-voided {
+  color: $error-red;
+}
+
+// Card Content
+::ng-deep .receipt-summary-card mat-card-content {
+  padding: 0.75rem 1.25rem 1.25rem 1.25rem;
+  margin: 0;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.info-icon {
+  font-size: 1.125rem;
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--text-secondary, $text-secondary-light);
+  flex-shrink: 0;
+
+  .theme-dark & {
+    color: var(--text-secondary, $text-secondary-dark);
+  }
+}
+
+.info-text {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text-primary, $text-primary-light);
+  line-height: 1.4;
+
+  .theme-dark & {
+    color: var(--text-primary, $text-primary-dark);
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .receipt-summary-card {
+    min-width: 100%;
+    max-width: 100%;
+  }
+
+  .amount-display {
+    font-size: 1.5rem;
+  }
+}

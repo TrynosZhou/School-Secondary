@@ -1,0 +1,96 @@
+import { ParentsService } from './parents.service';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
+import { CreateParentsDto } from '../dtos/createParents.dto';
+import { UpdateParentDto } from '../dtos/updateParent.dto';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { GetUser } from 'src/auth/decorators/get-user.decorator';
+import { TeachersEntity } from '../entities/teachers.entity';
+import { StudentsEntity } from '../entities/students.entity';
+import { ParentsEntity } from '../entities/parents.entity';
+import { IsArray, IsString } from 'class-validator';
+
+export class LinkStudentsDto {
+  @IsArray()
+  @IsString({ each: true })
+  studentNumbers: string[];
+}
+
+@Controller('parents')
+@UseGuards(AuthGuard())
+export class ParentsController {
+  constructor(private parentsService: ParentsService) {}
+
+  @Get()
+  getAllParents(
+    @GetUser() profile: TeachersEntity | StudentsEntity | ParentsEntity,
+  ) {
+    return this.parentsService.getAllParents(profile);
+  }
+
+  @Get('search')
+  searchParents(
+    @Query('q') q: string = '',
+    @Query('limit') limit = '50',
+    @GetUser() profile: TeachersEntity | StudentsEntity | ParentsEntity,
+  ) {
+    const parsedLimit = parseInt(limit, 10);
+    return this.parentsService.searchParents(q || '', parsedLimit, profile);
+  }
+
+  @Put(':email/students')
+  setLinkedStudents(
+    @Param('email') email: string,
+    @Body() body: LinkStudentsDto,
+    @GetUser() profile: TeachersEntity | StudentsEntity | ParentsEntity,
+  ) {
+    return this.parentsService.setLinkedStudents(
+      email,
+      body?.studentNumbers ?? [],
+      profile,
+    );
+  }
+
+  @Get(':email')
+  getParent(
+    @Param('email') email: string,
+    @GetUser() profile: TeachersEntity | StudentsEntity | ParentsEntity,
+  ) {
+    return this.parentsService.getParent(email, profile);
+  }
+
+  @Post()
+  createParent(
+    @Body() createParentDto: CreateParentsDto,
+    @GetUser() profile: TeachersEntity | StudentsEntity | ParentsEntity,
+  ) {
+    return this.parentsService.createParent(createParentDto, profile);
+  }
+
+  @Patch(':email')
+  updateParent(
+    @Param('email') email: string,
+    @Body() updateParentDto: UpdateParentDto,
+    @GetUser() profile: TeachersEntity | StudentsEntity | ParentsEntity,
+  ) {
+    return this.parentsService.updateParent(email, updateParentDto, profile);
+  }
+
+  @Delete(':email')
+  deleteParent(
+    @Param('email') email: string,
+    @GetUser() profile: TeachersEntity | StudentsEntity | ParentsEntity,
+  ) {
+    return this.parentsService.deleteParent(email, profile);
+  }
+}

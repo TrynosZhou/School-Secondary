@@ -1,0 +1,307 @@
+// Theme Variables
+$primary-blue: #2196f3;
+$primary-blue-dark: #1976d2;
+$accent-gold: #ffc107;
+$warn-brown: #795548;
+
+$text-primary-light: #2c3e50;
+$text-secondary-light: #7f8c8d;
+$bg-light: #f5f7fa;
+$surface-light: #ffffff;
+
+$text-primary-dark: #e0e0e0;
+$text-secondary-dark: #b0b0b0;
+$bg-dark: #121212;
+$surface-dark: #1e1e1e;
+
+.reminders {
+  color: red;
+  font-size: xx-small;
+}
+
+.settings-page-container {
+  padding: 0 20px;
+  max-width: 900px;
+  margin: 0 auto;
+  font-family: "Inter", sans-serif;
+  background: var(--background, $bg-light);
+  color: var(--text-primary, $text-primary-light);
+
+  &.theme-light {
+    background: $bg-light;
+    color: $text-primary-light;
+  }
+
+  &.theme-dark {
+    background: $bg-dark;
+    color: $text-primary-dark;
+  }
+}
+
+.header-section {
+  display: flex;
+  align-items: center;
+  margin-bottom: 25px;
+  color: var(--primary-blue, $primary-blue);
+
+  .header-icon {
+    font-size: 30px;
+    width: 40px;
+    height: 40px;
+    margin-right: 5px;
+    color: var(--primary-blue, $primary-blue);
+  }
+
+  h1 {
+    font-size: 1.8em;
+    margin: 0;
+    font-weight: 500;
+    color: var(--text-primary, $text-primary-light);
+  }
+}
+
+.theme-dark .header-section {
+  color: var(--primary-blue, #64b5f6);
+  
+  .header-icon {
+    color: var(--primary-blue, #64b5f6);
+  }
+  
+  h1 {
+    color: var(--text-primary, $text-primary-dark);
+  }
+}
+
+.settings-card {
+  border-radius: 12px;
+  padding: 25px;
+  background: var(--surface, $surface-light);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.theme-dark .settings-card {
+  background: var(--surface, $surface-dark);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.enrollment-preferences-section {
+  h2 {
+    font-size: 1.6em;
+    color: var(--text-primary, $text-primary-light);
+    margin-bottom: 10px;
+  }
+}
+
+.theme-dark .enrollment-preferences-section h2 {
+  color: var(--text-primary, $text-primary-dark);
+}
+
+.subtitle {
+  color: var(--text-secondary, $text-secondary-light);
+  font-size: 0.95em;
+  margin-bottom: 20px;
+}
+
+.theme-dark .subtitle {
+  color: var(--text-secondary, $text-secondary-dark);
+}
+
+.academic-level-selection {
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+
+  p {
+    margin: 0;
+    font-size: 1.05em;
+    color: var(--text-primary, $text-primary-light);
+  }
+}
+
+.theme-dark .academic-level-selection p {
+  color: var(--text-primary, $text-primary-dark);
+}
+
+.academic-level-radio-group {
+  mat-radio-button {
+    margin-right: 20px;
+  }
+}
+
+.section-divider {
+  margin: 25px 0;
+  border-color: rgba(127, 140, 141, 0.3); // Semi-transparent border only
+  opacity: 1; // Full opacity for the divider element itself
+}
+
+.theme-dark .section-divider {
+  border-color: rgba(176, 176, 176, 0.3); // Semi-transparent border only
+  opacity: 1; // Full opacity for the divider element itself
+}
+
+// Grid layout for Options, O Level, A Level columns
+.options-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 15px 20px;
+  align-items: center;
+}
+
+.grid-header {
+  display: contents;
+}
+
+.header-cell {
+  font-weight: bold;
+  color: var(--primary-blue, $primary-blue);
+  padding-bottom: 10px;
+  border-bottom: 2px solid rgba(127, 140, 141, 0.3); // Semi-transparent border only
+  opacity: 1; // Full opacity for text
+}
+
+.theme-dark .header-cell {
+  color: var(--primary-blue, #64b5f6);
+  border-bottom-color: rgba(176, 176, 176, 0.3); // Semi-transparent border only
+  opacity: 1; // Full opacity for text
+}
+
+.grid-row {
+  display: contents;
+}
+
+.label-cell {
+  font-weight: 500;
+  color: var(--text-primary, $text-primary-light);
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(127, 140, 141, 0.2); // Semi-transparent border only
+  opacity: 1; // Full opacity for text
+}
+
+.theme-dark .label-cell {
+  color: var(--text-primary, $text-primary-dark);
+  border-bottom-color: rgba(176, 176, 176, 0.2); // Semi-transparent border only
+  opacity: 1; // Full opacity for text
+}
+
+.control-cell {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(127, 140, 141, 0.2); // Semi-transparent border only
+  opacity: 1; // Full opacity for controls and content
+
+  mat-checkbox,
+  mat-radio-group {
+    margin-bottom: 5px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  mat-radio-button {
+    margin-bottom: 8px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.theme-dark .control-cell {
+  border-bottom-color: rgba(176, 176, 176, 0.2); // Semi-transparent border only
+  opacity: 1; // Full opacity for controls and content
+}
+
+// Action buttons at the bottom of the card
+.card-actions {
+  padding: 20px 25px 15px 25px;
+  border-top: 1px solid rgba(127, 140, 141, 0.3); // Semi-transparent border only
+  opacity: 1; // Full opacity for buttons
+  margin-top: 25px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.theme-dark .card-actions {
+  border-top-color: rgba(176, 176, 176, 0.3); // Semi-transparent border only
+  opacity: 1; // Full opacity for buttons
+}
+
+.card-actions button {
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-size: 1em;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .options-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .grid-header,
+  .grid-row {
+    display: block;
+  }
+
+  .header-cell,
+  .label-cell,
+  .control-cell {
+    padding: 8px 0;
+    border-bottom: none;
+  }
+
+  .header-cell {
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(127, 140, 141, 0.3);
+    opacity: 1; // Full opacity for text
+    margin-bottom: 10px;
+  }
+
+  .theme-dark .header-cell {
+    border-bottom-color: rgba(176, 176, 176, 0.3);
+    opacity: 1; // Full opacity for text
+  }
+
+  .label-cell {
+    font-weight: bold;
+    margin-top: 15px;
+    border-bottom: 1px dashed rgba(127, 140, 141, 0.2);
+    opacity: 1; // Full opacity for text
+    padding-bottom: 5px;
+  }
+
+  .theme-dark .label-cell {
+    border-bottom-color: rgba(176, 176, 176, 0.2);
+    opacity: 1; // Full opacity for text
+  }
+
+  .control-cell {
+    margin-bottom: 10px;
+  }
+
+  .academic-level-selection {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-page-container {
+    padding: 15px;
+  }
+
+  .header-section h1 {
+    font-size: 1.8em;
+  }
+
+  .settings-card {
+    padding: 15px;
+  }
+}

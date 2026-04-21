@@ -1,0 +1,68 @@
+<h2 mat-dialog-title>
+  Edit Report Release - {{ reportRelease.examType }} Term {{ reportRelease.termNumber }} {{ reportRelease.termYear }}
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="dialog-form">
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Release Status</mat-label>
+      <mat-select formControlName="isReleased">
+        <mat-option [value]="false">Not Released</mat-option>
+        <mat-option [value]="true">Released</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Scheduled Release Date</mat-label>
+      <input matInput 
+             [matDatepicker]="picker" 
+             formControlName="scheduledReleaseDate"
+             placeholder="Select date and time">
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+      <button 
+        mat-icon-button 
+        matSuffix 
+        (click)="clearScheduledDate()"
+        matTooltip="Clear scheduled date">
+        <mat-icon>clear</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Release Notes</mat-label>
+      <textarea matInput 
+                formControlName="releaseNotes" 
+                placeholder="Optional notes about this release"
+                rows="3">
+      </textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Send Notification</mat-label>
+      <mat-select formControlName="sendNotification">
+        <mat-option [value]="false">No</mat-option>
+        <mat-option [value]="true">Yes</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <div class="info-section">
+      <h3>Current Information</h3>
+      <p><strong>Created:</strong> {{ reportRelease.createdAt | date:'medium' }}</p>
+      <p><strong>Last Updated:</strong> {{ reportRelease.updatedAt | date:'medium' }}</p>
+      <p *ngIf="reportRelease.releaseDate"><strong>Released Date:</strong> {{ reportRelease.releaseDate | date:'medium' }}</p>
+      <p *ngIf="reportRelease.releasedByUser"><strong>Released By:</strong> {{ reportRelease.releasedByUser.username }}</p>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button 
+    mat-raised-button 
+    color="primary" 
+    (click)="onSave()"
+    [disabled]="!form.valid">
+    Save Changes
+  </button>
+</mat-dialog-actions>

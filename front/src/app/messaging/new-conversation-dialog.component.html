@@ -1,0 +1,49 @@
+<h2 mat-dialog-title>New Conversation</h2>
+<mat-dialog-content class="mat-typography">
+  <form [formGroup]="conversationForm" class="conversation-form">
+    <mat-form-field appearance="outline">
+      <mat-label>Conversation Type</mat-label>
+      <mat-select formControlName="type">
+        <mat-option [value]="'direct'">Direct Message</mat-option>
+        <mat-option [value]="'group'">Group Chat</mat-option>
+        <mat-option [value]="'class'" *ngIf="data.isAdmin || data.isDirector">Class Conversation</mat-option>
+        <mat-option [value]="'school_wide'" *ngIf="data.isAdmin || data.isDirector">School-Wide Announcement</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" *ngIf="conversationType !== 'direct' && conversationType !== 'school_wide'">
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name" placeholder="Conversation name" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" *ngIf="conversationType !== 'direct'">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description" rows="2" placeholder="Optional description"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" *ngIf="conversationType === 'class'">
+      <mat-label>Class</mat-label>
+      <mat-select formControlName="classId">
+        <mat-option *ngFor="let class of availableClasses" [value]="class.id">
+          {{ class.name }} (Form {{ class.form }})
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" *ngIf="conversationType === 'direct' || conversationType === 'group'">
+      <mat-label>Participants</mat-label>
+      <mat-select formControlName="participantIds" multiple>
+        <mat-option *ngFor="let user of availableUsers" [value]="user.id">
+          {{ user.username }} ({{ user.role }})
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-raised-button color="primary" (click)="onCreate()" [disabled]="conversationForm.invalid">
+    Create
+  </button>
+</mat-dialog-actions>
+

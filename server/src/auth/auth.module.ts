@@ -1,0 +1,90 @@
+/* eslint-disable prettier/prettier */
+import { Module, forwardRef } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { AccountsEntity } from './entities/accounts.entity';
+import { RoleEntity } from './entities/role.entity';
+import { PermissionEntity } from './entities/permission.entity';
+import { JwtStrategy } from './jwt.strategy';
+import { ResourceByIdModule } from '../resource-by-id/resource-by-id.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ActivityModule } from '../activity/activity.module';
+import { RolesPermissionsController } from './controllers/roles-permissions.controller';
+import { RolesPermissionsService } from './services/roles-permissions.service';
+import { RolesGuard } from './guards/roles.guard';
+import { PermissionsGuard } from './guards/permissions.guard';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { ParentStudentAccessGuard } from './guards/parent-student-access.guard';
+import { ParentsEntity } from 'src/profiles/entities/parents.entity';
+import { TeachersEntity } from 'src/profiles/entities/teachers.entity';
+
+@Module({
+  imports: [
+    // JwtModule.register({
+    //   secret: 'The way a crow shook on me',
+    //   signOptions: {
+    //     expiresIn: 3600 * 6,
+    //   },
+    // }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule], // Import ConfigModule to make ConfigService available
+      useFactory: (configService: ConfigService) => {
+        const expiresInStr = configService.get<string>('JWT_EXPIRES_IN') || '3600';
+        // Parse to number (in seconds) - convert string format like "3600s" to number
+        let expiresIn: number;
+        if (expiresInStr.endsWith('s')) {
+          expiresIn = parseInt(expiresInStr.slice(0, -1), 10) || 3600;
+        } else if (expiresInStr.endsWith('m')) {
+          expiresIn = (parseInt(expiresInStr.slice(0, -1), 10) || 60) * 60;
+        } else if (expiresInStr.endsWith('h')) {
+          expiresIn = (parseInt(expiresInStr.slice(0, -1), 10) || 1) * 3600;
+        } else {
+          expiresIn = parseInt(expiresInStr, 10) || 3600;
+        }
+        return {
+          secret: configService.get<string>('JWT_SECRET'), // Get the secret from the environment variable
+          signOptions: {
+            expiresIn, // Number in seconds (defaults to 1 hour = 3600 seconds)
+          },
+        };
+      },
+      inject: [ConfigService], // Tell NestJS to inject ConfigService into useFactory
+    }),
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    TypeOrmModule.forFeature([
+      AccountsEntity,
+      RoleEntity,
+      PermissionEntity,
+      ParentsEntity,
+      TeachersEntity,
+    ]),
+    ResourceByIdModule,
+    forwardRef(() => ActivityModule), // Use forwardRef to handle circular dependency
+  ],
+  controllers: [AuthController, RolesPermissionsController],
+  providers: [
+    AuthService, 
+    JwtStrategy, 
+    RolesPermissionsService,
+    RolesGuard, // Provide RolesGuard here so it can access AccountsEntity repository
+    PermissionsGuard, // Provide PermissionsGuard for permission-based access control
+    JwtAuthGuard, // Provide JwtAuthGuard for better error handling
+    ParentStudentAccessGuard,
+  ],
+  exports: [
+    JwtModule, // So TenantMiddleware (in AppModule) can inject JwtService
+    JwtStrategy,
+    PassportModule,
+    RolesPermissionsService,
+    RolesGuard, // Export RolesGuard so AppModule can use it as APP_GUARD
+    PermissionsGuard, // Export PermissionsGuard for use in other modules
+    JwtAuthGuard, // Export JwtAuthGuard for use in other modules
+    ParentStudentAccessGuard,
+    TypeOrmModule, // Export TypeOrmModule so RolesGuard can access AccountsEntity
+  ],
+})
+export class AuthModule {}

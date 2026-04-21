@@ -1,0 +1,133 @@
+.messaging-container {
+  display: flex;
+  height: calc(100vh - 64px); // Subtract toolbar height
+  overflow: hidden;
+}
+
+.conversations-sidebar {
+  width: 350px;
+  border-right: 1px solid var(--divider-color, #e0e0e0);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-header {
+  padding: 16px;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+  border-bottom: 1px solid var(--divider-color, #e0e0e0);
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h2 {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 20px;
+    }
+  }
+}
+
+.conversations-list {
+  flex: 1;
+  overflow-y: auto;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+
+  mat-list {
+    padding: 0;
+  }
+
+  .conversation-item {
+    cursor: pointer;
+    border-bottom: 1px solid var(--divider-color, #f0f0f0);
+    padding: 12px 16px;
+
+    &:hover {
+      background-color: var(--hover-color, #f5f5f5);
+    }
+
+    &.selected {
+      background-color: var(--primary-color-light, #e3f2fd);
+    }
+
+    .conversation-icon {
+      color: var(--primary-color, #2196f3);
+    }
+
+    .conversation-title {
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .conversation-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-secondary, #666);
+
+      .type-chip {
+        font-size: 10px;
+        height: 20px;
+      }
+
+      .unread-badge {
+        background-color: var(--primary-color, #2196f3);
+        color: white;
+        border-radius: 12px;
+        padding: 2px 8px;
+        font-size: 11px;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .empty-state {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-secondary, #666);
+  }
+
+  .loading-spinner {
+    display: flex;
+    justify-content: center;
+    padding: 40px;
+  }
+}
+
+.conversation-view-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.empty-conversation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-secondary, #666);
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  p {
+    font-size: 18px;
+  }
+}
+

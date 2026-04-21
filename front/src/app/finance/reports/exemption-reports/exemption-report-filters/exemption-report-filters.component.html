@@ -1,0 +1,42 @@
+<form (ngSubmit)="onApply()" #filterForm="ngForm">
+  <div class="filters-grid">
+    <mat-form-field appearance="outline">
+      <mat-label>Term Number</mat-label>
+      <mat-select [ngModel]="filters.termNum" (selectionChange)="onSelectChange('termNum', $event.value)"
+        name="termNum">
+        <mat-option value="">All Terms</mat-option>
+        <mat-option *ngFor="let termNum of (allTerms$ | async | getUniqueTermNumbers)" [value]="termNum">
+          {{ termNum }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Term Year</mat-label>
+      <mat-select [ngModel]="filters.termYear" (selectionChange)="onSelectChange('termYear', $event.value)"
+        name="termYear">
+        <mat-option value="">All Years</mat-option>
+        <mat-option *ngFor="let termYear of (allTerms$ | async | getUniqueTermYears)" [value]="termYear">
+          {{ termYear }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Exemption Type</mat-label>
+      <mat-select [ngModel]="filters.exemptionType" (selectionChange)="onSelectChange('exemptionType', $event.value)"
+        name="exemptionType">
+        <mat-option value="">All Types</mat-option>
+        <mat-option *ngFor="let type of exemptionTypes" [value]="type">
+          {{ type | titlecase | replaceUnderscores }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+  </div>
+
+  <div class="filter-actions">
+    <button mat-raised-button color="primary" type="submit">Apply Filters</button>
+    <button mat-stroked-button type="button" (click)="onClear()">Clear Filters</button>
+  </div>
+</form>

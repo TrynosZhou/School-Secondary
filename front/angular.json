@@ -1,0 +1,162 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "front": {
+      "projectType": "application",
+      "schematics": {},
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/front",
+            "index": "src/index.html",
+            "main": "src/main.ts",
+            "polyfills": ["zone.js"],
+            "tsConfig": "tsconfig.app.json",
+            "assets": [
+              "src/favicon.ico",
+              "src/favicon-16x16.png",
+              "src/favicon-32x32.png",
+              "src/apple-touch-icon.png",
+              "src/android-chrome-192x192.png",
+              "src/android-chrome-512x512.png",
+              "src/site.webmanifest",
+              "src/assets"
+            ],
+            "styles": [
+              "src/theme.scss",
+              "src/styles.css"
+            ],
+            "scripts": [
+              "node_modules/jspdf/dist/jspdf.umd.min.js",
+              "node_modules/jspdf-autotable/dist/jspdf.plugin.autotable.min.js"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "4mb",
+                  "maximumError": "5mb"
+                },
+          {
+            "type": "anyComponentStyle",
+            "maximumWarning": "15kb",
+            "maximumError": "20kb"
+          }
+              ],
+              "outputHashing": "all",
+              "optimization": {
+                "fonts": false
+              },
+              "allowedCommonJsDependencies": [
+                "canvg",
+                "html2canvas",
+                "jspdf-autotable",
+                "moment",
+                "core-js/modules/es.array.index-of",
+                "core-js/modules/es.array.iterator",
+                "core-js/modules/es.array.reduce",
+                "core-js/modules/es.array.reverse",
+                "core-js/modules/es.promise",
+                "core-js/modules/es.regexp.to-string",
+                "core-js/modules/es.string.ends-with",
+                "core-js/modules/es.string.includes",
+                "core-js/modules/es.string.match",
+                "core-js/modules/es.string.replace",
+                "core-js/modules/es.string.split",
+                "core-js/modules/es.string.starts-with",
+                "core-js/modules/es.string.trim",
+                "core-js/modules/web.dom-collections.iterator",
+                "raf",
+                "rgbcolor",
+                "qrcode"
+              ]
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": {
+                "fonts": false
+              },
+              "allowedCommonJsDependencies": [
+                "canvg",
+                "html2canvas",
+                "jspdf-autotable",
+                "moment",
+                "core-js/modules/es.array.index-of",
+                "core-js/modules/es.array.iterator",
+                "core-js/modules/es.array.reduce",
+                "core-js/modules/es.array.reverse",
+                "core-js/modules/es.promise",
+                "core-js/modules/es.regexp.to-string",
+                "core-js/modules/es.string.ends-with",
+                "core-js/modules/es.string.includes",
+                "core-js/modules/es.string.match",
+                "core-js/modules/es.string.replace",
+                "core-js/modules/es.string.split",
+                "core-js/modules/es.string.starts-with",
+                "core-js/modules/es.string.trim",
+                "core-js/modules/web.dom-collections.iterator",
+                "raf",
+                "rgbcolor",
+                "qrcode"
+              ],
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.development.ts"
+                }
+              ]
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+
+          "configurations": {
+            "production": {
+              "browserTarget": "front:build:production"
+            },
+            "development": {
+              "browserTarget": "front:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "front:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": ["zone.js", "zone.js/testing"],
+            "tsConfig": "tsconfig.spec.json",
+            "assets": ["src/favicon.ico", "src/assets"],
+            "styles": [
+              "@angular/material/prebuilt-themes/indigo-pink.css",
+              "src/styles.css"
+            ],
+            "scripts": []
+          }
+        }
+      }
+    }
+  },
+  "cli": {
+    "analytics": "b73f7ce2-7b1d-4d24-8544-7871473c9903"
+  }
+}

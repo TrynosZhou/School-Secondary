@@ -1,0 +1,128 @@
+/* Overall container for the dialog content */
+.main-container {
+  display: flex;
+  flex-direction: column; /* Stacks children (chips and table) vertically */
+  height: 90vh; /* Make the dialog fill a good portion of the screen height */
+  max-height: 90vh; /* Prevent it from getting too tall */
+  padding: 16px; /* Padding inside the mat-card */
+  box-sizing: border-box; /* Include padding in the element's total width/height */
+  overflow: hidden; /* Hide any overflow, individual sections will scroll */
+}
+
+/* Container for selected students (chips) */
+.selected-students-container {
+  flex-shrink: 0; /* Prevents this section from shrinking when space is tight */
+  padding: 10px 16px; /* Padding inside the chip container */
+  margin-bottom: 20px; /* Space between chips container and table container */
+  background-color: #f5f5f5; /* Light background for visual separation */
+  border-radius: 8px; /* Slightly rounded corners */
+  min-height: 80px; /* Ensures some minimum height */
+  display: flex;
+  flex-direction: column; /* Stacks the chip list and buttons vertically */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+mat-chip-listbox {
+  display: flex;
+  flex-wrap: wrap; /* Allows chips to wrap to the next line */
+  gap: 8px; /* Space between individual chips */
+  padding: 8px 0; /* Vertical padding around chips */
+  max-height: 100px; /* Limit height of chip list before scrolling */
+  overflow-y: auto; /* Enable vertical scroll if many chips */
+}
+
+.no-selected-students-message {
+  padding: 10px;
+  text-align: center;
+  color: #757575;
+  font-style: italic;
+}
+
+.bottom-btns {
+  display: flex;
+  justify-content: flex-end; /* Pushes buttons to the right */
+  gap: 10px; /* Space between buttons */
+  padding-top: 10px; /* Space above buttons */
+}
+
+/* Container for the main student table */
+.table-container {
+  flex-grow: 1; /* Allows the table container to take up all remaining vertical space */
+  display: flex;
+  flex-direction: column; /* Stacks the mat-card content (filter, table, paginator) */
+  overflow: hidden; /* Important: Prevents scrollbars on this container, allowing inner table to scroll */
+}
+
+.table-container mat-card {
+  flex-grow: 1; /* Allows the mat-card itself to fill the .table-container */
+  display: flex;
+  flex-direction: column; /* Stacks contents of the mat-card */
+  padding: 0; /* Remove default mat-card padding to manage it internally */
+  overflow: hidden; /* Hide overflow for the card, internal elements will scroll */
+}
+
+.top-panel {
+  display: flex;
+  justify-content: flex-end; /* Align filter to the right */
+  padding: 16px 16px 0; /* Padding around the filter field */
+  flex-shrink: 0; /* Prevent filter area from shrinking */
+}
+
+.top-panel mat-form-field {
+  width: 300px; /* Fixed width for the filter input */
+  margin-bottom: 10px; /* Space below the filter field */
+}
+
+.mat-elevation-z2 {
+  flex-grow: 1; /* Allows the table's scrollable div to expand */
+  overflow: auto; /* Enable scrolling for the table body */
+  display: flex;
+  flex-direction: column; /* To properly place table and paginator */
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse; /* For cleaner table lines */
+  flex-grow: 1; /* Allows the actual table element to fill space within its scrollable container */
+}
+
+.mat-header-cell {
+  background-color: #f0f0f0;
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.mat-column-action {
+  width: 80px; /* Fixed width for action column */
+  text-align: center;
+}
+
+.btns {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.mat-row:hover {
+  background-color: #e0e0e0; /* Lighter hover color */
+}
+
+.mat-paginator {
+  flex-shrink: 0; /* Prevents paginator from shrinking */
+  border-top: 1px solid #e0e0e0; /* Separator line for visual clarity */
+}
+
+/* Optional: Styles for the mat-dialog-container itself if you need to override global dialog styles */
+/* You might need to add this to your global styles or specific dialog config if not here */
+/*
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.mat-dialog-container {
+  display: flex;
+  flex-direction: column;
+  padding: 0 !important;
+}
+*/

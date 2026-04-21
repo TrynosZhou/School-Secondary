@@ -1,0 +1,360 @@
+// Theme Variables
+$primary-blue: #2196f3;
+$primary-blue-dark: #1976d2;
+$primary-blue-light: #64b5f6;
+$accent-gold: #ffc107;
+$success-green: #4caf50;
+$error-red: #f44336;
+
+$text-primary-light: #2c3e50;
+$text-secondary-light: #7f8c8d;
+$bg-light: #f5f7fa;
+$surface-light: #ffffff;
+$border-light: #e0e0e0;
+$divider-light: #e8e8e8;
+
+$text-primary-dark: #e0e0e0;
+$text-secondary-dark: #b0b0b0;
+$bg-dark: #121212;
+$surface-dark: #1e1e1e;
+$border-dark: #424242;
+$divider-dark: #2d2d2d;
+
+// Card Styles
+.balances-card {
+  background: var(--surface, $surface-light);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: none;
+  overflow: hidden;
+  transition: all 0.3s ease;
+
+  &.theme-dark {
+    background: var(--surface, $surface-dark);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+
+  &:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  }
+}
+
+// Card Header
+.card-header-wrapper {
+  background: linear-gradient(135deg, $primary-blue 0%, $primary-blue-dark 100%);
+  padding: 2rem;
+  color: white;
+  border-bottom: none;
+
+  .theme-dark & {
+    background: linear-gradient(135deg, #2c3e50 0%, #1a2a3a 100%);
+  }
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.header-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+}
+
+.header-icon {
+  font-size: 2.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  color: white;
+}
+
+.header-text {
+  flex: 1;
+}
+
+.card-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.card-subtitle {
+  font-size: 0.95rem;
+  margin: 0;
+  opacity: 0.9;
+  color: white;
+}
+
+// Section Headers
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--border-color, $divider-light);
+
+  .theme-dark & {
+    border-bottom-color: $divider-dark;
+  }
+}
+
+.section-icon {
+  font-size: 1.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  color: $primary-blue;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary, $text-primary-light);
+
+  .theme-dark & {
+    color: var(--text-primary, $text-primary-dark);
+  }
+}
+
+// Student Details Section
+.student-details-section {
+  margin-bottom: 2.5rem;
+}
+
+.student-details-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+  padding: 0;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.student-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba($primary-blue, 0.05) 0%, rgba($primary-blue-light, 0.05) 100%);
+  border: 2px solid var(--border-color, $border-light);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+
+  .theme-dark & {
+    background: linear-gradient(135deg, rgba($primary-blue, 0.1) 0%, rgba($primary-blue-light, 0.05) 100%);
+    border-color: $border-dark;
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba($primary-blue, 0.15);
+    border-color: $primary-blue;
+
+    .theme-dark & {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      border-color: $primary-blue;
+    }
+  }
+}
+
+.detail-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, $primary-blue 0%, $primary-blue-dark 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba($primary-blue, 0.3);
+}
+
+.detail-icon {
+  font-size: 1.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  color: white;
+}
+
+.detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.detail-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary, $text-secondary-light);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  line-height: 1.2;
+
+  .theme-dark & {
+    color: var(--text-secondary, $text-secondary-dark);
+  }
+}
+
+.detail-value {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary, $text-primary-light);
+  word-break: break-word;
+  line-height: 1.4;
+
+  .theme-dark & {
+    color: var(--text-primary, $text-primary-dark);
+  }
+}
+
+// Form Section
+.form-section {
+  padding: 0;
+}
+
+.balance-form {
+  width: 100%;
+}
+
+.form-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  padding: 1.5rem;
+  background: var(--background, $bg-light);
+  border-radius: 16px;
+  border: 2px solid var(--border-color, $border-light);
+
+  .theme-dark & {
+    background: var(--background, $bg-dark);
+    border-color: $border-dark;
+  }
+}
+
+.amount-field {
+  width: 100%;
+  max-width: 500px;
+
+  ::ng-deep {
+    .mat-mdc-form-field-subscript-wrapper {
+      margin-top: 0.5rem;
+    }
+
+    .mat-mdc-form-field-hint {
+      font-size: 0.875rem;
+      color: var(--text-secondary, $text-secondary-light);
+    }
+  }
+}
+
+.field-icon {
+  color: $primary-blue;
+  margin-right: 0.5rem;
+}
+
+// Save Button
+.save-button {
+  align-self: flex-start;
+  background: linear-gradient(135deg, $primary-blue 0%, $primary-blue-dark 100%);
+  color: white;
+  padding: 0.875rem 2.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba($primary-blue, 0.4);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-transform: none;
+  letter-spacing: 0.5px;
+  min-width: 180px;
+  justify-content: center;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba($primary-blue, 0.5);
+    background: linear-gradient(135deg, $primary-blue-dark 0%, $primary-blue 100%);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 4px 16px rgba($primary-blue, 0.4);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: var(--text-secondary, $text-secondary-light);
+  }
+
+  .button-icon {
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .button-text {
+    font-weight: 600;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .card-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .header-icon-wrapper {
+    width: 56px;
+    height: 56px;
+  }
+
+  .header-icon {
+    font-size: 2rem;
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .card-title {
+    font-size: 1.5rem;
+  }
+
+  .student-details-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .student-detail-item {
+    padding: 1.25rem;
+  }
+
+  .form-content {
+    padding: 1.25rem;
+  }
+
+  .amount-field {
+    max-width: 100%;
+  }
+
+  .save-button {
+    width: 100%;
+    min-width: unset;
+  }
+}

@@ -1,0 +1,363 @@
+<div class="aged-debtors-container" [class.theme-dark]="currentTheme === 'dark'">
+  <mat-card class="aged-debtors-card">
+    <!-- Header -->
+    <mat-card-header class="card-header">
+      <div class="header-content">
+        <div class="title-section">
+          <h2>
+            <mat-icon>account_balance_wallet</mat-icon>
+            Aged Debtors Report
+          </h2>
+        </div>
+        <div class="header-actions" *ngIf="(reportData$ | async) as report">
+          <button mat-icon-button (click)="toggleFilters()" matTooltip="Toggle Filters">
+            <mat-icon>{{ showFilters ? 'filter_alt' : 'filter_alt_outline' }}</mat-icon>
+          </button>
+          <button mat-icon-button (click)="onExport()" matTooltip="Export to CSV">
+            <mat-icon>download</mat-icon>
+          </button>
+          <button mat-icon-button (click)="onPrint()" matTooltip="Print Report">
+            <mat-icon>print</mat-icon>
+          </button>
+        </div>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Error State -->
+      <div *ngIf="hasError && errorMessage" class="error-state error-card">
+        <mat-icon class="error-icon" color="warn">error_outline</mat-icon>
+        <div class="error-content">
+          <h3>Error Loading Report</h3>
+          <p>{{ errorMessage }}</p>
+          <button mat-raised-button color="primary" (click)="onRetry()">
+            <mat-icon>refresh</mat-icon>
+            Retry
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="(isLoading$ | async) && !hasError" class="loading-state">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Loading aged debtors report...</p>
+        <p class="loading-hint">Please wait while we calculate aged balances</p>
+      </div>
+
+      <!-- Filter Section -->
+      <div *ngIf="showFilters && !hasError" class="filter-section">
+        <form [formGroup]="filterForm" class="filter-form-print">
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>As of Date</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="asOfDate">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-icon matPrefix>calendar_today</mat-icon>
+            <mat-hint>Select the date for aging calculation</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Select Term</mat-label>
+            <mat-select formControlName="termFilter">
+              <mat-option [value]="null">All Terms</mat-option>
+              <mat-option *ngFor="let term of (terms$ | async)" [value]="term">
+                Term {{ term.num }} ({{ term.year }})
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>calendar_today</mat-icon>
+            <mat-hint>Filter by academic term</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Select Class</mat-label>
+            <mat-select formControlName="classFilter">
+              <mat-option [value]="null">All Classes</mat-option>
+              <mat-option *ngFor="let class of (classes$ | async)" [value]="class">
+                {{ class.name }}
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>class</mat-icon>
+            <mat-hint>Filter by class</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Select Student</mat-label>
+            <mat-select formControlName="studentFilter">
+              <mat-option [value]="null">All Students</mat-option>
+              <mat-option *ngFor="let student of (students$ | async)" [value]="student">
+                {{ student.name }} {{ student.surname }} ({{ student.studentNumber }})
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>person</mat-icon>
+            <mat-hint>Filter by student</mat-hint>
+          </mat-form-field>
+
+          <div class="filter-actions-print">
+            <button mat-raised-button color="warn" (click)="onClearFilters()">
+              <mat-icon>clear</mat-icon>
+              Clear
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Print Header (only visible when printing) -->
+      <div class="print-header print-only">
+        <div class="print-header-content">
+          <div class="print-logo-section">
+            <img src="assets/jhs_logo.jpg" alt="Junior High School Logo" class="print-logo" 
+                 onerror="this.style.display='none'">
+            <div class="print-school-info">
+              <h1 class="print-school-name">Junior High School</h1>
+              <p class="print-school-address">30588 Lundi Drive, Rhodene, Masvingo</p>
+            </div>
+          </div>
+          <div class="print-report-info">
+            <h2 class="print-report-title">Aged Debtors Report</h2>
+            <p class="print-report-date">Generated: {{ printDate }}</p>
+            <p class="print-report-filters" *ngIf="filterForm.dirty">Filters: {{ activeFilters }}</p>
+            <p class="print-report-filters" *ngIf="!filterForm.dirty">All Aged Debtors</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Report Content -->
+      <div *ngIf="reportData$ | async as report; else noDataState">
+        <!-- Summary Statistics -->
+        <div *ngIf="reportSummary$ | async as summary" class="summary-cards">
+          <mat-card class="summary-card total-card">
+            <mat-card-content>
+              <mat-icon class="summary-icon" color="warn">account_balance_wallet</mat-icon>
+              <div class="summary-content">
+                <span class="summary-label">Total Outstanding</span>
+                <span class="summary-value outstanding">{{ summary.totalOutstanding | currency:'USD':'symbol':'1.2-2' }}</span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="summary-card">
+            <mat-card-content>
+              <mat-icon class="summary-icon" color="primary">description</mat-icon>
+              <div class="summary-content">
+                <span class="summary-label">Total Invoices</span>
+                <span class="summary-value invoices">{{ summary.totalInvoices }}</span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="summary-card">
+            <mat-card-content>
+              <mat-icon class="summary-icon">schedule</mat-icon>
+              <div class="summary-content">
+                <span class="summary-label">Avg. Days Overdue</span>
+                <span class="summary-value average">{{ summary.averageDaysOverdue }} days</span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="summary-card critical-card" *ngIf="summary.totalInvoices > 0">
+            <mat-card-content>
+              <mat-icon class="summary-icon" color="warn">warning</mat-icon>
+              <div class="summary-content">
+                <span class="summary-label">Critical (90+ Days)</span>
+                <span class="summary-value critical">{{ summary.criticalCount }}</span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- Age Bucket Summary -->
+        <div class="age-buckets">
+          <mat-card class="bucket-card current">
+            <mat-card-content>
+              <div class="bucket-header">
+                <mat-icon>check_circle</mat-icon>
+                <h4>Current (Not Due)</h4>
+              </div>
+              <p class="bucket-amount">{{ report.current | currency:'USD':'symbol':'1.2-2' }}</p>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="bucket-card overdue-1-30">
+            <mat-card-content>
+              <div class="bucket-header">
+                <mat-icon>schedule</mat-icon>
+                <h4>1-30 Days Overdue</h4>
+              </div>
+              <p class="bucket-amount">{{ report.due1_30Days | currency:'USD':'symbol':'1.2-2' }}</p>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="bucket-card overdue-31-60">
+            <mat-card-content>
+              <div class="bucket-header">
+                <mat-icon>warning</mat-icon>
+                <h4>31-60 Days Overdue</h4>
+              </div>
+              <p class="bucket-amount">{{ report.due31_60Days | currency:'USD':'symbol':'1.2-2' }}</p>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="bucket-card overdue-61-90">
+            <mat-card-content>
+              <div class="bucket-header">
+                <mat-icon>error</mat-icon>
+                <h4>61-90 Days Overdue</h4>
+              </div>
+              <p class="bucket-amount">{{ report.due61_90Days | currency:'USD':'symbol':'1.2-2' }}</p>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="bucket-card overdue-90plus critical">
+            <mat-card-content>
+              <div class="bucket-header">
+                <mat-icon>dangerous</mat-icon>
+                <h4>90+ Days Overdue</h4>
+              </div>
+              <p class="bucket-amount">{{ report.due90PlusDays | currency:'USD':'symbol':'1.2-2' }}</p>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Detailed Invoices Table -->
+        <div class="section-header">
+          <h4>
+            <mat-icon>description</mat-icon>
+            Detailed Outstanding Invoices
+          </h4>
+          <span class="section-count">{{ totalInvoices }} invoice(s)</span>
+        </div>
+
+        <div *ngIf="totalInvoices > 0; else noInvoicesFound">
+          <mat-paginator 
+            [length]="totalInvoices" 
+            [pageSize]="pageSize" 
+            [pageSizeOptions]="pageSizeOptions"
+            [pageIndex]="pageIndex" 
+            (page)="handlePageEvent($event)" 
+            aria-label="Select page of invoices"
+            class="print-hide">
+          </mat-paginator>
+
+          <div class="table-container">
+            <table mat-table [dataSource]="isPrinting ? allInvoices : paginatedInvoices" class="full-width-table">
+              <ng-container matColumnDef="invoiceNumber">
+                <th mat-header-cell *matHeaderCellDef>Invoice No.</th>
+                <td mat-cell *matCellDef="let element">{{ element.invoiceNumber }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="studentName">
+                <th mat-header-cell *matHeaderCellDef>Student Name</th>
+                <td mat-cell *matCellDef="let element">{{ element.studentName }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="studentNumber">
+                <th mat-header-cell *matHeaderCellDef>Student No.</th>
+                <td mat-cell *matCellDef="let element">{{ element.studentNumber }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="className">
+                <th mat-header-cell *matHeaderCellDef>Class</th>
+                <td mat-cell *matCellDef="let element">{{ element.className }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="termName">
+                <th mat-header-cell *matHeaderCellDef>Term</th>
+                <td mat-cell *matCellDef="let element">{{ element.termName }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="invoiceDate">
+                <th mat-header-cell *matHeaderCellDef>Inv. Date</th>
+                <td mat-cell *matCellDef="let element">{{ element.invoiceDate | date:'shortDate' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="dueDate">
+                <th mat-header-cell *matHeaderCellDef>Due Date</th>
+                <td mat-cell *matCellDef="let element">{{ element.dueDate | date:'shortDate' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="currentBalance">
+                <th mat-header-cell *matHeaderCellDef>Balance</th>
+                <td mat-cell *matCellDef="let element" [class]="getDaysOverdueClass(element.daysOverdue)">
+                  {{ element.currentBalance | currency:'USD':'symbol':'1.2-2' }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="daysOverdue">
+                <th mat-header-cell *matHeaderCellDef>Days Overdue</th>
+                <td mat-cell *matCellDef="let element" [class]="getDaysOverdueClass(element.daysOverdue)">
+                  {{ element.daysOverdue }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="statusBucket">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let element" [ngClass]="getStatusClass(element.statusBucket)">
+                  {{ element.statusBucket }}
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+          </div>
+
+          <mat-paginator 
+            [length]="totalInvoices" 
+            [pageSize]="pageSize" 
+            [pageSizeOptions]="pageSizeOptions"
+            [pageIndex]="pageIndex" 
+            (page)="handlePageEvent($event)" 
+            aria-label="Select page of invoices"
+            class="print-hide">
+          </mat-paginator>
+        </div>
+
+        <ng-template #noInvoicesFound>
+          <div class="no-data-state">
+            <mat-icon class="empty-icon">description</mat-icon>
+            <h3>No Invoices Found</h3>
+            <p>No outstanding invoices found for the selected criteria.</p>
+            <p *ngIf="filterForm.dirty" class="suggestion-text">
+              Try adjusting your filters or clearing them to see more results.
+            </p>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- No Data State -->
+      <ng-template #noDataState>
+        <div *ngIf="!(isLoading$ | async)" class="no-data-state">
+          <mat-icon class="empty-icon">account_balance_wallet</mat-icon>
+          <h3>No Data Available</h3>
+          <p>Unable to load aged debtors data. Please check your connection and try again.</p>
+          <button *ngIf="hasError" mat-raised-button color="primary" (click)="onRetry()">
+            <mat-icon>refresh</mat-icon>
+            Retry
+          </button>
+          <div *ngIf="!hasError" class="suggestion-box">
+            <mat-icon>lightbulb</mat-icon>
+            <p>Make sure invoices have been loaded. You can filter the report by date, term, class, or student to narrow down results.</p>
+          </div>
+        </div>
+      </ng-template>
+
+      <!-- Print Footer (only visible when printing) -->
+      <div class="print-footer print-only">
+        <div class="print-footer-content">
+          <div class="print-footer-left">
+            <p class="print-footer-text">Junior High School - Aged Debtors Report</p>
+          </div>
+          <div class="print-footer-center">
+            <p class="print-footer-text">Page <span class="page-number"></span></p>
+          </div>
+          <div class="print-footer-right">
+            <p class="print-footer-text">{{ printDate }}</p>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,188 @@
+<mat-card class="report" id="{{ report.studentNumber }}" #content>
+  <button
+    *ngIf="(canDownloadReport$ | async) && isReportSaved"
+    type="button" mat-mini-fab color="accent" class="download-btn" (click)="download()">
+    <span class="material-icons">file_download</span>
+  </button>
+
+  <div class="letter-head-container">
+    <img src="../../../assets/banner.jpeg" alt="School letter head" class="letter-head" />
+  </div>
+  <hr class="hr" />
+  <mat-card-title>
+    <h2>
+      {{ report.report.examType }}
+      {{ report.report.termNumber }},
+      {{ report.report.termYear }} Report Card
+    </h2>
+  </mat-card-title>
+  <hr class="accent hr" />
+  <mat-card-subtitle>
+    <div class="names-row">
+      <span><b>Student Number: </b> <span class="blue-text">{{ report.studentNumber }}</span></span>
+      <span><b>Name: </b> <span class="blue-text">{{ report.report.surname + " " + report.report.name }}</span></span>
+      <span><b>Class: </b><span class="blue-text">{{ report.report.className }}</span> </span>
+    </div>
+    <div class="names-row">
+      <span><b>Position in Class: </b> <span class="blue-text"> {{ report.report.classPosition }} / {{
+          report.report.classSize }} </span> </span>
+
+      <span *ngIf="report.name.charAt(0) === '5' || report.name.charAt(0) === '6'"><b>Points: </b> <span
+          class="blue-text"> {{ report.report.points }} </span> </span>
+
+      <span><b>Subjects Passed: </b> <span class="blue-text"> {{ report.report.subjectsPassed }} </span> </span>
+    </div>
+  </mat-card-subtitle>
+  <hr class="hr" />
+  <mat-card-content>
+    <div class="table-responsive-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th class="small-column">Ser</th>
+            <th>Subject</th>
+            <th>Mark</th>
+            <th>Average</th>
+            <th>Position</th>
+            <th>Grade</th>
+            <th>Teacher's Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let subjRow of report.report.subjectsTable; let i = index">
+            <td class="small-column">{{ i + 1 }}</td>
+            <td>{{ subjRow.subjectCode + " " + subjRow.subjectName }}</td>
+            <td class="blue-text">{{ subjRow.mark }}</td>
+            <td>{{ subjRow.averageMark.toFixed(1) }}</td>
+            <td>{{ subjRow.position }}</td>
+            <td>{{ subjRow.grade }}</td>
+            <td>{{ subjRow.comment }}</td>
+          </tr>
+          <tr class="average-mark-row">
+            <td colspan="2"><b>Average Mark</b></td>
+            <td>
+              {{
+              report.report.percentageAverge ? report.report.percentageAverge.toFixed(2) : ""
+              }}
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </mat-card-content>
+  <mat-card-footer class="footer">
+    <div class="comment-section">
+      <h3 class="underline">
+        Form Teacher's Comment
+        <button
+          *ngIf="canEditCommentAndNotStudent$ | async"
+          mat-stroked-button
+          type="button"
+          color="primary"
+          (click)="generateTeacherComment()"
+          [disabled]="generatingTeacherComment"
+        >
+          <mat-icon>auto_awesome</mat-icon>
+          {{ generatingTeacherComment ? 'Generating...' : 'Generate with AI' }}
+        </button>
+        <span
+          *ngIf="showAiSourceBadge && teacherCommentSource"
+          class="ai-source-badge"
+          [class.fallback]="teacherCommentSource === 'fallback'"
+        >
+          {{ teacherCommentSource === 'openai' ? 'AI' : 'Fallback' }}
+        </span>
+      </h3>
+
+      <!-- Editable for authorised staff -->
+      <mat-form-field
+        *ngIf="(canEditCommentAndNotStudent$ | async) && (!report.report.classTrComment || teacherEditState)"
+        appearance="outline"
+        class="full-width-textarea"
+      >
+        <mat-label>Type Teacher's Comment here</mat-label>
+        <textarea
+          matInput
+          cdkTextareaAutosize
+          cdkAutosizeMinRows="2"
+          cdkAutosizeMaxRows="6"
+          [formControl]="teacherCommentControl"
+          (blur)="saveTeacherComment()"
+        ></textarea>
+      </mat-form-field>
+
+      <!-- Display mode for authorised staff -->
+      <p
+        *ngIf="(canEditCommentAndNotStudent$ | async) && report.report.classTrComment && !teacherEditState"
+        class="displayed-head-comment"
+      >
+        {{ report.report.classTrComment }}
+        <button
+          mat-icon-button
+          aria-label="Edit teacher comment"
+          color="accent"
+          (click)="toggleTeacherEditState()"
+        >
+          <mat-icon>edit</mat-icon>
+        </button>
+      </p>
+
+      <!-- Read‑only view for students -->
+      <p *ngIf="isStudent$ | async" class="student-view-head-comment">
+        {{ report.report.classTrComment || 'No teacher comment yet.' }}
+      </p>
+    </div>
+    <div class="comment-section headmaster-comment-section">
+      <h3 class="underline">
+        Head's Comment
+        <button
+          *ngIf="canEditCommentAndNotStudent$ | async"
+          mat-stroked-button
+          type="button"
+          color="primary"
+          (click)="generateHeadComment()"
+          [disabled]="generatingHeadComment"
+        >
+          <mat-icon>auto_awesome</mat-icon>
+          {{ generatingHeadComment ? 'Generating...' : 'Generate with AI' }}
+        </button>
+        <span
+          *ngIf="showAiSourceBadge && headCommentSource"
+          class="ai-source-badge"
+          [class.fallback]="headCommentSource === 'fallback'"
+        >
+          {{ headCommentSource === 'openai' ? 'AI' : 'Fallback' }}
+        </span>
+      </h3>
+      <form [formGroup]="commentForm" class="head-comment-form">
+        <mat-form-field *ngIf="(canEditCommentAndNotStudent$ | async) && (!report.report.headComment || editState)" appearance="outline"
+          class="full-width-textarea">
+          <mat-label>Type Headmaster's Comment here</mat-label>
+          <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="3" cdkAutosizeMaxRows="7" formControlName="comment"
+            (blur)="saveComment()"></textarea>
+          <mat-error *ngIf="commentForm.get('comment')?.hasError('required')">Comment is required</mat-error>
+        </mat-form-field>
+
+        <p *ngIf="(canEditCommentAndNotStudent$ | async) && report.report.headComment && !editState" class="displayed-head-comment">
+          {{ report.report.headComment }}
+          <button mat-icon-button aria-label="Edit icon" color="accent" (click)="toggleEditState()">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </p>
+
+        <p *ngIf="isStudent$ | async" class="student-view-head-comment">
+          {{ report.report.headComment || 'No Headmaster\'s comment yet.' }}
+        </p>
+
+        <p class="missing-comment-cue" *ngIf="(canEditCommentAndNotStudent$ | async) && !report.report.headComment && !editState">
+          No Headmaster's comment entered. Click the field to add.
+        </p>
+
+      </form>
+    </div>
+  </mat-card-footer>
+</mat-card>

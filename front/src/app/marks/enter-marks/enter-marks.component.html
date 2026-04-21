@@ -1,0 +1,267 @@
+<!-- Background Elements -->
+<div class="background-elements">
+  <div class="floating-circle circle-1"></div>
+  <div class="floating-circle circle-2"></div>
+  <div class="floating-circle circle-3"></div>
+</div>
+
+<!-- Main Container -->
+<div class="main-container">
+  <mat-toolbar class="title">{{ title.getTitle() }}</mat-toolbar>
+
+  <div class="sticky-progress-bar" matTooltip="{{ value }} out of {{ maxValue }} marks entered">
+    <div class="mat-elevation-z1 progress-bar-container">
+        <mat-progress-bar color="primary" [value]="(value/maxValue * 100)" mode="determinate"></mat-progress-bar>
+      <span class="progress-value">
+        {{ value }} / {{ maxValue }} Marks Entered
+      </span>
+    </div>
+  </div>
+
+  <mat-card class="container">
+  <form [formGroup]="enrolForm" (ngSubmit)="fetchClassList()">
+    <div class="top-btns">
+      <mat-form-field appearance="outline">
+        <mat-label>Choose Term</mat-label>
+        <mat-select formControlName="term">
+          <mat-option *ngFor="let term of terms$ | async; trackBy: trackByTerm" [value]="term">
+            {{ formatTerm(term) }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="termControl?.invalid && termControl?.touched">Term is required</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Exam Type</mat-label>
+        <mat-select formControlName="examType">
+          <mat-option *ngFor="let ty of examtype" [value]="ty">
+            {{ ty }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="examTypeControl?.invalid && examTypeControl?.touched">Exam Type is required</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Choose Class</mat-label>
+        <mat-select formControlName="class">
+          <mat-option *ngFor="let clas of classes$ | async; trackBy: trackByClass" [value]="clas.name">
+            {{ clas.name }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="classControl?.invalid && classControl?.touched">Class is required</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Choose Subject</mat-label>
+        <mat-select formControlName="subject">
+          <mat-option *ngFor="let subject of subjects$ | async; trackBy: trackBySubject" [value]="subject">
+            {{ subject.code + " " + subject.name }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="subjectControl?.invalid && subjectControl?.touched">Subject is required</mat-error>
+      </mat-form-field>
+
+      <button mat-mini-fab color="primary" type="submit" [disabled]="enrolForm.invalid" matTooltip="Fetch Student List">
+        <mat-icon>list</mat-icon>
+      </button>
+    </div>
+  </form>
+
+
+  <div class="mat-elevation-z2 table-container">
+    <div class="top-panel">
+      <mat-form-field appearance="outline"> <mat-label>Filter</mat-label>
+        <input matInput (keyup)="applyFilter($event)" placeholder="Ex. Mia" #input />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div *ngIf="getPendingCount() > 0" class="pending-sync-banner">
+      <span>{{ getPendingCount() }} mark(s) waiting to sync.</span>
+      <button mat-button color="accent" (click)="retryPendingMarks()">Retry now</button>
+    </div>
+
+    <div *ngIf="dataSource.data.length > 0; else noDataMessage">
+      <table mat-table [dataSource]="dataSource" matSort>
+        <ng-container matColumnDef="studentNumber">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            Student Number
+          </th>
+          <td mat-cell *matCellDef="let row">{{ row.student.studentNumber }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="surname">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Surname</th>
+          <td mat-cell *matCellDef="let row">{{ row.student.surname }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+          <td mat-cell *matCellDef="let row">{{ row.student.name }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="gender">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Gender</th>
+          <td mat-cell *matCellDef="let row">{{ row.student.gender }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="markComment">
+          <th mat-header-cell *matHeaderCellDef [attr.colspan]="2">
+            Mark / Comment
+          </th>
+          <td mat-cell *matCellDef="let row; let i = index">
+            <div [formGroup]="getMarkFormGroup(i)" class="mark-comment-group">
+              <mat-form-field 
+                appearance="outline" 
+                class="mark-input"
+                [class.saving]="isMarkSaving(i)"
+                [class.saved]="isMarkSaved(i)">
+                <mat-label>Mark</mat-label>
+                <input 
+                  matInput 
+                  type="number" 
+                  formControlName="mark" 
+                  (blur)="onMarkBlur(row, i); saveMark(row, i)" 
+                  min="0" 
+                  max="100" 
+                />
+                
+                <!-- Saving indicator -->
+                <mat-spinner 
+                  *ngIf="isMarkSaving(i)" 
+                  matSuffix 
+                  diameter="16"
+                  strokeWidth="2">
+                </mat-spinner>
+                
+                <!-- Saved indicator -->
+                <mat-icon 
+                  *ngIf="isMarkSaved(i)" 
+                  matSuffix 
+                  class="saved-icon"
+                  color="primary">
+                  check_circle
+                </mat-icon>
+                
+                <mat-error *ngIf="getMarkControl(i).hasError('required') && getMarkControl(i).touched">
+                  Mark is required.
+                </mat-error>
+                <mat-error
+                  *ngIf="(getMarkControl(i).hasError('min') || getMarkControl(i).hasError('max')) && getMarkControl(i).touched">
+                  Mark must be between 0 and 100.
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field 
+                appearance="outline" 
+                class="comment-input"
+                [class.saving]="isMarkSaving(i)"
+                [class.saved]="isMarkSaved(i)">
+                <mat-label>
+                  <span *ngIf="!isGeneratingComments(i) && !isMarkSaving(i)">Comment</span>
+                  <span *ngIf="isGeneratingComments(i)">Generating AI suggestions...</span>
+                  <span *ngIf="isMarkSaving(i)">Saving mark...</span>
+                </mat-label>
+                <input 
+                  matInput 
+                  formControlName="comment" 
+                  [matAutocomplete]="auto" 
+                  (blur)="saveMark(row, i)"
+                  (focus)="onCommentInputFocus(i)"
+                  [disabled]="isGeneratingComments(i)"
+                  [placeholder]="isGeneratingComments(i) ? 'Please wait for AI suggestions...' : 'Type or select a comment'"
+                  #commentInput
+                />
+                <mat-autocomplete 
+                  #auto="matAutocomplete" 
+                  (optionSelected)="saveMark(row, i)"
+                  [displayWith]="displayCommentOption">
+                  <mat-option
+                    *ngFor="let option of getFilteredCommentOptions(i) | async" 
+                    [value]="option"
+                    [disabled]="option === 'Generating AI comments...'">
+                    <mat-icon *ngIf="option === 'Generating AI comments...'" class="loading-icon">hourglass_empty</mat-icon>
+                    {{ option }}
+                  </mat-option>
+                </mat-autocomplete>
+                
+                <!-- AI Loading indicator -->
+                <mat-spinner 
+                  *ngIf="isGeneratingComments(i) && !isMarkSaving(i)" 
+                  matSuffix 
+                  diameter="18">
+                </mat-spinner>
+                
+                <!-- Mark Saving indicator -->
+                <mat-spinner 
+                  *ngIf="isMarkSaving(i)" 
+                  matSuffix 
+                  diameter="16"
+                  strokeWidth="2"
+                  color="accent">
+                </mat-spinner>
+                
+                <!-- Saved indicator -->
+                <mat-icon 
+                  *ngIf="isMarkSaved(i) && !isGeneratingComments(i)" 
+                  matSuffix 
+                  class="saved-icon"
+                  color="primary"
+                  title="Mark saved successfully">
+                  check_circle
+                </mat-icon>
+                
+                <!-- AI indicator when comments are loaded and not saving/saved -->
+                <mat-icon 
+                  *ngIf="!isGeneratingComments(i) && !isMarkSaving(i) && !isMarkSaved(i) && commentOptions.has(i)" 
+                  matSuffix 
+                  class="ai-indicator"
+                  title="AI-generated suggestions">
+                  psychology
+                </mat-icon>
+                
+                <mat-error *ngIf="getCommentControl(i).hasError('required') && getCommentControl(i).touched">
+                  Comment is required.
+                </mat-error>
+              </mat-form-field>
+              <div *ngIf="isSaveFailed(i)" class="row-save-error">
+                <span>Couldn't save.</span>
+                <button mat-button color="warn" (click)="retrySaveForRow(row, i)">Retry</button>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="action">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Actions</th>
+          <td mat-cell *matCellDef="let row; let i = index" class="action-btns">
+            <button mat-icon-button color="warn" type="button" (click)="deleteMark(row)" matTooltip="Delete Mark">
+              <mat-icon> delete_forever </mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns; let i = index;"
+          [class.dirty-row]="getMarkFormGroup(i).dirty"></tr>
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+            No data matching the filter "{{ input.value }}"
+          </td>
+        </tr>
+      </table>
+
+      <mat-paginator [pageSizeOptions]="[10, 15, 50]" aria-label="Select page of users"></mat-paginator>
+    </div>
+
+    <ng-template #noDataMessage>
+      <div class="no-data-message">
+        <p *ngIf="!enrolForm.valid && !dataSource.data.length">Please select Term, Exam Type, Class, and Subject, then
+          click the list button to fetch student marks.</p>
+        <p *ngIf="enrolForm.valid && dataSource.data.length === 0">No students found for the selected criteria, or no
+          marks have been entered yet.</p>
+      </div>
+    </ng-template>
+  </div>
+</mat-card>
+</div>

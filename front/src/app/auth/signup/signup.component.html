@@ -1,0 +1,183 @@
+<!-- Loading Overlay -->
+<div class="loading-overlay" *ngIf="(isLoading$ | async)">
+  <div class="loading-content">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p class="loading-text">Creating your account...</p>
+  </div>
+</div>
+
+<!-- Main Container -->
+<div class="signup-container" [class.animated-bg-light]="currentTheme === 'light'" [class.animated-bg-dark]="currentTheme === 'dark'">
+  <!-- Background Elements -->
+  <div class="background-elements">
+    <div class="circle circle-1"></div>
+    <div class="circle circle-2"></div>
+    <div class="circle circle-3"></div>
+  </div>
+
+  <!-- Signup Card -->
+  <mat-card class="signup-card mat-elevation-z8">
+    <!-- Header Section -->
+    <mat-card-header class="signup-header">
+      <div class="logo-container">
+        <mat-icon class="logo-icon">school</mat-icon>
+      </div>
+      <div class="welcome-section">
+        <h2 class="signup-title">Create Account</h2>
+        <p class="signup-subtitle">Join our school community today</p>
+      </div>
+    </mat-card-header>
+
+    <!-- Error Message -->
+    <div class="error-container" *ngIf="errorMsg$ | async as errorMsg">
+      <mat-icon class="error-icon">error_outline</mat-icon>
+      <span class="error-message">{{ errorMsg }}</span>
+    </div>
+
+    <!-- Form Section -->
+    <mat-card-content class="signup-content">
+      <form class="signup-form" [formGroup]="signupForm" (ngSubmit)="signup()">
+        <!-- Role Selection -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Select Role</mat-label>
+          <mat-select 
+            formControlName="role" 
+            placeholder="Choose your role"
+            [compareWith]="compareRoles"
+            [class.error]="role?.invalid && role?.touched">
+            <mat-option value="">Select Role</mat-option>
+            <mat-option *ngFor="let role of roles" [value]="role">
+              {{ role.charAt(0).toUpperCase() + role.slice(1) }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix class="field-icon">person_outline</mat-icon>
+          <mat-hint *ngIf="!role?.invalid || !role?.touched">What are you to the school?</mat-hint>
+          
+          <mat-error *ngIf="role?.hasError('required') && role?.touched">
+            <mat-icon class="error-icon-small">error</mat-icon>
+            Role is required
+          </mat-error>
+        </mat-form-field>
+
+        <!-- ID/Email Field -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>{{
+            role?.value === 'teacher' || role?.value === 'dev'
+            ? 'I.D Number'
+            : role?.value === 'student'
+            ? 'Student Number'
+            : 'Email Address'
+            }}</mat-label>
+          <input 
+            type="text" 
+            matInput 
+            formControlName="id" 
+            [placeholder]="getPlaceholder()"
+            [class.error]="id?.invalid && id?.touched" />
+          <mat-icon matPrefix class="field-icon">
+            {{ role?.value === 'teacher' || role?.value === 'dev' ? 'badge' : role?.value === 'student' ? 'school' : 'email' }}
+          </mat-icon>
+          <mat-hint *ngIf="!id?.invalid || !id?.touched">{{ getHint() }}</mat-hint>
+          
+          <mat-error *ngIf="id?.hasError('required') && id?.touched">
+            <mat-icon class="error-icon-small">error</mat-icon>
+            {{ getFieldLabel() }} is required
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Username Field -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Username</mat-label>
+          <input 
+            type="text" 
+            matInput 
+            formControlName="username" 
+            placeholder="Enter your username"
+            autocomplete="username"
+            [class.error]="username?.invalid && username?.touched" />
+          <mat-icon matPrefix class="field-icon">person</mat-icon>
+          <mat-hint *ngIf="!username?.invalid || !username?.touched">Choose a unique username</mat-hint>
+          
+          <mat-error *ngIf="username?.hasError('required') && username?.touched">
+            <mat-icon class="error-icon-small">error</mat-icon>
+            Username is required
+          </mat-error>
+          <mat-error *ngIf="username?.hasError('minlength') && username?.touched">
+            <mat-icon class="error-icon-small">error</mat-icon>
+            Username must be at least 2 characters ({{ username?.value?.length || 0 }}/2)
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Password Field -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Password</mat-label>
+          <input 
+            [type]="hide ? 'password' : 'text'" 
+            matInput 
+            formControlName="password" 
+            placeholder="Enter your password"
+            autocomplete="new-password"
+            [class.error]="password?.invalid && password?.touched" />
+          <mat-icon matPrefix class="field-icon">lock</mat-icon>
+          <button 
+            mat-icon-button 
+            matSuffix 
+            type="button"
+            (click)="hide = !hide" 
+            [attr.aria-label]="hide ? 'Show password' : 'Hide password'"
+            [attr.aria-pressed]="!hide">
+            <mat-icon class="field-icon">{{ hide ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-hint *ngIf="!password?.invalid || !password?.touched">Create a strong password</mat-hint>
+          
+          <mat-error *ngIf="password?.hasError('required') && password?.touched">
+            <mat-icon class="error-icon-small">error</mat-icon>
+            Password is required
+          </mat-error>
+          <mat-error *ngIf="password?.hasError('minlength') && password?.touched">
+            <mat-icon class="error-icon-small">error</mat-icon>
+            Password must be at least 8 characters ({{ password?.value?.length || 0 }}/8)
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Sign Up Button -->
+        <button 
+          mat-raised-button 
+          color="primary" 
+          type="submit" 
+          class="signup-button"
+          [disabled]="signupForm.invalid || (isLoading$ | async)"
+          [class.loading]="isLoading$ | async">
+          <mat-icon *ngIf="!(isLoading$ | async)">person_add</mat-icon>
+          <mat-spinner *ngIf="isLoading$ | async" diameter="20"></mat-spinner>
+          {{ (isLoading$ | async) ? 'Creating Account...' : 'Create Account' }}
+        </button>
+
+        <!-- Divider -->
+        <div class="divider">
+          <span class="divider-text">or</span>
+        </div>
+
+        <!-- Sign In Button -->
+        <button 
+          mat-stroked-button 
+          type="button" 
+          class="signin-button"
+          (click)="switchToSignIn()"
+          [disabled]="isLoading$ | async">
+          <mat-icon>login</mat-icon>
+          Already have an account? Sign In
+        </button>
+      </form>
+    </mat-card-content>
+
+    <!-- Footer -->
+    <mat-card-footer class="signup-footer">
+      <p class="footer-text">
+        By creating an account, you agree to our 
+        <a href="#" class="footer-link">Terms of Service</a> and 
+        <a href="#" class="footer-link">Privacy Policy</a>
+      </p>
+    </mat-card-footer>
+  </mat-card>
+</div>

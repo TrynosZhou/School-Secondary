@@ -1,0 +1,44 @@
+.dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.half-width {
+  flex: 1 1 240px;
+  min-width: 220px;
+}
+
+.context {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0 14px;
+  opacity: 0.95;
+}
+
+.context-title {
+  font-weight: 700;
+}
+
+.context-subtitle {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.error {
+  color: #c62828;
+  font-size: 13px;
+  margin-top: 8px;
+}
+

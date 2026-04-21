@@ -1,0 +1,53 @@
+<h2 mat-dialog-title>{{ title }}</h2>
+
+<div mat-dialog-content>
+  <div class="context">
+    <mat-icon>meeting_room</mat-icon>
+    <div>
+      <div class="context-title">{{ data.room.name }}</div>
+      <div class="context-subtitle">{{ contextSubtitle }}</div>
+    </div>
+  </div>
+
+  <form [formGroup]="form" class="dialog-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Item name</mat-label>
+      <input matInput formControlName="name" placeholder="e.g. Microscope" />
+    </mat-form-field>
+
+    <div class="row">
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Category (optional)</mat-label>
+        <input matInput formControlName="category" placeholder="e.g. Equipment" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Unit (optional)</mat-label>
+        <input matInput formControlName="unit" placeholder="e.g. pcs, bottles" />
+      </mat-form-field>
+    </div>
+
+    <div class="row" *ngIf="mode === 'create'">
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Starting quantity</mat-label>
+        <input matInput type="number" formControlName="quantityOnHand" min="0" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Reorder level (optional)</mat-label>
+        <input matInput type="number" formControlName="reorderLevel" min="0" />
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Notes (optional)</mat-label>
+      <textarea matInput rows="3" formControlName="notes"></textarea>
+    </mat-form-field>
+  </form>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Cancel</button>
+  <button mat-raised-button color="primary" type="button" (click)="save()">{{ saveLabel }}</button>
+</div>
+

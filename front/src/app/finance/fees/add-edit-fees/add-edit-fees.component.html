@@ -1,0 +1,125 @@
+<!-- Loading Overlay -->
+<div class="loading-overlay" *ngIf="isLoading$ | async">
+  <div class="loading-spinner">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>{{ data.mode === 'edit' ? 'Updating fee...' : 'Adding fee...' }}</p>
+  </div>
+</div>
+
+<!-- Dialog Header -->
+<div class="dialog-header" [class.theme-light]="currentTheme === 'light'" [class.theme-dark]="currentTheme === 'dark'">
+  <div class="header-content">
+    <mat-icon class="header-icon">{{ data.mode === 'edit' ? 'edit' : 'add' }}</mat-icon>
+    <div class="header-text">
+      <h2 class="dialog-title">{{ data.mode === 'edit' ? 'Edit Fee' : 'Add New Fee' }}</h2>
+      <p class="dialog-subtitle">{{ data.mode === 'edit' ? 'Update fee information' : 'Create a new fee entry' }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- Form Content -->
+<div class="dialog-content">
+  <form [formGroup]="feesForm" (ngSubmit)="onSubmit()" class="fees-form">
+    
+    <!-- Fee Name Field -->
+    <div class="form-field">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Fee Name</mat-label>
+        <mat-select formControlName="name" [errorStateMatcher]="errorStateMatcher">
+          <mat-option *ngFor="let name of feesNames" [value]="name">
+            {{ getFeeDisplayName(name) }}
+          </mat-option>
+        </mat-select>
+        <mat-icon matSuffix>category</mat-icon>
+        <mat-error *ngIf="name?.hasError('required')">
+          Fee name is required
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Amount Field -->
+    <div class="form-field">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Amount</mat-label>
+        <input matInput 
+               formControlName="amount" 
+               type="number" 
+               step="0.01" 
+               min="0"
+               placeholder="0.00"
+               [errorStateMatcher]="errorStateMatcher">
+        <span matPrefix>$&nbsp;</span>
+        <mat-icon matSuffix>attach_money</mat-icon>
+        <mat-error *ngIf="amount?.hasError('required')">
+          Amount is required
+        </mat-error>
+        <mat-error *ngIf="amount?.hasError('min')">
+          Amount must be greater than 0
+        </mat-error>
+        <mat-error *ngIf="amount?.hasError('pattern')">
+          Please enter a valid amount
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Description Field -->
+    <div class="form-field">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Description</mat-label>
+        <textarea matInput 
+                  formControlName="description" 
+                  rows="3"
+                  placeholder="Enter a detailed description of this fee..."
+                  [errorStateMatcher]="errorStateMatcher"></textarea>
+        <mat-icon matSuffix>description</mat-icon>
+        <mat-error *ngIf="description?.hasError('maxlength')">
+          Description must be less than 500 characters
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Fee Category Info -->
+    <div class="fee-info-card" *ngIf="name?.value">
+      <div class="info-header">
+        <mat-icon class="info-icon">info</mat-icon>
+        <span class="info-title">Fee Category</span>
+      </div>
+      <div class="info-content">
+        <div class="category-badge" [ngClass]="getCategoryClass(name?.value)">
+          {{ getFeeCategory(name?.value) }}
+        </div>
+        <p class="category-description">{{ getCategoryDescription(name?.value) }}</p>
+      </div>
+    </div>
+
+    <!-- Error Messages -->
+    <div class="error-container" *ngIf="errorMsg$ | async as errorMsg">
+      <div class="error-message">
+        <mat-icon class="error-icon">error</mat-icon>
+        <span>{{ errorMsg }}</span>
+      </div>
+    </div>
+
+  </form>
+</div>
+
+<!-- Dialog Actions -->
+<div class="dialog-actions">
+  <button mat-button 
+          type="button" 
+          (click)="onCancel()" 
+          class="cancel-button">
+    <mat-icon>close</mat-icon>
+    Cancel
+  </button>
+  
+  <button mat-raised-button 
+          color="primary" 
+          type="submit" 
+          [disabled]="feesForm.invalid || (isLoading$ | async)"
+          (click)="onSubmit()"
+          class="submit-button">
+    <mat-icon>{{ data.mode === 'edit' ? 'save' : 'add' }}</mat-icon>
+    {{ data.mode === 'edit' ? 'Update Fee' : 'Add Fee' }}
+  </button>
+</div>

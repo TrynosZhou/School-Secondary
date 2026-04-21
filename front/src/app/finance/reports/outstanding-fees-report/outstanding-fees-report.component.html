@@ -1,0 +1,349 @@
+<div class="outstanding-fees-container" [class.theme-dark]="currentTheme === 'dark'">
+  <mat-card class="outstanding-fees-card">
+    <!-- Header -->
+    <mat-card-header class="card-header">
+      <div class="header-content">
+        <div class="title-section">
+          <h2>
+            <mat-icon>account_balance_wallet</mat-icon>
+            Outstanding Fees Report
+          </h2>
+        </div>
+        <div class="header-actions" *ngIf="(reportData$ | async) as reportData">
+          <button mat-icon-button (click)="toggleFilters()" matTooltip="Toggle Filters">
+            <mat-icon>{{ showFilters ? 'filter_alt' : 'filter_alt_outline' }}</mat-icon>
+          </button>
+          <button mat-icon-button (click)="onExport()" matTooltip="Export to CSV">
+            <mat-icon>download</mat-icon>
+          </button>
+          <button mat-icon-button (click)="onPrint()" matTooltip="Print Report">
+            <mat-icon>print</mat-icon>
+          </button>
+        </div>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Error State -->
+      <div *ngIf="hasError && errorMessage" class="error-state error-card">
+        <mat-icon class="error-icon" color="warn">error_outline</mat-icon>
+        <div class="error-content">
+          <h3>Error Loading Report</h3>
+          <p>{{ errorMessage }}</p>
+          <button mat-raised-button color="primary" (click)="onRetry()">
+            <mat-icon>refresh</mat-icon>
+            Retry
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="(isLoading$ | async) && !hasError" class="loading-state">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Loading outstanding fees report...</p>
+        <p class="loading-hint">Please wait while we calculate outstanding balances</p>
+      </div>
+
+      <!-- Filter Section -->
+      <div *ngIf="showFilters && !hasError" class="filter-section">
+        <form [formGroup]="filterForm" class="filter-form-print">
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Search Student</mat-label>
+            <input matInput formControlName="searchQuery" placeholder="e.g., John Doe or student number">
+            <mat-icon matPrefix>search</mat-icon>
+            <mat-hint>Search by student name or number</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Select Term</mat-label>
+            <mat-select formControlName="termFilter">
+              <mat-option [value]="null">All Terms</mat-option>
+              <mat-option *ngFor="let term of (terms$ | async)" [value]="term">
+                Term {{ term.num }} ({{ term.year }})
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>calendar_today</mat-icon>
+            <mat-hint>Filter by academic term</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Select Class</mat-label>
+            <mat-select formControlName="classFilter">
+              <mat-option [value]="null">All Classes</mat-option>
+              <mat-option *ngFor="let class of (allClasses$ | async)" [value]="class">
+                {{ class.name }}
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>class</mat-icon>
+            <mat-hint>Filter by class</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Select Residence</mat-label>
+            <mat-select formControlName="residenceFilter">
+              <mat-option [value]="null">All Residences</mat-option>
+              <mat-option value="Boarder">Boarder</mat-option>
+              <mat-option value="Day">Day</mat-option>
+            </mat-select>
+            <mat-icon matPrefix>home</mat-icon>
+            <mat-hint>Filter by residence type</mat-hint>
+          </mat-form-field>
+
+          <div class="filter-actions-print">
+            <button mat-raised-button color="warn" (click)="onClearFilters()">
+              <mat-icon>clear</mat-icon>
+              Clear
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Print Header (only visible when printing) -->
+      <div class="print-header print-only">
+        <div class="print-header-content">
+          <div class="print-logo-section">
+            <img src="assets/jhs_logo.jpg" alt="Junior High School Logo" class="print-logo" 
+                 onerror="this.style.display='none'">
+            <div class="print-school-info">
+              <h1 class="print-school-name">Junior High School</h1>
+              <p class="print-school-address">30588 Lundi Drive, Rhodene, Masvingo</p>
+            </div>
+          </div>
+          <div class="print-report-info">
+            <h2 class="print-report-title">Outstanding Fees Report</h2>
+            <p class="print-report-date">Generated: {{ printDate }}</p>
+            <p class="print-report-filters" *ngIf="filterForm.dirty">Filters: {{ activeFilters }}</p>
+            <p class="print-report-filters" *ngIf="!filterForm.dirty">All Outstanding Fees</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Report Content -->
+      <div *ngIf="reportData$ | async as report; else noDataState">
+        <!-- Summary Statistics -->
+        <div *ngIf="reportSummary$ | async as summary" class="summary-cards">
+          <mat-card class="summary-card">
+            <mat-card-content>
+              <mat-icon class="summary-icon" color="warn">account_balance_wallet</mat-icon>
+              <div class="summary-content">
+                <span class="summary-label">Total Outstanding</span>
+                <span class="summary-value outstanding">{{ summary.totalOverallOutstanding | currency:'USD':'symbol':'1.2-2' }}</span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="summary-card">
+            <mat-card-content>
+              <mat-icon class="summary-icon" color="primary">people</mat-icon>
+              <div class="summary-content">
+                <span class="summary-label">Total Students</span>
+                <span class="summary-value students">{{ summary.totalStudents }}</span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="summary-card">
+            <mat-card-content>
+              <mat-icon class="summary-icon">class</mat-icon>
+              <div class="summary-content">
+                <span class="summary-label">Classes Affected</span>
+                <span class="summary-value">{{ summary.totalClasses }}</span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="summary-card" *ngIf="summary.totalStudents > 0">
+            <mat-card-content>
+              <mat-icon class="summary-icon" style="color: #ff9800;">trending_up</mat-icon>
+              <div class="summary-content">
+                <span class="summary-label">Average Outstanding</span>
+                <span class="summary-value average">{{ summary.averageOutstanding | currency:'USD':'symbol':'1.2-2' }}</span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- Overall Total Outstanding -->
+        <div class="total-outstanding">
+          <h2>
+            <mat-icon>account_balance_wallet</mat-icon>
+            Overall Outstanding Fees: {{ report.totalOverallOutstanding | currency:'USD':'symbol':'1.2-2' }}
+          </h2>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Summary by Class -->
+        <div class="section-header">
+          <h4>
+            <mat-icon>class</mat-icon>
+            Summary by Class
+          </h4>
+          <span class="section-count">{{ enrolmentSummaryTableData.length }} class(es)</span>
+        </div>
+        <div class="table-container" *ngIf="enrolmentSummaryTableData.length > 0; else noClassSummary">
+          <table mat-table [dataSource]="enrolmentSummaryTableData" class="full-width-table">
+            <ng-container matColumnDef="enrolName">
+              <th mat-header-cell *matHeaderCellDef>Class Name</th>
+              <td mat-cell *matCellDef="let element">{{ element.enrolName }}</td>
+            </ng-container>
+            <ng-container matColumnDef="totalOutstanding">
+              <th mat-header-cell *matHeaderCellDef>Outstanding Amount</th>
+              <td mat-cell *matCellDef="let element" [class]="getTotalOutstandingClass(element.totalOutstanding)">
+                {{ element.totalOutstanding | currency:'USD':'symbol':'1.2-2' }}
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="enrolmentSummaryDisplayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: enrolmentSummaryDisplayedColumns"></tr>
+          </table>
+        </div>
+
+        <ng-template #noClassSummary>
+          <div class="no-data-state">
+            <mat-icon class="empty-icon">class</mat-icon>
+            <p>No class summary data available for the selected filters.</p>
+          </div>
+        </ng-template>
+
+        <mat-divider></mat-divider>
+
+        <!-- Summary by Residence -->
+        <div class="section-header">
+          <h4>
+            <mat-icon>home</mat-icon>
+            Summary by Residence
+          </h4>
+          <span class="section-count">{{ residenceSummaryTableData.length }} residence(s)</span>
+        </div>
+        <div class="table-container" *ngIf="residenceSummaryTableData.length > 0; else noResidenceSummary">
+          <table mat-table [dataSource]="residenceSummaryTableData" class="full-width-table">
+            <ng-container matColumnDef="residence">
+              <th mat-header-cell *matHeaderCellDef>Residence</th>
+              <td mat-cell *matCellDef="let element">{{ element.residence }}</td>
+            </ng-container>
+            <ng-container matColumnDef="totalOutstanding">
+              <th mat-header-cell *matHeaderCellDef>Outstanding Amount</th>
+              <td mat-cell *matCellDef="let element" [class]="getTotalOutstandingClass(element.totalOutstanding)">
+                {{ element.totalOutstanding | currency:'USD':'symbol':'1.2-2' }}
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="residenceSummaryDisplayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: residenceSummaryDisplayedColumns"></tr>
+          </table>
+        </div>
+
+        <ng-template #noResidenceSummary>
+          <div class="no-data-state">
+            <mat-icon class="empty-icon">home</mat-icon>
+            <p>No residence summary data available for the selected filters.</p>
+          </div>
+        </ng-template>
+
+        <mat-divider></mat-divider>
+
+        <!-- Student Details -->
+        <div class="section-header">
+          <h4>
+            <mat-icon>people</mat-icon>
+            Students with Outstanding Balances
+          </h4>
+          <span class="section-count">{{ totalStudents }} student(s)</span>
+        </div>
+
+        <div *ngIf="totalStudents > 0; else noStudentsFound">
+          <mat-paginator 
+            [length]="totalStudents" 
+            [pageSize]="pageSize" 
+            [pageSizeOptions]="pageSizeOptions"
+            [pageIndex]="pageIndex" 
+            (page)="handlePageEvent($event)" 
+            aria-label="Select page of outstanding students"
+            class="print-hide">
+          </mat-paginator>
+
+          <div class="student-details-table-container">
+            <table mat-table [dataSource]="isPrinting ? studentDetailsTableData : paginatedStudentDetails" class="full-width-table">
+              <ng-container matColumnDef="studentName">
+                <th mat-header-cell *matHeaderCellDef>Student Name</th>
+                <td mat-cell *matCellDef="let element">{{ element.studentName }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="enrolName">
+                <th mat-header-cell *matHeaderCellDef>Class/Enrolment</th>
+                <td mat-cell *matCellDef="let element">{{ element.enrolName }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="residence">
+                <th mat-header-cell *matHeaderCellDef>Residence</th>
+                <td mat-cell *matCellDef="let element">{{ element.residence }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="totalOutstanding">
+                <th mat-header-cell *matHeaderCellDef>Outstanding Balance</th>
+                <td mat-cell *matCellDef="let element" [class]="getTotalOutstandingClass(element.totalOutstanding)">
+                  {{ element.totalOutstanding | currency:'USD':'symbol':'1.2-2' }}
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="studentDetailsDisplayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: studentDetailsDisplayedColumns"></tr>
+            </table>
+          </div>
+
+          <mat-paginator 
+            [length]="totalStudents" 
+            [pageSize]="pageSize" 
+            [pageSizeOptions]="pageSizeOptions"
+            [pageIndex]="pageIndex" 
+            (page)="handlePageEvent($event)" 
+            aria-label="Select page of outstanding students"
+            class="print-hide">
+          </mat-paginator>
+        </div>
+
+        <ng-template #noStudentsFound>
+          <div class="no-data-state">
+            <mat-icon class="empty-icon">people</mat-icon>
+            <h3>No Students Found</h3>
+            <p>No students found with outstanding balances for the selected criteria.</p>
+            <p *ngIf="filterForm.dirty" class="suggestion-text">
+              Try adjusting your filters or clearing them to see more results.
+            </p>
+          </div>
+        </ng-template>
+
+        <!-- Print Footer (only visible when printing) -->
+        <div class="print-footer print-only">
+          <div class="print-footer-content">
+            <div class="print-footer-left">
+              <p class="print-footer-text">Junior High School - Outstanding Fees Report</p>
+            </div>
+            <div class="print-footer-center">
+              <p class="print-footer-text">Page <span class="page-number"></span></p>
+            </div>
+            <div class="print-footer-right">
+              <p class="print-footer-text">{{ printDate }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- No Data State -->
+      <ng-template #noDataState>
+        <div *ngIf="!(isLoading$ | async)" class="no-data-state">
+          <mat-icon class="empty-icon">account_balance_wallet</mat-icon>
+          <h3>No Data Available</h3>
+          <p>Unable to load outstanding fees data. Please check your connection and try again.</p>
+          <button *ngIf="hasError" mat-raised-button color="primary" (click)="onRetry()">
+            <mat-icon>refresh</mat-icon>
+            Retry
+          </button>
+          <div *ngIf="!hasError" class="suggestion-box">
+            <mat-icon>lightbulb</mat-icon>
+            <p>Make sure invoices have been loaded and students are enrolled. You can filter the report by term, class, or residence to narrow down results.</p>
+          </div>
+        </div>
+      </ng-template>
+    </mat-card-content>
+  </mat-card>
+</div>

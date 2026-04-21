@@ -1,0 +1,548 @@
+// Theme Variables
+$primary-blue: #2196f3;
+$primary-blue-dark: #1976d2;
+$accent-gold: #ffc107;
+$warn-brown: #795548;
+
+$text-primary-light: #2c3e50;
+$text-secondary-light: #7f8c8d;
+$bg-light: #f5f7fa;
+$surface-light: #ffffff;
+
+$text-primary-dark: #e0e0e0;
+$text-secondary-dark: #b0b0b0;
+$bg-dark: #121212;
+$surface-dark: #1e1e1e;
+
+/* Main Container */
+.student-finance-container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  color: var(--text-primary, $text-primary-light);
+
+  // When animated background classes are present, let them control the background
+  &:not(.animated-bg-light):not(.animated-bg-dark) {
+    background: var(--background, $bg-light);
+  }
+
+  // Fallback for theme classes without animated background
+  &.theme-light:not(.animated-bg-light):not(.animated-bg-dark) {
+    background: linear-gradient(135deg, #{$bg-light} 0%, #e0f2f7 100%);
+  }
+
+  &.theme-dark:not(.animated-bg-light):not(.animated-bg-dark) {
+    background: linear-gradient(135deg, #{$bg-dark} 0%, #1a2a3a 100%);
+  }
+}
+
+.student-finance-container > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Header Section */
+.header-section {
+  background: linear-gradient(135deg, $primary-blue 0%, $primary-blue-dark 100%);
+  border-radius: 20px;
+  padding: 2rem;
+  color: white;
+  box-shadow: 0 8px 32px rgba(33, 150, 243, 0.3);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.theme-dark .header-section {
+  background: linear-gradient(135deg, #2c3e50 0%, #1a2a3a 100%);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.header-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  z-index: 0;
+}
+
+.header-content {
+  position: relative;
+  z-index: 1;
+}
+
+.page-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: white;
+}
+
+.title-icon {
+  font-size: 2.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.page-subtitle {
+  font-size: 1.2rem;
+  margin: 0;
+  opacity: 0.95;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Selection Panel */
+.selection-panel {
+  background: var(--surface, $surface-light);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  margin-bottom: 2rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-dark .selection-panel {
+  background: var(--surface, $surface-dark);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.selection-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.theme-dark .selection-panel:hover {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+.selection-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.term-field {
+  width: 100%;
+}
+
+.student-search-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.selected-student-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(33, 150, 243, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(33, 150, 243, 0.2);
+  margin-top: 1rem;
+}
+
+.theme-dark .selected-student-info {
+  background: rgba(100, 181, 246, 0.1);
+  border-color: rgba(100, 181, 246, 0.2);
+}
+
+.student-icon {
+  color: var(--primary-blue, $primary-blue);
+  font-size: 1.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.student-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.student-name {
+  font-weight: 600;
+  color: var(--text-primary, $text-primary-light);
+  font-size: 1.1rem;
+}
+
+.theme-dark .student-name {
+  color: var(--text-primary, $text-primary-dark);
+}
+
+.student-number {
+  color: var(--text-secondary, $text-secondary-light);
+  font-size: 0.9rem;
+  font-family: 'Roboto Mono', monospace;
+}
+
+.theme-dark .student-number {
+  color: var(--text-secondary, $text-secondary-dark);
+}
+
+.action-buttons {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.save-button {
+  min-width: 140px;
+  height: 48px;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.save-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+}
+
+.save-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.generate-button {
+  min-width: 180px;
+  height: 48px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.generate-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(33, 150, 243, 0.4);
+}
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  background: var(--surface, $surface-light);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-bottom: 2rem;
+}
+
+.theme-dark .loading-container {
+  background: var(--surface, $surface-dark);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.spinner-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.loading-text {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+  color: var(--text-secondary, $text-secondary-light);
+}
+
+.theme-dark .loading-text {
+  color: var(--text-secondary, $text-secondary-dark);
+}
+
+/* Error State */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  background: rgba(244, 67, 54, 0.1);
+  border-radius: 16px;
+  border: 1px solid rgba(244, 67, 54, 0.2);
+  margin-bottom: 2rem;
+}
+
+.theme-dark .error-container {
+  background: rgba(244, 67, 54, 0.2);
+  border-color: rgba(244, 67, 54, 0.3);
+}
+
+.error-icon {
+  font-size: 4rem;
+  color: #f44336;
+  margin-bottom: 1rem;
+}
+
+.error-title {
+  color: #d32f2f;
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.error-message {
+  color: var(--text-secondary, $text-secondary-light);
+  margin: 0 0 2rem 0;
+  font-size: 1rem;
+  max-width: 400px;
+}
+
+.theme-dark .error-message {
+  color: var(--text-secondary, $text-secondary-dark);
+}
+
+/* Main Content */
+.main-content {
+  margin-top: 24px;
+}
+
+/* Side-by-side grid layout */
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+/* Responsive design - maintain side-by-side layout as long as possible */
+/* For tablets in landscape and medium screens - keep side-by-side but adjust gap */
+@media (max-width: 1200px) and (min-width: 900px) {
+  .content-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+}
+
+/* For tablets in portrait - keep side-by-side if possible, reduce gap */
+@media (max-width: 900px) and (min-width: 768px) {
+  .content-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  
+  .billing-card,
+  .invoice-card {
+    min-width: 0; // Allow cards to shrink
+  }
+}
+
+/* Only stack vertically on smaller mobile devices */
+@media (max-width: 768px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+/* Cards */
+.invoice-card,
+.billing-card,
+.no-data-card {
+  background: var(--surface, $surface-light);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  height: fit-content;
+  min-width: 0; // Allow cards to shrink in flex/grid layouts
+  overflow: visible; // Allow scaled content to be visible
+  container-type: inline-size; // Enable container queries for responsive scaling
+}
+
+// Ensure mat-card-content displays invoice properly
+.invoice-card mat-card-content {
+  overflow: visible;
+  display: block;
+  min-height: 0;
+  padding: 1rem;
+  max-width: 100%;
+}
+
+.legacy-balance-container {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.legacy-balance-field {
+  flex: 1 1 auto;
+  min-width: 220px;
+  max-width: 320px;
+}
+
+.legacy-balance-button {
+  white-space: nowrap;
+}
+
+.theme-dark .invoice-card,
+.theme-dark .billing-card,
+.theme-dark .no-data-card {
+  background: var(--surface, $surface-dark);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.invoice-card:hover,
+.billing-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.theme-dark .invoice-card:hover,
+.theme-dark .billing-card:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* No Data State */
+.no-data-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.no-data-icon {
+  font-size: 4rem;
+  color: var(--text-secondary, $text-secondary-light);
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.theme-dark .no-data-icon {
+  color: var(--text-secondary, $text-secondary-dark);
+  opacity: 0.3;
+}
+
+.no-data-title {
+  color: var(--text-secondary, $text-secondary-light);
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.theme-dark .no-data-title {
+  color: var(--text-secondary, $text-secondary-dark);
+}
+
+.no-data-message {
+  color: var(--text-secondary, $text-secondary-light);
+  margin: 0;
+  font-size: 1rem;
+  max-width: 400px;
+  line-height: 1.5;
+  opacity: 0.8;
+}
+
+.theme-dark .no-data-message {
+  color: var(--text-secondary, $text-secondary-dark);
+  opacity: 0.7;
+}
+
+/* Responsive Design */
+/* Adjust container padding for medium screens to maximize space */
+@media (max-width: 1200px) and (min-width: 900px) {
+  .student-finance-container {
+    padding: 1.5rem;
+  }
+}
+
+/* For tablets - reduce padding more */
+@media (max-width: 900px) and (min-width: 768px) {
+  .student-finance-container {
+    padding: 1rem;
+  }
+  
+  .header-section {
+    padding: 1.25rem;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+  }
+  
+  .selection-form {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+}
+
+/* Mobile devices */
+@media (max-width: 768px) {
+  .student-finance-container {
+    padding: 1rem;
+  }
+  
+  .header-section {
+    padding: 1.5rem;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+  }
+  
+  .selection-form {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .generate-button,
+  .save-button {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .student-finance-container {
+    padding: 0.5rem;
+  }
+  
+  .header-section {
+    padding: 1rem;
+  }
+  
+  .page-title {
+    font-size: 1.8rem;
+  }
+  
+  .title-icon {
+    font-size: 2rem;
+    width: 2rem;
+    height: 2rem;
+  }
+}

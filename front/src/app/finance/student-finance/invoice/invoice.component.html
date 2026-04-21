@@ -1,0 +1,99 @@
+<div class="invoice-container-wrapper" 
+     [class.theme-light]="currentTheme === 'light'"
+     [class.theme-dark]="currentTheme === 'dark'"
+     *ngIf="canAccessBilling$ | async">
+  
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon class="title-icon">receipt_long</mat-icon>
+        Invoice Management
+      </h1>
+      <p class="page-subtitle">View and manage student invoices by term</p>
+    </div>
+  </div>
+
+  <!-- Term Selection Card -->
+  <mat-card class="term-select-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>calendar_today</mat-icon>
+        Select Academic Term
+      </mat-card-title>
+      <mat-card-subtitle>Choose a term to view invoices</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="term-select">
+        <mat-form-field appearance="outline" style="width: 100%; max-width: 400px;">
+          <mat-label>Academic Term</mat-label>
+          <mat-select [(ngModel)]="term" (selectionChange)="onTermChange($event.value)">
+            <mat-option *ngFor="let t of terms$ | async" [value]="t">
+              Term {{ t.num }} - {{ t.year }}
+            </mat-option>
+          </mat-select>
+          <mat-hint>Select the term to view invoices</mat-hint>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Main Content -->
+  <div class="invoices-container" *ngIf="term; else noTermTemplate">
+    <!-- Invoice Selection Panel -->
+    <div class="invoice-selection">
+      <app-search-invoice class="search-invoice" 
+                          (invoiceSelected)="onInvoiceSelected($event)"></app-search-invoice>
+      <app-invoice-list [selectedInvoice]="invoice"
+                        (invoiceSelected)="onInvoiceSelected($event)"></app-invoice-list>
+    </div>
+
+    <!-- Invoice Display Container -->
+    <div class="invoice-container">
+      <app-invoice-item *ngIf="invoice; else noInvoiceTemplate" 
+                        [downloadable]="true" 
+                        [invoice]="invoice"></app-invoice-item>
+      
+      <ng-template #noInvoiceTemplate>
+        <div class="empty-state">
+          <mat-icon class="empty-icon">description</mat-icon>
+          <h3 class="empty-title">No Invoice Selected</h3>
+          <p class="empty-message">
+            Select an invoice from the list or search to view details and download PDF
+          </p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- No Term Selected Template -->
+  <ng-template #noTermTemplate>
+    <mat-card class="term-select-card">
+      <mat-card-content>
+        <div class="empty-state">
+          <mat-icon class="empty-icon">event_available</mat-icon>
+          <h3 class="empty-title">Select a Term</h3>
+          <p class="empty-message">
+            Please select an academic term above to view and manage invoices
+          </p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </ng-template>
+
+</div>
+
+<!-- Unauthorized Access -->
+<div class="invoice-container-wrapper" *ngIf="!(canAccessBilling$ | async)">
+  <mat-card>
+    <mat-card-content>
+      <div class="empty-state">
+        <mat-icon class="empty-icon">lock</mat-icon>
+        <h3 class="empty-title">Access Restricted</h3>
+        <p class="empty-message">
+          You do not have permission to access invoice management. Please contact your administrator.
+        </p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

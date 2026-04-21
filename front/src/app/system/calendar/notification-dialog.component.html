@@ -1,0 +1,39 @@
+<h2 mat-dialog-title>
+  <mat-icon>notifications</mat-icon>
+  Notification Settings
+</h2>
+<mat-dialog-content class="mat-typography">
+  <div class="event-info">
+    <h3>{{ data.event.title }}</h3>
+    <p *ngIf="data.event.description">{{ data.event.description }}</p>
+    <p><strong>Date:</strong> {{ data.event.startDate | date:'medium' }}</p>
+    <p *ngIf="data.event.location"><strong>Location:</strong> {{ data.event.location }}</p>
+  </div>
+
+  <form [formGroup]="notificationForm" class="notification-form">
+    <mat-checkbox formControlName="enabled" class="enable-checkbox">
+      Enable notifications for this event
+    </mat-checkbox>
+
+    <div class="reminder-options" *ngIf="notificationForm.get('enabled')?.value">
+      <h4>Remind me:</h4>
+      <div class="reminder-chips">
+        <button
+          *ngFor="let option of reminderOptions"
+          mat-stroked-button
+          [class.selected]="isReminderSelected(option.minutes)"
+          (click)="toggleReminder(option.minutes)"
+          class="reminder-button">
+          {{ option.label }}
+        </button>
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-raised-button color="primary" (click)="onSave()">
+    Save Preferences
+  </button>
+</mat-dialog-actions>
+

@@ -1,0 +1,235 @@
+<div class="departments-page">
+  <mat-card class="departments-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>apartment</mat-icon>
+        Departments
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form class="new-dept-form" (ngSubmit)="addDepartment()">
+        <mat-form-field appearance="outline" class="name-field">
+          <mat-label>Department name</mat-label>
+          <input
+            matInput
+            [(ngModel)]="newDeptName"
+            name="newDeptName"
+            required
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="description-field">
+          <mat-label>Description (optional)</mat-label>
+          <input
+            matInput
+            [(ngModel)]="newDeptDescription"
+            name="newDeptDescription"
+          />
+        </mat-form-field>
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="saving || !newDeptName.trim()"
+        >
+          <mat-icon>add</mat-icon>
+          Create
+        </button>
+      </form>
+
+      <div *ngIf="loading" class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading departments…</p>
+      </div>
+
+      <div *ngIf="!loading && departments.length === 0" class="empty-state">
+        <mat-icon>info</mat-icon>
+        <p>No departments have been configured yet.</p>
+      </div>
+
+      <table
+        mat-table
+        *ngIf="!loading && departments.length > 0"
+        [dataSource]="departments"
+        class="departments-table"
+      >
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef> Name </th>
+          <td mat-cell *matCellDef="let dept">
+            <button class="row-link" type="button" (click)="selectDepartment(dept)">
+              {{ dept.name }}
+            </button>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef> Description </th>
+          <td mat-cell *matCellDef="let dept">
+            {{ dept.description || '—' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef> Actions </th>
+          <td mat-cell *matCellDef="let dept">
+            <button
+              mat-icon-button
+              color="primary"
+              (click)="editDepartment(dept)"
+              matTooltip="Edit department"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="deleteDepartment(dept.id)"
+              matTooltip="Delete department"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="detail-card" *ngIf="selectedDepartment as dept; else pickDept">
+    <mat-card-header>
+      <mat-card-title>{{ dept.name }}</mat-card-title>
+      <mat-card-subtitle>{{ dept.description || 'No description' }}</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="hod-row">
+        <mat-form-field appearance="outline" class="hod-field">
+          <mat-label>Head of Department (HOD)</mat-label>
+          <mat-select
+            [value]="dept.hodId ?? null"
+            (selectionChange)="setHod($event.value)"
+          >
+            <mat-option [value]="null">None</mat-option>
+            <mat-option
+              *ngFor="let t of (dept.teachers || [])"
+              [value]="t.id"
+            >
+              {{ formatTeacherName(t) }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <div class="hod-hint">
+          HOD must be assigned to this department first.
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <mat-tab-group>
+        <mat-tab label="Teachers">
+          <div class="tab-body">
+            <div class="add-row">
+              <mat-form-field appearance="outline" class="add-field">
+                <mat-label>Assign teacher</mat-label>
+                <input
+                  type="text"
+                  matInput
+                  [formControl]="teacherToAddControl"
+                  [matAutocomplete]="teacherAuto"
+                  placeholder="Search by name or email"
+                />
+                <mat-autocomplete #teacherAuto="matAutocomplete" [displayWith]="displayTeacherId">
+                  <mat-option *ngFor="let t of filteredTeachers$ | async" [value]="t.id">
+                    {{ formatTeacherName(t) }} — {{ t.email }}
+                  </mat-option>
+                </mat-autocomplete>
+              </mat-form-field>
+              <button mat-raised-button color="primary" type="button" (click)="addTeacherToDepartment()">
+                <mat-icon>person_add</mat-icon>
+                Assign
+              </button>
+            </div>
+
+            <mat-chip-set *ngIf="(dept.teachers || []).length; else noTeachers">
+              <mat-chip
+                *ngFor="let t of (dept.teachers || [])"
+                [removable]="true"
+                (removed)="removeTeacherFromDepartment(t.id)"
+              >
+                {{ formatTeacherName(t) }}
+                <button matChipRemove aria-label="Remove teacher">
+                  <mat-icon>cancel</mat-icon>
+                </button>
+              </mat-chip>
+            </mat-chip-set>
+
+            <ng-template #noTeachers>
+              <div class="empty-mini">No teachers assigned to this department.</div>
+            </ng-template>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Subjects">
+          <div class="tab-body">
+            <div class="add-row">
+              <mat-form-field appearance="outline" class="add-field">
+                <mat-label>Link subject</mat-label>
+                <input
+                  type="text"
+                  matInput
+                  [formControl]="subjectToAddControl"
+                  [matAutocomplete]="subjectAuto"
+                  placeholder="Search by code or name"
+                />
+                <mat-autocomplete #subjectAuto="matAutocomplete" [displayWith]="displaySubjectCode">
+                  <mat-option *ngFor="let s of filteredSubjects$ | async" [value]="s.code">
+                    {{ s.name }} ({{ s.code }})
+                  </mat-option>
+                </mat-autocomplete>
+              </mat-form-field>
+              <button mat-raised-button color="primary" type="button" (click)="addSubjectToDepartment()">
+                <mat-icon>add</mat-icon>
+                Link
+              </button>
+            </div>
+
+            <mat-list *ngIf="(dept.subjectMappings || []).length; else noSubjects">
+              <mat-list-item *ngFor="let m of (dept.subjectMappings || [])">
+                <div class="subject-row">
+                  <div class="subject-main">
+                    <div class="subject-code">{{ m.subject?.code || m.subjectCode }}</div>
+                    <div class="subject-name">{{ m.subject?.name || '—' }}</div>
+                  </div>
+                  <button mat-icon-button color="warn" (click)="removeSubjectFromDepartment(m.subjectCode)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </mat-list-item>
+            </mat-list>
+
+            <ng-template #noSubjects>
+              <div class="empty-mini">No subjects linked to this department.</div>
+            </ng-template>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card-content>
+  </mat-card>
+
+  <ng-template #pickDept>
+    <mat-card class="detail-card">
+      <mat-card-content class="pick-state">
+        <mat-icon>touch_app</mat-icon>
+        <div>
+          <div class="pick-title">Select a department</div>
+          <div class="pick-sub">Click a department name to manage HOD, teachers and subjects.</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </ng-template>
+</div>
+

@@ -1,0 +1,65 @@
+<div class="exemption-item" 
+     [class.theme-dark]="currentTheme === 'dark'"
+     [class.selected]="isSelected"
+     [class.active]="exemption.isActive"
+     [class.inactive]="!exemption.isActive">
+  
+  <div class="exemption-content">
+    <!-- Main Info Row -->
+    <div class="main-info-row">
+      <!-- Student Info -->
+      <div class="student-info">
+        <mat-icon class="student-icon">person</mat-icon>
+        <div class="student-details">
+          <span class="student-name">{{ exemption.student.name }} {{ exemption.student.surname }}</span>
+          <span class="student-number">{{ exemption.student.studentNumber }}</span>
+        </div>
+      </div>
+
+      <!-- Exemption Type and Amount -->
+      <div class="exemption-meta">
+        <div class="type-badge">
+          <mat-icon [class]="'type-icon ' + getTypeColor(exemption.type)">
+            {{ getTypeIcon(exemption.type) }}
+          </mat-icon>
+          <span class="type-text">{{ getTypeLabel(exemption.type) }}</span>
+        </div>
+        <div class="amount-display">
+          <mat-icon class="amount-icon">payments</mat-icon>
+          <span class="amount-value">{{ formatAmount() }}</span>
+        </div>
+      </div>
+
+      <!-- Status Badge -->
+      <div class="status-badge" [class.active]="exemption.isActive" [class.inactive]="!exemption.isActive">
+        <mat-icon>{{ exemption.isActive ? 'check_circle' : 'cancel' }}</mat-icon>
+        <span>{{ exemption.isActive ? 'Active' : 'Inactive' }}</span>
+      </div>
+    </div>
+
+    <!-- Description (if exists) -->
+    <div class="description-row" *ngIf="exemption.description">
+      <mat-icon class="description-icon">description</mat-icon>
+      <span class="description-text">{{ exemption.description }}</span>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="exemption-actions">
+    <button 
+      mat-icon-button 
+      color="primary"
+      (click)="onEdit($event)"
+      matTooltip="Edit Exemption">
+      <mat-icon>edit</mat-icon>
+    </button>
+    <button 
+      mat-icon-button 
+      color="warn"
+      (click)="onDelete($event)"
+      matTooltip="Delete Exemption">
+      <mat-icon>delete</mat-icon>
+    </button>
+  </div>
+</div>
+

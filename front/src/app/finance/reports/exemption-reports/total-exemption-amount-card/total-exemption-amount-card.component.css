@@ -1,0 +1,20 @@
+/* src/app/finance/components/exemption-reports/total-exemption-amount-card/total-exemption-amount-card.css */
+
+.total-exemption-card {
+  text-align: center;
+  padding: 20px;
+  background-color: #e8eaf6; /* Lighter primary shade */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.total-exemption-card .label {
+  font-size: 1.2em;
+  color: #3f51b5; /* Angular Material primary color */
+  margin-bottom: 10px;
+}
+
+.total-exemption-card .amount {
+  font-size: 2.8em;
+  font-weight: bold;
+  color: #3f51b5;
+}

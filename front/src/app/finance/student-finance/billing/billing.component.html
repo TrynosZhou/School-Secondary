@@ -1,0 +1,115 @@
+<div class="settings-page-container" [class.theme-light]="currentTheme === 'light'" [class.theme-dark]="currentTheme === 'dark'">
+
+  <mat-card class="settings-card mat-elevation-z4">
+    <mat-card-content>
+      <div class="enrollment-preferences-section">
+        <div class="header-section">
+          <mat-icon class="header-icon">settings</mat-icon>
+          <h1>Enrollment Preferences</h1>
+        </div>
+        <p class="subtitle">Configure specific enrollment options for O Level and A Level students.</p>
+        <p class="subtitle" *ngIf="isVacationTerm">
+          Vacation term mode: only flat vacation tuition is charged (Day or Boarder). No food, transport, or other extra fees.
+        </p>
+
+        <form [formGroup]="academicSettingsForm">
+          <div class="academic-level-selection">
+            <p><strong>Select Academic Level:</strong></p>
+            <mat-radio-group aria-label="Select Academic Level" formControlName="selectedAcademicLevel"
+              class="academic-level-radio-group">
+              <mat-radio-button value="O Level" color="primary">O Level</mat-radio-button>
+              <mat-radio-button value="A Level" color="primary">A Level</mat-radio-button>
+            </mat-radio-group>
+            <mat-error
+              *ngIf="selectedAcademicLevel?.invalid && selectedAcademicLevel?.touched">
+              Academic Level is required.
+            </mat-error>
+          </div>
+
+          <mat-divider class="section-divider"></mat-divider>
+
+          <div class="options-grid">
+            <div class="grid-header">
+              <div class="header-cell">Option</div>
+              <div class="header-cell">O Level</div>
+              <div class="header-cell">A Level</div>
+            </div>
+
+            <div class="grid-row" *ngIf="!isVacationTerm">
+              <div class="label-cell">New Comer?</div>
+              <div class="control-cell">
+                <mat-checkbox formControlName="oLevelNewComer" color="primary">O Level New Comer</mat-checkbox>
+              </div>
+              <div class="control-cell">
+                <mat-checkbox formControlName="aLevelNewComer" color="primary">A Level New Comer</mat-checkbox>
+              </div>
+            </div>
+
+            <div class="grid-row" *ngIf="!isVacationTerm">
+              <div class="label-cell">Additional Fees</div>
+              <div class="control-cell">
+              </div>
+              <div class="control-cell">
+                <mat-checkbox formControlName="aLevelScienceLevy" color="primary">Science Levy</mat-checkbox>
+              </div>
+            </div>
+
+            <div class="grid-row">
+              <div class="label-cell">Residence Type</div>
+              <div class="control-cell">
+                <mat-radio-group formControlName="oLevelAccommodationType">
+                  <mat-radio-button *ngFor="let option of accommodationOptions" [value]="option" color="primary">
+                    {{ option }}
+                  </mat-radio-button>
+                </mat-radio-group>
+                <mat-error
+                  *ngIf="oLevelAccommodationType.invalid && oLevelAccommodationType.touched && academicLevel === 'O Level'">
+                  Accommodation Type is required.
+                </mat-error>
+              </div>
+              <div class="control-cell">
+                <mat-radio-group formControlName="aLevelAccommodationType">
+                  <mat-radio-button *ngFor="let option of accommodationOptions" [value]="option" color="primary">
+                    {{ option }}
+                  </mat-radio-button>
+                </mat-radio-group>
+                <mat-error
+                  *ngIf="aLevelAccommodationType.invalid && aLevelAccommodationType.touched && academicLevel === 'A Level'">
+                  Accommodation Type is required.
+                </mat-error>
+              </div>
+            </div>
+
+            <div class="grid-row" *ngIf="showTransportFoodOptions">
+              <div class="label-cell">Meal & Transport</div>
+              <div class="control-cell">
+                <mat-checkbox formControlName="foodOption" color="primary">Food</mat-checkbox>
+                <mat-checkbox formControlName="transportOption" color="primary">Transport</mat-checkbox>
+              </div>
+              <div class="control-cell"></div>
+            </div>
+
+            <div class="grid-row" *ngIf="showMiscellaneousCharges">
+              <div class="label-cell">Miscellaneous Charges</div>
+              <div class="control-cell">
+                <mat-checkbox formControlName="groomingFee" color="primary">Grooming Fee</mat-checkbox>
+                <mat-checkbox formControlName="brokenFurnitureFee" color="primary">Broken Furniture</mat-checkbox>
+              </div>
+              <div class="control-cell">
+                <mat-checkbox formControlName="lostBooksFee" color="primary">Lost Books</mat-checkbox>
+                <mat-checkbox formControlName="miscellaneousCharge" color="primary">Other Charges</mat-checkbox>
+              </div>
+            </div>
+
+          </div>
+        </form>
+      </div>
+    </mat-card-content>
+
+    <mat-card-actions align="end" class="card-actions">
+      <button mat-button (click)="onCancel()" color="warn">Cancel</button>
+      <button mat-raised-button color="primary" (click)="onSaveChanges()" [disabled]="academicSettingsForm.invalid">Save
+        Changes</button>
+    </mat-card-actions>
+  </mat-card>
+</div>

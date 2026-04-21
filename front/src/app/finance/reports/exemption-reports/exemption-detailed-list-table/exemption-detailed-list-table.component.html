@@ -1,0 +1,58 @@
+<div class="mat-elevation-z2 report-table-container">
+  <table mat-table [dataSource]="dataSource" matSort>
+    <ng-container matColumnDef="invoiceNumber">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Invoice #</th>
+      <td mat-cell *matCellDef="let element">{{ element.invoiceNumber }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="invoiceDate">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Invoice Date</th>
+      <td mat-cell *matCellDef="let element">{{ element.invoiceDate | date : 'shortDate' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="studentName">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Student Name</th>
+      <td mat-cell *matCellDef="let element">{{ element.studentName }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="studentNumber">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Student #</th>
+      <td mat-cell *matCellDef="let element">{{ element.studentNumber }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="enrolName">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Enrolment</th>
+      <td mat-cell *matCellDef="let element">{{ element.enrolName }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="exemptionType">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Exemption Type</th>
+      <td mat-cell *matCellDef="let element">{{ element.exemptionType | titlecase | replaceUnderscores }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="exemptedAmount">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Exempted Amount</th>
+      <td mat-cell *matCellDef="let element">${{ element.exemptedAmount | number : '1.2-2' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="grossBill">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Gross Bill</th>
+      <td mat-cell *matCellDef="let element">${{ element.grossBill | number : '1.2-2' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="netBillAfterExemption">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Net Bill (After Exemption)</th>
+      <td mat-cell *matCellDef="let element">${{ element.netBillAfterExemption | number : '1.2-2' }}</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell" colspan="9">No detailed exemption items available for the selected filters.</td>
+    </tr>
+  </table>
+
+  <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]"
+    aria-label="Select page of detailed exemption data"></mat-paginator>
+</div>

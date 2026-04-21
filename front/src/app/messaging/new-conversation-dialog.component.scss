@@ -1,0 +1,12 @@
+.conversation-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 10px 0;
+  min-width: 500px;
+}
+
+mat-dialog-actions {
+  padding: 16px 24px;
+}
+

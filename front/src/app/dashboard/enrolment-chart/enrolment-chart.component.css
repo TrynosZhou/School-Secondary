@@ -1,0 +1,8 @@
+/* src/app/enrolment-chart/enrolment-chart.component.css */
+.chart {
+  display: flex;
+  justify-content: stretch;
+  align-items: stretch;
+  width: 100% !important; /* Force canvas to take 100% width of its container */
+  height: auto !important; /* Maintain aspect ratio */
+}

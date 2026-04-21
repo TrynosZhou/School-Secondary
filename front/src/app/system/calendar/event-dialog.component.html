@@ -1,0 +1,77 @@
+<h2 mat-dialog-title>
+  {{ isViewMode ? 'Event Details' : (isEditMode ? 'Edit Event' : 'Create New Event') }}
+</h2>
+<mat-dialog-content class="mat-typography">
+  <form [formGroup]="eventForm" class="event-form">
+    <mat-form-field appearance="outline">
+      <mat-label>Event Title</mat-label>
+      <input matInput formControlName="title" required />
+      <mat-error *ngIf="eventForm.get('title')?.hasError('required')">
+        Title is required
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description" rows="3"></textarea>
+    </mat-form-field>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Start Date & Time</mat-label>
+        <input matInput [matDatepicker]="startPicker" formControlName="startDate" required />
+        <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+        <mat-datepicker #startPicker></mat-datepicker>
+        <mat-error *ngIf="eventForm.get('startDate')?.hasError('required')">
+          Start date is required
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>End Date & Time</mat-label>
+        <input matInput [matDatepicker]="endPicker" formControlName="endDate" required />
+        <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+        <mat-datepicker #endPicker></mat-datepicker>
+        <mat-error *ngIf="eventForm.get('endDate')?.hasError('required')">
+          End date is required
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Location</mat-label>
+        <input matInput formControlName="location" placeholder="e.g., Main Hall" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Color</mat-label>
+        <input matInput type="color" formControlName="color" />
+      </mat-form-field>
+    </div>
+
+    <div class="form-checkboxes">
+      <mat-checkbox formControlName="allDay">All Day Event</mat-checkbox>
+      <mat-checkbox formControlName="isPublic" *ngIf="!isViewMode">Public Event (visible to all users)</mat-checkbox>
+    </div>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">{{ isViewMode ? 'Close' : 'Cancel' }}</button>
+  <button mat-button (click)="onOpenNotifications()" *ngIf="isViewMode">
+    <mat-icon>notifications</mat-icon>
+    Notifications
+  </button>
+  <button mat-button (click)="onEdit()" *ngIf="isViewMode && isAdmin">
+    <mat-icon>edit</mat-icon>
+    Edit
+  </button>
+  <button mat-button color="warn" (click)="onDelete()" *ngIf="isEditMode && !isViewMode">
+    <mat-icon>delete</mat-icon>
+    Delete
+  </button>
+  <button mat-raised-button color="primary" (click)="onSave()" [disabled]="eventForm.invalid && !isViewMode">
+    {{ isViewMode ? 'Edit' : (isEditMode ? 'Save Changes' : 'Create Event') }}
+  </button>
+</mat-dialog-actions>
+

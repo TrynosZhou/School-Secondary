@@ -1,0 +1,402 @@
+/* student-dashboard.component.css */
+
+/* Continuous assessment analytics */
+.continuous-analytics-container {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.continuous-analytics-container h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
+.analytics-cards {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.analytics-card {
+  flex: 1;
+  min-width: 180px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.analytics-card label {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.8;
+}
+
+.analytics-card span {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.subject-averages-card,
+.recent-assessments-card {
+  margin-top: 1.5rem;
+  background: #f8f9ff;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.subject-average {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.recent-assessment {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.recent-assessment .topic {
+  font-weight: 600;
+}
+
+.recent-assessment .meta {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.score-pill {
+  background: #e8f4ff;
+  color: #1976d2;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+/* Liabilities */
+.liabilities-card .liabilities-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.liabilities-card .liability {
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.03);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.liabilities-card .desc {
+  font-weight: 600;
+}
+
+.liabilities-card .meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.liabilities-card .amount {
+  font-weight: 700;
+}
+
+.liabilities-card .hint {
+  margin-top: 8px;
+  opacity: 0.8;
+  font-size: 12px;
+}
+
+.student-dashboard-main-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+}
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.quick-action-card {
+  display: flex;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+  background: #fff;
+  border-radius: 14px;
+  padding: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.quick-action-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.12);
+}
+
+.quick-action-card mat-icon {
+  color: #4f46e5;
+}
+
+.quick-action-card h4 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.quick-action-card p {
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.summary-cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  justify-content: center;
+}
+
+.summary-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  min-width: 350px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.summary-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+}
+
+.summary-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+/* Specific styles for the new cards */
+.student-details-card::before {
+  background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.enrolment-details-card::before {
+  background: linear-gradient(90deg, #f093fb, #f5576c);
+}
+
+.financial-card::before {
+  background: linear-gradient(90deg, #4facfe, #00f2fe);
+}
+
+.academic-card::before {
+  background: linear-gradient(90deg, #43e97b, #38f9d7);
+}
+
+.summary-card h4 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  border-bottom: 2px solid #ecf0f1;
+  padding-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.data-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.data-item:hover {
+  background: rgba(255, 255, 255, 0.8);
+  transform: translateX(4px);
+}
+
+.data-item label {
+  font-weight: 600;
+  color: #2c3e50;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+}
+
+.data-item span {
+  color: #34495e;
+  font-weight: 500;
+}
+
+.amount-owed span.negative {
+  color: #e74c3c;
+  font-weight: 700;
+  background: linear-gradient(45deg, #e74c3c, #c0392b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 4px rgba(231, 76, 60, 0.3);
+}
+
+.amount-owed span.positive {
+  color: #27ae60;
+  font-weight: 700;
+  background: linear-gradient(45deg, #27ae60, #2ecc71);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 4px rgba(39, 174, 96, 0.3);
+}
+
+.no-data-message,
+.loading-spinner {
+  text-align: center;
+  padding: 2rem;
+  font-style: italic;
+  color: #7f8c8d;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  margin: 1rem 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.loading-amount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  height: 24px;
+}
+
+.loading-amount mat-spinner {
+  display: inline-block;
+}
+
+.loading-spinner {
+  font-weight: 600;
+  color: #3498db;
+  background: linear-gradient(45deg, #3498db, #2980b9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Responsive adjustments for summary cards */
+@media (max-width: 1200px) {
+  .summary-cards-container {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .student-dashboard-main-container {
+    padding: 1rem;
+    gap: 1.5rem;
+  }
+  
+  .summary-cards-container {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .summary-card {
+    min-width: 280px;
+    padding: 1.5rem;
+  }
+  
+}
+
+@media (max-width: 480px) {
+  .student-dashboard-main-container {
+    padding: 0.5rem;
+  }
+  
+  .summary-card {
+    min-width: 250px;
+    padding: 1rem;
+  }
+  
+}
+
+.outstanding-container {
+  margin-top: 1.5rem;
+  border-top: 2px solid #ecf0f1;
+  padding-top: 1.5rem;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.outstanding-label {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.9rem;
+}
+
+.outstanding-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  color: #e74c3c;
+  padding: 0.5rem;
+  background: rgba(231, 76, 60, 0.1);
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.outstanding-item:hover {
+  background: rgba(231, 76, 60, 0.2);
+  transform: translateX(4px);
+}
+
+.outstanding-item span {
+  font-weight: 600;
+}
+
+.outstanding-amount {
+  font-weight: 700;
+  background: linear-gradient(45deg, #e74c3c, #c0392b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

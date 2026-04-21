@@ -1,0 +1,310 @@
+<div class="class-lists-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="title-toolbar">
+      <div class="toolbar-content">
+        <div class="title-section">
+          <mat-icon class="title-icon">list_alt</mat-icon>
+          <h1 class="page-title">Class Lists</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Selection Section -->
+  <div class="selection-section">
+    <mat-card class="selection-card">
+      <mat-card-header class="card-header">
+        <div class="header-content">
+          <mat-icon class="section-icon">filter_list</mat-icon>
+          <div class="header-text">
+            <h2 class="section-title">Select Class & Term</h2>
+            <p class="section-subtitle">Choose a class and term to view the student list</p>
+          </div>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content class="card-content">
+        <form [formGroup]="classForm" (ngSubmit)="fetchClassList()">
+          <div class="form-fields">
+            <div class="form-field">
+              <mat-form-field appearance="outline">
+                <mat-label>Choose Term</mat-label>
+                <mat-select formControlName="term">
+                  <mat-option *ngFor="let term of terms$ | async" [value]="term">
+                    {{ formatTerm(term) }}
+                  </mat-option>
+                </mat-select>
+                <mat-icon matSuffix>calendar_today</mat-icon>
+                <mat-hint>Select the academic term</mat-hint>
+                <mat-error *ngIf="term?.invalid && term?.touched">Term is required</mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-field">
+              <mat-form-field appearance="outline">
+                <mat-label>Choose Class</mat-label>
+                <mat-select formControlName="clas">
+                  <mat-option *ngFor="let clas of classes$ | async" [value]="clas.name">
+                    {{ clas.name }}
+                  </mat-option>
+                </mat-select>
+                <mat-icon matSuffix>class</mat-icon>
+                <mat-hint>Select the class</mat-hint>
+                <mat-error *ngIf="clas?.invalid && clas?.touched">Class is required</mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="action-buttons">
+              <button 
+                mat-raised-button 
+                color="primary" 
+                type="submit" 
+                [disabled]="classForm.invalid || isLoading"
+                class="fetch-button"
+              >
+                <mat-icon *ngIf="!isLoading">list</mat-icon>
+                <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+                <span>{{ isLoading ? 'Loading...' : 'Fetch List' }}</span>
+              </button>
+
+              <button 
+                mat-raised-button 
+                color="accent" 
+                type="button" 
+                (click)="downloadPDF()" 
+                [disabled]="!hasData || isLoading"
+                class="download-button"
+                matTooltip="Download as PDF"
+              >
+                <mat-icon>download</mat-icon>
+                <span>Download PDF</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Search Section -->
+  <div class="search-section" *ngIf="hasData">
+    <mat-card class="search-card">
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search Students</mat-label>
+          <input 
+            matInput 
+            [formControl]="searchControl"
+            (input)="onSearchChange($event)"
+            placeholder="Search by student number, name, surname, gender, or residence..."
+          />
+          <mat-icon matSuffix>search</mat-icon>
+          <button 
+            mat-icon-button 
+            matSuffix 
+            *ngIf="searchControl.value" 
+            (click)="clearSearch()"
+            matTooltip="Clear search"
+          >
+            <mat-icon>clear</mat-icon>
+          </button>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Summary Section -->
+  <div class="summary-section" *ngIf="hasData">
+    <mat-card class="summary-card">
+      <mat-card-header class="summary-header">
+        <div class="header-content">
+          <mat-icon class="section-icon">analytics</mat-icon>
+          <div class="header-text">
+            <h2 class="section-title">Class Summary</h2>
+            <p class="section-subtitle">{{ selectedClassName }} - {{ selectedTermName }}</p>
+          </div>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content class="summary-content">
+        <div class="summary-grid">
+          <div class="summary-item total">
+            <div class="summary-icon">
+              <mat-icon>group</mat-icon>
+            </div>
+            <div class="summary-text">
+              <span class="summary-label">Total Students</span>
+              <span class="summary-value">{{ totalStudents }}</span>
+            </div>
+          </div>
+
+          <div class="summary-item boys">
+            <div class="summary-icon">
+              <mat-icon [color]="getGenderColor('Male')">male</mat-icon>
+            </div>
+            <div class="summary-text">
+              <span class="summary-label">Boys</span>
+              <span class="summary-value">{{ totalBoys }}</span>
+            </div>
+          </div>
+
+          <div class="summary-item girls">
+            <div class="summary-icon">
+              <mat-icon [color]="getGenderColor('Female')">female</mat-icon>
+            </div>
+            <div class="summary-text">
+              <span class="summary-label">Girls</span>
+              <span class="summary-value">{{ totalGirls }}</span>
+            </div>
+          </div>
+
+          <div class="summary-item boarders">
+            <div class="summary-icon">
+              <mat-icon [color]="getResidenceColor('Boarder')">hotel</mat-icon>
+            </div>
+            <div class="summary-text">
+              <span class="summary-label">Boarders</span>
+              <span class="summary-value">{{ totalBoarders }}</span>
+            </div>
+          </div>
+
+          <div class="summary-item day-scholars">
+            <div class="summary-icon">
+              <mat-icon [color]="getResidenceColor('Day')">home</mat-icon>
+            </div>
+            <div class="summary-text">
+              <span class="summary-label">Day Scholars</span>
+              <span class="summary-value">{{ totalDayScholars }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Table Section -->
+  <div class="table-section" *ngIf="hasData">
+    <mat-card class="table-card">
+      <mat-card-header class="table-header">
+        <div class="header-content">
+          <mat-icon class="section-icon">table_chart</mat-icon>
+          <div class="header-text">
+            <h2 class="section-title">Student List</h2>
+            <p class="section-subtitle">{{ dataSource.data.length }} students found</p>
+          </div>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content class="table-content">
+        <div class="table-container">
+          <table mat-table [dataSource]="dataSource" matSort class="students-table">
+            <!-- Index Column -->
+            <ng-container matColumnDef="index">
+              <th mat-header-cell *matHeaderCellDef class="index-header">
+                <mat-icon>format_list_numbered</mat-icon>
+                <span>#</span>
+              </th>
+              <td mat-cell *matCellDef="let element; let i = index" class="index-cell">
+                <div class="index-number">{{ i + 1 }}</div>
+              </td>
+            </ng-container>
+
+            <!-- Student Number Column -->
+            <ng-container matColumnDef="studentNumber">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header class="student-number-header">
+                <mat-icon>badge</mat-icon>
+                <span>Student Number</span>
+              </th>
+              <td mat-cell *matCellDef="let row" class="student-number-cell">
+                <div class="student-number">{{ row.student.studentNumber }}</div>
+              </td>
+            </ng-container>
+
+            <!-- Surname Column -->
+            <ng-container matColumnDef="surname">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header class="surname-header">
+                <mat-icon>person</mat-icon>
+                <span>Surname</span>
+              </th>
+              <td mat-cell *matCellDef="let row" class="surname-cell">
+                <div class="student-name">{{ row.student.surname }}</div>
+              </td>
+            </ng-container>
+
+            <!-- Name Column -->
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header class="name-header">
+                <mat-icon>person_outline</mat-icon>
+                <span>Name</span>
+              </th>
+              <td mat-cell *matCellDef="let row" class="name-cell">
+                <div class="student-name">{{ row.student.name }}</div>
+              </td>
+            </ng-container>
+
+            <!-- Gender Column -->
+            <ng-container matColumnDef="gender">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header class="gender-header">
+                <mat-icon>wc</mat-icon>
+                <span>Gender</span>
+              </th>
+              <td mat-cell *matCellDef="let row" class="gender-cell">
+                <div class="gender-badge" [ngClass]="'gender-' + row.student.gender?.toLowerCase()">
+                  <mat-icon [color]="getGenderColor(row.student.gender)">{{ getGenderIcon(row.student.gender) }}</mat-icon>
+                  <span>{{ row.student.gender }}</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Residence Column -->
+            <ng-container matColumnDef="residence">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header class="residence-header">
+                <mat-icon>location_on</mat-icon>
+                <span>Residence</span>
+              </th>
+              <td mat-cell *matCellDef="let row" class="residence-cell">
+                <div class="residence-badge" [ngClass]="'residence-' + row.residence?.toLowerCase()">
+                  <mat-icon [color]="getResidenceColor(row.residence)">{{ getResidenceIcon(row.residence) }}</mat-icon>
+                  <span>{{ row.residence }}</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns" class="header-row"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns; trackBy: trackByEnrolId" class="data-row"></tr>
+
+            <!-- No Data Row -->
+            <tr class="no-data-row" *matNoDataRow>
+              <td class="no-data-cell" [attr.colspan]="displayedColumns.length">
+                <div class="no-data-content">
+                  <mat-icon>inbox</mat-icon>
+                  <h3>No Students Found</h3>
+                  <p>No students match your current search criteria.</p>
+                </div>
+              </td>
+            </tr>
+          </table>
+
+          <mat-paginator 
+            [pageSizeOptions]="[10, 25, 50, 100]" 
+            showFirstLastButtons
+            class="students-paginator"
+            aria-label="Select page of students"
+          ></mat-paginator>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!hasData && !isLoading">
+    <mat-card class="empty-card">
+      <mat-card-content class="empty-content">
+        <mat-icon class="empty-icon">school</mat-icon>
+        <h2>No Class List Selected</h2>
+        <p>Select a class and term to view the student list, or download it as a PDF.</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

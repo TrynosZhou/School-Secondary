@@ -1,0 +1,45 @@
+<h2 mat-dialog-title>Receive into inventory</h2>
+
+<div mat-dialog-content>
+  <div class="meta">
+    <div><strong>Requisition:</strong> {{ data.requisition.title }}</div>
+    <div><strong>Department:</strong> {{ data.requisition.department?.name || '—' }}</div>
+  </div>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Destination room</mat-label>
+    <mat-select [(ngModel)]="selectedRoomId">
+      <mat-option *ngFor="let r of rooms" [value]="r.id">
+        {{ r.name }}<span *ngIf="r.code"> ({{ r.code }})</span>
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <div class="lines">
+    <div class="line" *ngFor="let l of lines">
+      <div class="desc">
+        <div class="title">{{ l.item.description }}</div>
+        <div class="sub">
+          Ordered: {{ l.item.quantity }} • Received: {{ l.item.receivedQuantity || 0 }} • Remaining: {{ l.remaining }}
+        </div>
+      </div>
+      <mat-form-field appearance="outline" class="qty">
+        <mat-label>Receive</mat-label>
+        <input matInput type="number" min="0" [max]="l.remaining" [(ngModel)]="l.receiveQty" />
+      </mat-form-field>
+    </div>
+  </div>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Notes (optional)</mat-label>
+    <textarea matInput rows="2" [(ngModel)]="notes"></textarea>
+  </mat-form-field>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()" [disabled]="saving">Cancel</button>
+  <button mat-raised-button color="primary" type="button" (click)="receive()" [disabled]="saving">
+    Receive
+  </button>
+</div>
+

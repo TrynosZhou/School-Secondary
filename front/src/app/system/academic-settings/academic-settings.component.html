@@ -1,0 +1,323 @@
+<div class="academic-settings-container" [class.theme-dark]="currentTheme === 'dark'">
+  <mat-card class="settings-card">
+    <mat-card-header class="card-header">
+      <h2>
+        <mat-icon>school</mat-icon>
+        Academic Settings
+      </h2>
+      <p>Manage terms, classes, subjects, and grading systems</p>
+    </mat-card-header>
+
+    <mat-card-content>
+      <mat-tab-group [(selectedIndex)]="selectedTab">
+        <!-- Terms Management Tab -->
+        <mat-tab label="Terms">
+          <div class="tab-content">
+            <app-terms></app-terms>
+          </div>
+        </mat-tab>
+
+        <!-- Classes Management Tab -->
+        <mat-tab label="Classes">
+          <div class="tab-content">
+            <app-classes></app-classes>
+          </div>
+        </mat-tab>
+
+        <!-- Subjects Management Tab -->
+        <mat-tab label="Subjects">
+          <div class="tab-content">
+            <app-subjects></app-subjects>
+          </div>
+        </mat-tab>
+
+        <!-- Report Release Management Tab -->
+        <mat-tab label="Report Releases">
+          <div class="tab-content">
+            <app-report-release-management></app-report-release-management>
+          </div>
+        </mat-tab>
+
+        <!-- Grading System Tab -->
+        <mat-tab label="Grading System">
+          <div class="tab-content">
+            <form [formGroup]="gradingSettingsForm" (ngSubmit)="onSaveGradingSettings()">
+              <div class="form-section">
+                <h3>
+                  <mat-icon>grade</mat-icon>
+                  Grade Scale Configuration
+                </h3>
+                
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Grade Scale</mat-label>
+                  <mat-select formControlName="gradeScale" required>
+                    <mat-option *ngFor="let scale of gradeScales" [value]="scale.value">
+                      {{ scale.label }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matPrefix>assessment</mat-icon>
+                  <mat-error *ngIf="gradingSettingsForm.get('gradeScale')?.hasError('required')">
+                    Grade scale is required
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <div class="form-section">
+                <h3>
+                  <mat-icon>check_circle</mat-icon>
+                  Grade Thresholds
+                </h3>
+                
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Passing Grade</mat-label>
+                    <input matInput type="number" formControlName="passingGrade" min="0" max="100" required>
+                    <mat-icon matPrefix>check</mat-icon>
+                    <mat-hint>Minimum grade to pass</mat-hint>
+                    <mat-error *ngIf="gradingSettingsForm.get('passingGrade')?.hasError('required')">
+                      Passing grade is required
+                    </mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Excellent Grade</mat-label>
+                    <input matInput type="number" formControlName="excellentGrade" min="0" max="100" required>
+                    <mat-icon matPrefix>star</mat-icon>
+                    <mat-hint>Minimum grade for excellent performance</mat-hint>
+                    <mat-error *ngIf="gradingSettingsForm.get('excellentGrade')?.hasError('required')">
+                      Excellent grade is required
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <div class="form-section">
+                <h3>
+                  <mat-icon>visibility</mat-icon>
+                  Grade Visibility
+                </h3>
+                
+                <mat-slide-toggle formControlName="showGradesToStudents" color="primary">
+                  Show Grades to Students
+                </mat-slide-toggle>
+
+                <mat-slide-toggle formControlName="showGradesToParents" color="primary">
+                  Show Grades to Parents
+                </mat-slide-toggle>
+
+                <mat-slide-toggle formControlName="allowGradeOverrides" color="primary">
+                  Allow Grade Overrides
+                  <mat-icon matTooltip="Allow administrators to override calculated grades">info</mat-icon>
+                </mat-slide-toggle>
+              </div>
+
+              <div class="form-actions">
+                <button mat-raised-button color="warn" type="button" (click)="onResetGradingSettings()">
+                  <mat-icon>refresh</mat-icon>
+                  Reset to Defaults
+                </button>
+                <button mat-raised-button color="primary" type="submit" [disabled]="gradingSettingsForm.invalid || isLoading">
+                  <mat-icon>save</mat-icon>
+                  Save Grading Settings
+                </button>
+              </div>
+            </form>
+
+            <mat-divider style="margin: 32px 0;"></mat-divider>
+
+            <!-- Grade Thresholds Management -->
+            <div class="form-section">
+              <h3>
+                <mat-icon>assessment</mat-icon>
+                Grade Thresholds by Level
+              </h3>
+              <p class="section-description">Configure the minimum marks required for each grade at O Level and A Level</p>
+
+              <!-- O Level Grade Thresholds -->
+              <mat-card class="grade-threshold-card" style="margin-bottom: 24px;">
+                <mat-card-header>
+                  <mat-card-title>
+                    <mat-icon>school</mat-icon>
+                    O Level Grade Thresholds
+                  </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <form [formGroup]="oLevelForm" (ngSubmit)="onSaveOLevelGrading()">
+                    <div class="thresholds-grid">
+                      <mat-form-field appearance="outline">
+                        <mat-label>A* Threshold</mat-label>
+                        <input matInput type="number" formControlName="aStar" min="0" max="100" required>
+                        <mat-hint>Minimum mark for A*</mat-hint>
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline">
+                        <mat-label>A Threshold</mat-label>
+                        <input matInput type="number" formControlName="a" min="0" max="100" required>
+                        <mat-hint>Minimum mark for A</mat-hint>
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline">
+                        <mat-label>B Threshold</mat-label>
+                        <input matInput type="number" formControlName="b" min="0" max="100" required>
+                        <mat-hint>Minimum mark for B</mat-hint>
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline">
+                        <mat-label>C Threshold</mat-label>
+                        <input matInput type="number" formControlName="c" min="0" max="100" required>
+                        <mat-hint>Minimum mark for C</mat-hint>
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline">
+                        <mat-label>D Threshold</mat-label>
+                        <input matInput type="number" formControlName="d" min="0" max="100" required>
+                        <mat-hint>Minimum mark for D</mat-hint>
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline">
+                        <mat-label>E Threshold</mat-label>
+                        <input matInput type="number" formControlName="e" min="0" max="100" required>
+                        <mat-hint>Minimum mark for E</mat-hint>
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline">
+                        <mat-label>Fail Grade Symbol</mat-label>
+                        <input matInput formControlName="failGrade" required>
+                        <mat-hint>Grade symbol for failing marks (e.g., U)</mat-hint>
+                      </mat-form-field>
+                    </div>
+
+                    <!-- Current Thresholds Display -->
+                    <div *ngIf="oLevelGrading" class="current-thresholds" style="margin-top: 16px;">
+                      <h4>Current Thresholds:</h4>
+                      <table mat-table [dataSource]="oLevelThresholdsDataSource" class="thresholds-table">
+                        <ng-container matColumnDef="grade">
+                          <th mat-header-cell *matHeaderCellDef>Grade</th>
+                          <td mat-cell *matCellDef="let row">{{ row.grade }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="threshold">
+                          <th mat-header-cell *matHeaderCellDef>Minimum Mark</th>
+                          <td mat-cell *matCellDef="let row">{{ row.threshold === 0 ? 'Below E' : row.threshold }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="description">
+                          <th mat-header-cell *matHeaderCellDef>Description</th>
+                          <td mat-cell *matCellDef="let row">{{ row.description }}</td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                      </table>
+                    </div>
+
+                    <div class="form-actions" style="margin-top: 16px;">
+                      <button mat-raised-button color="primary" type="submit" [disabled]="oLevelForm.invalid || isLoading">
+                        <mat-icon>save</mat-icon>
+                        Save O Level Thresholds
+                      </button>
+                    </div>
+                  </form>
+                </mat-card-content>
+              </mat-card>
+
+              <!-- A Level Grade Thresholds -->
+              <mat-card class="grade-threshold-card">
+                <mat-card-header>
+                  <mat-card-title>
+                    <mat-icon>school</mat-icon>
+                    A Level Grade Thresholds
+                  </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <form [formGroup]="aLevelForm" (ngSubmit)="onSaveALevelGrading()">
+                    <div class="thresholds-grid">
+                      <mat-form-field appearance="outline">
+                        <mat-label>A* Threshold</mat-label>
+                        <input matInput type="number" formControlName="aStar" min="0" max="100" required>
+                        <mat-hint>Minimum mark for A*</mat-hint>
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline">
+                        <mat-label>A Threshold</mat-label>
+                        <input matInput type="number" formControlName="a" min="0" max="100" required>
+                        <mat-hint>Minimum mark for A</mat-hint>
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline">
+                        <mat-label>B Threshold</mat-label>
+                        <input matInput type="number" formControlName="b" min="0" max="100" required>
+                        <mat-hint>Minimum mark for B</mat-hint>
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline">
+                        <mat-label>C Threshold</mat-label>
+                        <input matInput type="number" formControlName="c" min="0" max="100" required>
+                        <mat-hint>Minimum mark for C</mat-hint>
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline">
+                        <mat-label>D Threshold</mat-label>
+                        <input matInput type="number" formControlName="d" min="0" max="100" required>
+                        <mat-hint>Minimum mark for D</mat-hint>
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline">
+                        <mat-label>E Threshold</mat-label>
+                        <input matInput type="number" formControlName="e" min="0" max="100" required>
+                        <mat-hint>Minimum mark for E</mat-hint>
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline">
+                        <mat-label>Fail Grade Symbol</mat-label>
+                        <input matInput formControlName="failGrade" required>
+                        <mat-hint>Grade symbol for failing marks (e.g., F)</mat-hint>
+                      </mat-form-field>
+                    </div>
+
+                    <!-- Current Thresholds Display -->
+                    <div *ngIf="aLevelGrading" class="current-thresholds" style="margin-top: 16px;">
+                      <h4>Current Thresholds:</h4>
+                      <table mat-table [dataSource]="aLevelThresholdsDataSource" class="thresholds-table">
+                        <ng-container matColumnDef="grade">
+                          <th mat-header-cell *matHeaderCellDef>Grade</th>
+                          <td mat-cell *matCellDef="let row">{{ row.grade }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="threshold">
+                          <th mat-header-cell *matHeaderCellDef>Minimum Mark</th>
+                          <td mat-cell *matCellDef="let row">{{ row.threshold === 0 ? 'Below E' : row.threshold }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="description">
+                          <th mat-header-cell *matHeaderCellDef>Description</th>
+                          <td mat-cell *matCellDef="let row">{{ row.description }}</td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                      </table>
+                    </div>
+
+                    <div class="form-actions" style="margin-top: 16px;">
+                      <button mat-raised-button color="primary" type="submit" [disabled]="aLevelForm.invalid || isLoading">
+                        <mat-icon>save</mat-icon>
+                        Save A Level Thresholds
+                      </button>
+                    </div>
+                  </form>
+                </mat-card-content>
+              </mat-card>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+
+      <!-- Loading Overlay -->
+      <div *ngIf="isLoading" class="loading-overlay">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+
+

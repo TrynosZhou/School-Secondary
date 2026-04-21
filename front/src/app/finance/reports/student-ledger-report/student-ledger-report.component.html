@@ -1,0 +1,245 @@
+<div class="ledger-container" [class.theme-dark]="currentTheme === 'dark'">
+  <mat-card class="ledger-report-card">
+    <mat-card-header class="card-header">
+      <div class="header-content">
+        <mat-card-title>
+          <mat-icon class="title-icon">account_balance</mat-icon>
+          Student Ledger Report
+        </mat-card-title>
+        <div class="header-actions" *ngIf="selectedStudent">
+          <button mat-icon-button (click)="toggleFilters()" matTooltip="Toggle Filters">
+            <mat-icon>{{ showFilters ? 'filter_alt' : 'filter_alt_outline' }}</mat-icon>
+          </button>
+          <button mat-icon-button (click)="onExport()" matTooltip="Export to CSV" 
+                  *ngIf="(filteredLedger$ | async) as ledger; else noDataToExport">
+            <mat-icon>download</mat-icon>
+          </button>
+          <button mat-icon-button (click)="onPrint()" matTooltip="Print Report" 
+                  *ngIf="selectedStudent && (filteredLedger$ | async) as ledger">
+            <mat-icon>print</mat-icon>
+          </button>
+        </div>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Search Section -->
+      <div class="search-section">
+        <app-student-search (studentSelected)="onStudentSelected($event)"></app-student-search>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="hasError && errorMessage" class="error-state error-card">
+        <mat-icon class="error-icon" color="warn">error_outline</mat-icon>
+        <div class="error-content">
+          <h3>Error Loading Ledger</h3>
+          <p>{{ errorMessage }}</p>
+          <button mat-raised-button color="primary" (click)="onRetry()">
+            <mat-icon>refresh</mat-icon>
+            Retry
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading$ | async" class="loading-state">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Loading ledger data...</p>
+        <p class="loading-hint">Please wait while we fetch the student's transaction history</p>
+      </div>
+
+      <!-- Student Info & Summary -->
+      <div *ngIf="selectedStudent && !hasError && !(isLoading$ | async)" class="student-section">
+        <div class="selected-student-info">
+          <div class="student-header">
+            <div class="student-details">
+              <h3>
+                <mat-icon>person</mat-icon>
+                {{ selectedStudent.name }} {{ selectedStudent.surname }}
+              </h3>
+              <p class="student-number">Student Number: {{ selectedStudent.studentNumber }}</p>
+            </div>
+            <div class="balance-display" *ngIf="ledgerView$ | async as view">
+              <div class="balance-value" [class]="getBalanceClass(view.displayBalance)">
+                <span class="balance-label">{{ getBalanceLabel(view.displayBalance) }}</span>
+                <span class="balance-amount">{{ view.displayBalance | currency:'USD':'symbol':'1.2-2' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary Statistics -->
+        <div *ngIf="ledgerView$ | async as summary" class="summary-cards">
+          <mat-card class="summary-card">
+            <mat-card-content>
+              <mat-icon class="summary-icon" color="warn">description</mat-icon>
+              <div class="summary-content">
+                <span class="summary-label">Total Debits</span>
+                <span class="summary-value amount-out">{{ summary.totalDebits | currency:'USD':'symbol':'1.2-2' }}</span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+          
+          <mat-card class="summary-card">
+            <mat-card-content>
+              <mat-icon class="summary-icon" color="primary">payments</mat-icon>
+              <div class="summary-content">
+                <span class="summary-label">Total Credits</span>
+                <span class="summary-value amount-in">{{ summary.totalCredits | currency:'USD':'symbol':'1.2-2' }}</span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+          
+          <mat-card class="summary-card">
+            <mat-card-content>
+              <mat-icon class="summary-icon">receipt_long</mat-icon>
+              <div class="summary-content">
+                <span class="summary-label">Transactions</span>
+                <span class="summary-value">{{ summary.transactionCount }}</span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+          
+          <mat-card class="summary-card" *ngIf="summary.oldestTransaction">
+            <mat-card-content>
+              <mat-icon class="summary-icon">date_range</mat-icon>
+              <div class="summary-content">
+                <span class="summary-label">Date Range</span>
+                <span class="summary-value small">
+                  {{ summary.oldestTransaction | date:'shortDate' }} - {{ summary.newestTransaction | date:'shortDate' }}
+                </span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- Filters Section -->
+        <div *ngIf="showFilters" class="filters-section">
+          <mat-card class="filters-card">
+            <mat-card-header>
+              <mat-card-title>Filters</mat-card-title>
+              <button mat-icon-button (click)="onClearFilters()" matTooltip="Clear All Filters">
+                <mat-icon>clear</mat-icon>
+              </button>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="filters-grid">
+                <mat-form-field appearance="outline" class="filter-field">
+                  <mat-label>Transaction Type</mat-label>
+                  <mat-select [formControl]="transactionTypeFilter">
+                    <mat-option [value]="null">All Types</mat-option>
+                    <mat-option value="Invoice">Invoice</mat-option>
+                    <mat-option value="Payment">Payment</mat-option>
+                    <mat-option value="Allocation">Allocation</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="filter-field">
+                  <mat-label>Start Date</mat-label>
+                  <input matInput [matDatepicker]="startPicker" [formControl]="startDateFilter">
+                  <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #startPicker></mat-datepicker>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="filter-field">
+                  <mat-label>End Date</mat-label>
+                  <input matInput [matDatepicker]="endPicker" [formControl]="endDateFilter">
+                  <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #endPicker></mat-datepicker>
+                </mat-form-field>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- Ledger Table -->
+        <div *ngIf="filteredLedger$ | async as ledger; else noLedgerFound" class="ledger-section">
+          <div *ngIf="ledger.length > 0; else noLedgerFound">
+            <div class="table-header">
+              <h4>Transaction History</h4>
+              <span class="transaction-count">{{ ledger.length }} transaction(s)</span>
+            </div>
+            <div class="ledger-table-container mat-elevation-z2">
+              <table mat-table [dataSource]="ledger" class="full-width-table">
+                <ng-container matColumnDef="date">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header class="mat-column-date">Date</th>
+                  <td mat-cell *matCellDef="let element" class="mat-column-date">
+                    {{ element.date | date:'shortDate' }}
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="type">
+                  <th mat-header-cell *matHeaderCellDef class="mat-column-type">Type</th>
+                  <td mat-cell *matCellDef="let element" class="mat-column-type type-cell">
+                    <mat-icon [color]="element.direction === 'in' ? 'primary' : 'warn'" class="type-icon">
+                      {{ getTransactionIcon(element.type) }}
+                    </mat-icon>
+                    <span>{{ element.type }}</span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="description">
+                  <th mat-header-cell *matHeaderCellDef class="mat-column-description">Description</th>
+                  <td mat-cell *matCellDef="let element" class="mat-column-description description-cell">
+                    {{ element.description }}
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="amount">
+                  <th mat-header-cell *matHeaderCellDef class="mat-column-amount text-right">Amount</th>
+                  <td mat-cell *matCellDef="let element" [class]="getTransactionDirectionClass(element.direction)" class="mat-column-amount text-right">
+                    {{ element.amount | currency:'USD':'symbol':'1.2-2' }}
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="runningBalance">
+                  <th mat-header-cell *matHeaderCellDef class="mat-column-runningBalance text-right">Running Balance</th>
+                  <td mat-cell *matCellDef="let element" [class]="getBalanceClass(element.runningBalance)" class="mat-column-runningBalance text-right">
+                    {{ element.runningBalance | currency:'USD':'symbol':'1.2-2' }}
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns" 
+                    class="ledger-row"
+                    [class.credit-row]="row.direction === 'in'"
+                    [class.debit-row]="row.direction === 'out'">
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #noLedgerFound>
+          <div class="no-data-state">
+            <mat-icon class="empty-icon">receipt_long</mat-icon>
+            <h3>No Transactions Found</h3>
+            <p *ngIf="selectedStudent">
+              No ledger entries found for {{ selectedStudent.name }} {{ selectedStudent.surname }}.
+            </p>
+            <p *ngIf="showFilters" class="suggestion-text">
+              Try adjusting your filters or clearing them to see more results.
+            </p>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- No Student Selected -->
+      <div *ngIf="!selectedStudent && !(isLoading$ | async) && !hasError" class="no-student-state">
+        <mat-icon class="empty-icon">search</mat-icon>
+        <h3>Select a Student</h3>
+        <p>Use the search field above to find and select a student to view their ledger.</p>
+        <div class="suggestion-box">
+          <mat-icon>lightbulb</mat-icon>
+          <p>You can filter transactions by type and date range, export to CSV, or print the report.</p>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<ng-template #noDataToExport>
+  <button mat-icon-button disabled matTooltip="No data to export">
+    <mat-icon>download</mat-icon>
+  </button>
+</ng-template>

@@ -1,0 +1,201 @@
+// Theme Variables
+$primary-blue: #2196f3;
+$success-green: #4caf50;
+$warn-orange: #ff9800;
+$text-primary-light: #2c3e50;
+$text-secondary-light: #7f8c8d;
+$bg-light: #f5f7fa;
+$surface-light: #ffffff;
+$border-light: #e0e0e0;
+
+$text-primary-dark: #e0e0e0;
+$text-secondary-dark: #b0b0b0;
+$bg-dark: #121212;
+$surface-dark: #1e1e1e;
+$border-dark: #424242;
+
+.exemptions-list-container {
+  width: 100%;
+
+  .theme-dark & {
+    // Dark theme styles
+  }
+}
+
+.list-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: var(--surface, $surface-light);
+  border-radius: 12px 12px 0 0;
+  border-bottom: 2px solid var(--border-color, $border-light);
+  font-weight: 600;
+  color: var(--text-primary, $text-primary-light);
+  font-size: 1.125rem;
+
+  .theme-dark & {
+    background: var(--surface, $surface-dark);
+    border-bottom-color: $border-dark;
+    color: var(--text-primary, $text-primary-dark);
+  }
+
+  mat-icon {
+    color: $primary-blue;
+  }
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  min-height: 250px;
+
+  mat-icon {
+    font-size: 3rem;
+    width: 3rem;
+    height: 3rem;
+    animation: spin 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+    color: $primary-blue;
+    margin-bottom: 1.5rem;
+  }
+
+  p {
+    color: var(--text-secondary, $text-secondary-light);
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 500;
+    animation: pulse 2s ease-in-out infinite;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.empty-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  background: var(--surface, $surface-light);
+  border-radius: 0 0 16px 16px;
+  min-height: 250px;
+  animation: fadeIn 0.4s ease-in;
+
+  .theme-dark & {
+    background: var(--surface, $surface-dark);
+  }
+
+  mat-icon {
+    font-size: 4rem;
+    width: 4rem;
+    height: 4rem;
+    color: var(--text-secondary, $text-secondary-light);
+    opacity: 0.4;
+    margin-bottom: 1.5rem;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  p {
+    color: var(--text-secondary, $text-secondary-light);
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 500;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.exemptions-list {
+  background: var(--surface, $surface-light);
+  border-radius: 0 0 12px 12px;
+  padding: 0;
+
+  .theme-dark & {
+    background: var(--surface, $surface-dark);
+  }
+}
+
+// Angular Material list items have a fixed height by default, which clips our multi-line exemption cards.
+// Force list items to auto-size and allow wrapping content.
+.exemptions-list ::ng-deep .mat-mdc-list-item,
+.exemptions-list ::ng-deep .mdc-list-item {
+  height: auto !important;
+  min-height: unset !important;
+  align-items: stretch;
+}
+
+.exemptions-list ::ng-deep .mat-mdc-list-item .mdc-list-item__content,
+.exemptions-list ::ng-deep .mdc-list-item__content {
+  height: auto !important;
+  min-height: unset !important;
+  overflow: visible;
+  white-space: normal;
+  width: 100%;
+}
+
+.exemptions-list ::ng-deep .mat-mdc-list-item .mat-mdc-list-item-unscoped-content,
+.exemptions-list ::ng-deep .mat-mdc-list-item-unscoped-content {
+  width: 100%;
+}
+
+.exemption-list-item {
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-bottom: 1px solid var(--border-color, $border-light);
+  padding: 0;
+  margin-bottom: 0.75rem;
+  background: transparent !important;
+
+  .theme-dark & {
+    border-bottom-color: $border-dark;
+  }
+
+  &:hover {
+    transform: translateX(4px);
+  }
+
+  &:active {
+    transform: translateX(2px);
+  }
+
+  &.selected {
+    background: transparent !important;
+  }
+
+  &:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+}
+

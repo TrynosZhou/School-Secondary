@@ -1,0 +1,117 @@
+// Theme Variables
+$primary-blue: #2196f3;
+$accent-gold: #ffc107;
+$warn-brown: #795548;
+
+$text-primary-light: #2c3e50;
+$text-secondary-light: #7f8c8d;
+$bg-light: #f5f7fa;
+$surface-light: #ffffff;
+
+$text-primary-dark: #e0e0e0;
+$text-secondary-dark: #b0b0b0;
+$bg-dark: #121212;
+$surface-dark: #1e1e1e;
+
+.confirm-dialog-container {
+  padding: 16px 16px 8px 16px;
+
+  &.theme-light {
+    background: $surface-light;
+    color: $text-primary-light;
+  }
+
+  &.theme-dark {
+    background: $surface-dark;
+    color: $text-primary-dark;
+  }
+}
+
+h1[mat-dialog-title] {
+  margin: -24px -24px 0 -24px;
+  padding: 1.25rem 1.25rem 1rem 1.25rem;
+  background: linear-gradient(135deg, $primary-blue 0%, #1976d2 100%);
+  color: white;
+  border-radius: 12px 12px 0 0;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, $accent-gold, $warn-brown, $primary-blue);
+    background-size: 200% 100%;
+    animation: gradientMove 3s ease infinite;
+  }
+}
+
+.theme-dark h1[mat-dialog-title] {
+  background: linear-gradient(135deg, #2c3e50 0%, #1a2a3a 100%);
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+div[mat-dialog-content] {
+  padding: 1.25rem 1.5rem;
+}
+
+.bills-preview {
+  margin-top: 0.75rem;
+
+  h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    color: var(--text-primary, $text-primary-light);
+  }
+
+  .bills-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.4rem 0;
+      border-bottom: 1px dashed rgba(127, 140, 141, 0.25);
+
+      .bill-name {
+        margin-right: 1rem;
+      }
+      .bill-amount {
+        font-weight: 600;
+      }
+    }
+  }
+
+  .bills-total {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.6rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid rgba(127, 140, 141, 0.35);
+    font-weight: 600;
+  }
+}
+
+div[mat-dialog-actions] {
+  padding: 1rem 1.25rem 1.25rem 1.25rem;
+  border-top: 1px solid rgba(127, 140, 141, 0.2);
+}
+
+.theme-dark div[mat-dialog-actions] {
+  border-top-color: rgba(176, 176, 176, 0.2);
+}
+
+button[mat-button] {
+  border-radius: 8px;
+}
+
+
+

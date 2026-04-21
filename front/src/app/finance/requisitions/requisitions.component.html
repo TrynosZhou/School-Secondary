@@ -1,0 +1,333 @@
+<div class="requisitions-page">
+  <mat-card class="requisition-card">
+    <mat-card-header>
+      <mat-card-title>Requisition workspace</mat-card-title>
+      <mat-card-subtitle>
+        Filter, track statuses, and export your current requisition view.
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="filters-row">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search requisitions</mat-label>
+          <input matInput [formControl]="searchControl" placeholder="title, department, item, status" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="status-field">
+          <mat-label>Status</mat-label>
+          <mat-select [formControl]="statusFilterControl">
+            <mat-option value="all">All statuses</mat-option>
+            <mat-option value="submitted">Submitted</mat-option>
+            <mat-option value="in_review_deputy">In review (deputy)</mat-option>
+            <mat-option value="in_review_head">In review (head)</mat-option>
+            <mat-option value="awaiting_authorization">Awaiting authorization</mat-option>
+            <mat-option value="authorized">Authorized</mat-option>
+            <mat-option value="rejected">Rejected</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <button mat-stroked-button color="primary" (click)="exportFilteredCsv()">
+          <mat-icon>download</mat-icon>
+          Export CSV
+        </button>
+      </div>
+
+      <div class="status-summary" *ngIf="statusSummary.length">
+        <div class="status-pill" *ngFor="let entry of statusSummary">
+          <span class="label">{{ entry.status | titlecase }}</span>
+          <span class="count">{{ entry.count }}</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="requisition-card" *ngIf="canCreate">
+    <mat-card-header>
+      <div mat-card-avatar class="requisition-avatar"></div>
+      <mat-card-title>New Department Requisition</mat-card-title>
+      <mat-card-subtitle>
+        Request items for your department. You can track progress as it moves through approvals.
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="submit()" class="requisition-form">
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Requisition title</mat-label>
+            <input matInput formControlName="title" placeholder="e.g. Science lab consumables" />
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Overview / justification</mat-label>
+            <textarea
+              matInput
+              formControlName="description"
+              rows="3"
+              placeholder="Briefly describe what these items are for"
+            ></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="line-items-header">
+          <h3>Line items</h3>
+          <button mat-stroked-button color="primary" type="button" (click)="addItemRow()">
+            <mat-icon>add</mat-icon>
+            Add item
+          </button>
+        </div>
+
+        <div formArrayName="items" class="line-items">
+          <div
+            class="line-item-row"
+            *ngFor="let item of items.controls; let i = index"
+            [formGroupName]="i"
+          >
+            <mat-form-field appearance="outline" class="qty-field">
+              <mat-label>Qty</mat-label>
+              <input matInput type="number" formControlName="quantity" min="1" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="description-field">
+              <mat-label>Item description</mat-label>
+              <input
+                matInput
+                formControlName="description"
+                placeholder="e.g. A4 exam papers, whiteboard markers"
+              />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="use-field">
+              <mat-label>Intended use</mat-label>
+              <input
+                matInput
+                formControlName="intendedUse"
+                placeholder="e.g. Term 1 mock exams, daily class teaching"
+              />
+            </mat-form-field>
+
+            <button
+              mat-icon-button
+              color="warn"
+              type="button"
+              (click)="removeItemRow(i)"
+              [disabled]="items.length === 1"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="loading">
+            <mat-icon>send</mat-icon>
+            Submit requisition
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="requisition-card">
+    <mat-card-header>
+      <mat-card-title>Your requisitions</mat-card-title>
+      <mat-card-subtitle>
+        Track status as they move from deputy to head to director/auditor.
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <table mat-table [dataSource]="filteredMyRequisitions" class="requisitions-table" *ngIf="filteredMyRequisitions.length">
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef> Date </th>
+          <td mat-cell *matCellDef="let req">
+            {{ req.createdAt | date: 'mediumDate' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef> Title </th>
+          <td mat-cell *matCellDef="let req">
+            <div class="title-cell">
+              <div class="title-text">{{ req.title }}</div>
+              <div class="subtitle" *ngIf="req.description">{{ req.description }}</div>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="department">
+          <th mat-header-cell *matHeaderCellDef> Department </th>
+          <td mat-cell *matCellDef="let req">
+            {{ req.department?.name || '—' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef> Status </th>
+          <td mat-cell *matCellDef="let req">
+            <mat-chip-set>
+              <mat-chip [ngClass]="'status-' + req.status">
+                {{ req.status | titlecase }}
+              </mat-chip>
+            </mat-chip-set>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="items">
+          <th mat-header-cell *matHeaderCellDef> Items </th>
+          <td mat-cell *matCellDef="let req">
+            <div class="items-cell">
+              <div *ngFor="let item of req.items">
+                <span class="qty">{{ item.quantity }}×</span>
+                <span class="desc">{{ item.description }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" (click)="openDetails(row)" class="clickable-row"></tr>
+      </table>
+
+      <div class="empty-state" *ngIf="!filteredMyRequisitions.length">
+        <mat-icon>inventory_2</mat-icon>
+        <p>{{ myRequisitions.length ? 'No requisitions match your filter.' : 'No requisitions yet. Use the form above to submit one for your department.' }}</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="requisition-card" *ngIf="pendingReceiving.length">
+    <mat-card-header>
+      <mat-card-title>Pending receiving</mat-card-title>
+      <mat-card-subtitle>
+        Authorised requisitions with items still awaiting receipt. Open one to receive into a room.
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <table mat-table [dataSource]="filteredPendingReceiving" class="requisitions-table" *ngIf="filteredPendingReceiving.length">
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef> Date </th>
+          <td mat-cell *matCellDef="let req">
+            {{ req.createdAt | date: 'mediumDate' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef> Title </th>
+          <td mat-cell *matCellDef="let req">
+            <div class="title-cell">
+              <div class="title-text">{{ req.title }}</div>
+              <div class="subtitle" *ngIf="req.description">{{ req.description }}</div>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="department">
+          <th mat-header-cell *matHeaderCellDef> Department </th>
+          <td mat-cell *matCellDef="let req">
+            {{ req.department?.name || '—' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef> Status </th>
+          <td mat-cell *matCellDef="let req">
+            <mat-chip-set>
+              <mat-chip [ngClass]="'status-' + req.status">
+                {{ req.status | titlecase }}
+              </mat-chip>
+            </mat-chip-set>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="items">
+          <th mat-header-cell *matHeaderCellDef> Items </th>
+          <td mat-cell *matCellDef="let req">
+            <div class="items-cell">
+              <div *ngFor="let item of req.items">
+                <span class="qty">{{ item.quantity }}×</span>
+                <span class="desc">{{ item.description }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" (click)="openDetails(row)" class="clickable-row"></tr>
+      </table>
+      <div class="empty-state" *ngIf="!filteredPendingReceiving.length">
+        <mat-icon>inventory_2</mat-icon>
+        <p>No pending receiving requisitions match your filter.</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="requisition-card" *ngIf="approvalRequisitions.length">
+    <mat-card-header>
+      <mat-card-title>Requisitions for your approval</mat-card-title>
+      <mat-card-subtitle>
+        Open a requisition to sign, authorise, or reject it.
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <table mat-table [dataSource]="filteredApprovalRequisitions" class="requisitions-table" *ngIf="filteredApprovalRequisitions.length">
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef> Date </th>
+          <td mat-cell *matCellDef="let req">
+            {{ req.createdAt | date: 'mediumDate' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef> Title </th>
+          <td mat-cell *matCellDef="let req">
+            <div class="title-cell">
+              <div class="title-text">{{ req.title }}</div>
+              <div class="subtitle" *ngIf="req.description">{{ req.description }}</div>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="department">
+          <th mat-header-cell *matHeaderCellDef> Department </th>
+          <td mat-cell *matCellDef="let req">
+            {{ req.department?.name || '—' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef> Status </th>
+          <td mat-cell *matCellDef="let req">
+            <mat-chip-set>
+              <mat-chip [ngClass]="'status-' + req.status">
+                {{ req.status | titlecase }}
+              </mat-chip>
+            </mat-chip-set>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="items">
+          <th mat-header-cell *matHeaderCellDef> Items </th>
+          <td mat-cell *matCellDef="let req">
+            <div class="items-cell">
+              <div *ngFor="let item of req.items">
+                <span class="qty">{{ item.quantity }}×</span>
+                <span class="desc">{{ item.description }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" (click)="openDetails(row)" class="clickable-row"></tr>
+      </table>
+      <div class="empty-state" *ngIf="!filteredApprovalRequisitions.length">
+        <mat-icon>pending_actions</mat-icon>
+        <p>No approval requisitions match your filter.</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+

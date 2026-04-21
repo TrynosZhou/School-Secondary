@@ -1,0 +1,8 @@
+<div class="empty-state" role="status" aria-live="polite">
+  <mat-icon class="empty-state-icon">{{ icon }}</mat-icon>
+  <h3 class="empty-state-title">{{ title }}</h3>
+  <p *ngIf="message" class="empty-state-message">{{ message }}</p>
+  <div class="empty-state-actions">
+    <ng-content></ng-content>
+  </div>
+</div>

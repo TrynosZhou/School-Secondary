@@ -1,0 +1,138 @@
+<div class="integrations-container">
+  <mat-card class="integrations-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>link</mat-icon>
+        Integrations
+      </mat-card-title>
+      <mat-card-subtitle>Manage external service integrations</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Status Summary -->
+      <div *ngIf="statusSummary" class="status-summary">
+        <mat-card class="summary-card">
+          <mat-card-content>
+            <div class="summary-item">
+              <div class="summary-value">{{ statusSummary.total }}</div>
+              <div class="summary-label">Total Integrations</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-value success">{{ statusSummary.active }}</div>
+              <div class="summary-label">Active</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-value">{{ statusSummary.inactive }}</div>
+              <div class="summary-label">Inactive</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-value error">{{ statusSummary.error }}</div>
+              <div class="summary-label">Errors</div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions-bar">
+        <button mat-raised-button color="primary" (click)="openCreateDialog()">
+          <mat-icon>add</mat-icon>
+          Add Integration
+        </button>
+      </div>
+
+      <!-- Loading Spinner -->
+      <div *ngIf="isLoading" class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Loading integrations...</p>
+      </div>
+
+      <!-- Integrations Table -->
+      <div *ngIf="!isLoading" class="table-container">
+        <table mat-table [dataSource]="integrations" class="integrations-table">
+          <!-- Name Column -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Name</th>
+            <td mat-cell *matCellDef="let integration">
+              <div class="integration-name">
+                <mat-icon>{{ getTypeIcon(integration.type) }}</mat-icon>
+                <div>
+                  <strong>{{ integration.name }}</strong>
+                  <div class="integration-type">{{ getTypeLabel(integration.type) }}</div>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Type Column -->
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let integration">
+              <mat-chip>{{ getTypeLabel(integration.type) }}</mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let integration">
+              <mat-chip [color]="getStatusColor(integration.status)">
+                {{ getStatusLabel(integration.status) }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Test Mode Column -->
+          <ng-container matColumnDef="isTestMode">
+            <th mat-header-cell *matHeaderCellDef>Mode</th>
+            <td mat-cell *matCellDef="let integration">
+              <mat-chip *ngIf="integration.isTestMode" color="accent">Test</mat-chip>
+              <span *ngIf="!integration.isTestMode">Production</span>
+            </td>
+          </ng-container>
+
+          <!-- Last Sync Column -->
+          <ng-container matColumnDef="lastSyncAt">
+            <th mat-header-cell *matHeaderCellDef>Last Sync</th>
+            <td mat-cell *matCellDef="let integration">
+              {{ integration.lastSyncAt ? (integration.lastSyncAt | date: 'short') : 'Never' }}
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let integration">
+              <button mat-icon-button [matTooltip]="'Test Connection'" (click)="testIntegration(integration)">
+                <mat-icon>check_circle</mat-icon>
+              </button>
+              <button mat-icon-button [matTooltip]="'Edit'" (click)="openEditDialog(integration)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button [matTooltip]="integration.status === 'ACTIVE' ? 'Deactivate' : 'Activate'" (click)="toggleStatus(integration)">
+                <mat-icon>{{ integration.status === 'ACTIVE' ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" [matTooltip]="'Delete'" (click)="deleteIntegration(integration)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+
+        <!-- Empty State -->
+        <div *ngIf="integrations.length === 0" class="empty-state">
+          <mat-icon>link_off</mat-icon>
+          <p>No integrations configured</p>
+          <button mat-raised-button color="primary" (click)="openCreateDialog()">
+            <mat-icon>add</mat-icon>
+            Add Your First Integration
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+

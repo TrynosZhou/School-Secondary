@@ -1,0 +1,16 @@
+<mat-form-field class="receipt-search-field">
+  <mat-label>Search for Receipt</mat-label>
+  <input type="text" matInput [formControl]="searchControl" [matAutocomplete]="auto" />
+  <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn"
+    (optionSelected)="selectReceipt($event.option.value)">
+    <mat-option *ngFor="let receipt of searchResults$ | async" [value]="receipt">
+      <span>
+        <strong>#{{ receipt.receiptNumber }}</strong> -
+        {{ receipt.student.name }} {{ receipt.student.surname }} ({{ receipt.student.studentNumber }})
+      </span>
+      <small style="color: grey; margin-left: 8px;">
+        {{ receipt.description }}
+      </small>
+    </mat-option>
+  </mat-autocomplete>
+</mat-form-field>

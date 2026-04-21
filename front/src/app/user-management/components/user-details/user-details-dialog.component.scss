@@ -1,0 +1,232 @@
+// School Theme Variables
+$primary-blue: #2196f3;
+$primary-blue-dark: #1976d2;
+$accent-gold: #ffc107;
+$warn-brown: #795548;
+
+$white: #ffffff;
+$text-primary: #2c3e50;
+$text-secondary: #7f8c8d;
+$border-color: #e9ecef;
+$bg-light: #f8f9fa;
+$error-color: #f44336;
+
+.dialog-header {
+  background: linear-gradient(135deg, $primary-blue 0%, $primary-blue-dark 100%);
+  color: white;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  button {
+    color: white;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: rotate(90deg);
+    }
+  }
+}
+
+.dialog-content {
+  padding: 2rem;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.user-details-content {
+  .user-header {
+    display: flex;
+    gap: 1.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid $border-color;
+    margin-bottom: 2rem;
+
+    .user-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, $primary-blue 0%, $primary-blue-dark 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+
+      .avatar-initials {
+        font-size: 28px;
+        font-weight: 600;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+    }
+
+    .user-info {
+      flex: 1;
+
+      .user-name {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.5rem;
+        color: $text-primary;
+      }
+
+      .user-username {
+        margin: 0 0 1rem 0;
+        color: $text-secondary;
+      }
+
+      .user-badges {
+        display: flex;
+        gap: 0.5rem;
+      }
+    }
+  }
+
+  .user-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .info-section {
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      color: $primary-blue-dark;
+      font-size: 1.1rem;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+
+      .info-item {
+        label {
+          display: block;
+          color: $text-secondary;
+          font-size: 0.875rem;
+          margin-bottom: 0.25rem;
+        }
+
+        span {
+          display: block;
+          color: $text-primary;
+          font-size: 1rem;
+        }
+      }
+    }
+  }
+
+  .activity-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: $bg-light;
+      border-radius: 8px;
+
+      .activity-icon {
+        color: $primary-blue-dark;
+      }
+
+      .activity-info {
+        display: flex;
+        flex-direction: column;
+
+        .activity-label {
+          color: $text-secondary;
+          font-size: 0.875rem;
+        }
+
+        .activity-value {
+          color: $text-primary;
+          font-size: 1.25rem;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+}
+
+.loading-container, .error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+
+  p {
+    margin-top: 1rem;
+    color: $text-secondary;
+  }
+}
+
+.error-container {
+  .error-icon {
+    color: $error-color;
+    font-size: 48px;
+  }
+}
+
+.status-text {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &.status-active {
+    color: green;
+  }
+
+  &.status-inactive {
+    color: red;
+  }
+
+  mat-icon {
+    font-size: 1.2rem;
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+}
+
+.dialog-actions {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid $border-color;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  background: $bg-light;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+  }
+}

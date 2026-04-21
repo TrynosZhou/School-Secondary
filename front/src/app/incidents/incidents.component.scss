@@ -1,0 +1,43 @@
+.incidents-page {
+  display: grid;
+  gap: 16px;
+}
+
+.incident-card {
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+
+    .full {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .actions {
+    margin-top: 8px;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .table {
+    width: 100%;
+  }
+
+  .reason-field {
+    min-width: 220px;
+    margin-right: 8px;
+  }
+
+  .empty {
+    padding: 12px 0;
+    opacity: 0.8;
+  }
+}
+
+@media (max-width: 900px) {
+  .incident-card .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

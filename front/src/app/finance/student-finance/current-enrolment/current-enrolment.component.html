@@ -1,0 +1,66 @@
+<div class="current-enrolment-dialog" *ngIf="currentEnrolment">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <mat-icon>school</mat-icon>
+      Current Enrolment
+    </h2>
+    <button *ngIf="dialogRef" mat-icon-button (click)="dialogRef.close()" class="close-btn" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    <div class="enrolment-grid">
+      <span class="enrolment-label">Student</span>
+      <span class="enrolment-value">{{ currentEnrolment.student.name }} {{ currentEnrolment.student.surname }}</span>
+
+      <span class="enrolment-label">Term</span>
+      <span class="enrolment-value">Term {{ currentEnrolment.num }} {{ currentEnrolment.year }}</span>
+
+      <span class="enrolment-label">Class</span>
+      <span class="enrolment-value">
+        <div class="display-mode" *ngIf="!editable">
+          <span class="value-text">{{ currentEnrolment.name }}</span>
+          <mat-icon fontIcon="edit" (click)="startEdit()" aria-label="Edit class"></mat-icon>
+        </div>
+        <div class="edit-mode" *ngIf="editable">
+          <mat-form-field appearance="outline">
+            <mat-label>Class</mat-label>
+            <mat-select [value]="editClassName" (selectionChange)="editClassName = $event.value" required>
+              <mat-option *ngFor="let c of classes$ | async" [value]="c.name">
+                {{ c.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </span>
+
+      <span class="enrolment-label">Residence</span>
+      <span class="enrolment-value">
+        <div class="display-mode" *ngIf="!editable">
+          <span class="value-text">{{ currentEnrolment.residence }}</span>
+          <mat-icon fontIcon="edit" (click)="startEdit()" aria-label="Edit residence"></mat-icon>
+        </div>
+        <div class="edit-mode" *ngIf="editable">
+          <mat-form-field appearance="outline">
+            <mat-label>Residence</mat-label>
+            <mat-select [value]="editResidence" (selectionChange)="editResidence = $event.value">
+              <mat-option *ngFor="let residence of residences" [value]="residence">
+                {{ residence }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </span>
+
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions" *ngIf="editable">
+    <button mat-button (click)="cancelEdit()" [disabled]="saving">Cancel</button>
+    <button mat-raised-button color="primary" (click)="saveEnrolment()" [disabled]="saving || !editClassName.trim()" class="save-btn">
+      <mat-spinner *ngIf="saving" diameter="20"></mat-spinner>
+      <span *ngIf="!saving">Save changes</span>
+    </button>
+  </mat-dialog-actions>
+</div>

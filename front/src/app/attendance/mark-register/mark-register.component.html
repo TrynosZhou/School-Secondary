@@ -1,0 +1,221 @@
+<div class="attendance-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="title-toolbar">
+      <div class="toolbar-content">
+        <div class="title-section">
+          <mat-icon class="title-icon">edit_note</mat-icon>
+          <h1 class="page-title">{{ title.getTitle() }}</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Selection Section -->
+  <div class="selection-section">
+    <div class="selection-card">
+      <div class="card-header">
+        <div class="header-content">
+          <mat-icon class="section-icon">filter_list</mat-icon>
+          <div class="header-text">
+            <h2 class="section-title">Select Class & Date</h2>
+            <p class="section-subtitle">Choose a class, term, and date to mark attendance</p>
+          </div>
+        </div>
+      </div>
+      <div class="card-content">
+        <form [formGroup]="registerForm" (ngSubmit)="fetchClassList()">
+          <div class="form-fields">
+            <div class="form-field">
+              <mat-form-field appearance="outline">
+                <mat-label>Choose Term</mat-label>
+                <mat-select formControlName="term">
+                  <mat-option *ngFor="let term of terms$ | async" [value]="term">
+                    Term {{ term.num }} {{ term.year }}
+                  </mat-option>
+                </mat-select>
+                <mat-icon matSuffix>calendar_today</mat-icon>
+                <mat-hint>Select the academic term</mat-hint>
+                <mat-error *ngIf="term?.invalid && term?.touched">
+                  {{ getFormErrorMessage('term') }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+            <div class="form-field">
+              <mat-form-field appearance="outline">
+                <mat-label>Choose Class</mat-label>
+                <mat-select formControlName="clas">
+                  <mat-option *ngFor="let clas of classes$ | async" [value]="clas.name">
+                    {{ clas.name }}
+                  </mat-option>
+                </mat-select>
+                <mat-icon matSuffix>class</mat-icon>
+                <mat-hint>Select the class</mat-hint>
+                <mat-error *ngIf="clas?.invalid && clas?.touched">
+                  {{ getFormErrorMessage('clas') }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+            <div class="form-field">
+              <mat-form-field appearance="outline">
+                <mat-label>Select Date</mat-label>
+                <input matInput [matDatepicker]="picker" formControlName="date">
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+                <mat-hint>Choose the date for attendance</mat-hint>
+                <mat-error *ngIf="date?.invalid && date?.touched">
+                  {{ getFormErrorMessage('date') }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+            <div class="form-field">
+              <button
+                mat-raised-button
+                type="submit"
+                color="primary"
+                [disabled]="registerForm.invalid"
+                class="fetch-button"
+              >
+                <mat-icon>list</mat-icon>
+                Fetch Class List
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Attendance Table Section -->
+  <div class="table-section" *ngIf="(classAttendance$ | async)?.length">
+    <div class="table-card">
+      <div class="table-header">
+        <div class="header-content">
+          <mat-icon class="section-icon">event_available</mat-icon>
+          <div class="header-text">
+            <h2 class="section-title">Mark Attendance</h2>
+            <p class="section-subtitle">Check the box to mark Present, uncheck to mark Absent. Changes are saved automatically.</p>
+          </div>
+        </div>
+      </div>
+      <div class="table-content">
+        <div class="table-container">
+          <table mat-table [dataSource]="dataSource" matSort class="attendance-table">
+            <!-- Index Column -->
+            <ng-container matColumnDef="index">
+              <th mat-header-cell *matHeaderCellDef class="index-header">
+                <mat-icon>format_list_numbered</mat-icon>
+                <span>#</span>
+              </th>
+              <td mat-cell *matCellDef="let row; let i = index" class="index-cell">
+                <div class="index-number">{{ i + 1 }}</div>
+              </td>
+            </ng-container>
+
+            <!-- Student Number Column -->
+            <ng-container matColumnDef="studentNumber">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header class="student-number-header">
+                <mat-icon>badge</mat-icon>
+                <span>Student Number</span>
+              </th>
+              <td mat-cell *matCellDef="let row" class="student-number-cell">
+                <div class="student-number">{{ row.studentNumber }}</div>
+              </td>
+            </ng-container>
+
+            <!-- Surname Column -->
+            <ng-container matColumnDef="surname">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header class="surname-header">
+                <mat-icon>person</mat-icon>
+                <span>Surname</span>
+              </th>
+              <td mat-cell *matCellDef="let row" class="surname-cell">
+                <div class="student-name">{{ row.surname }}</div>
+              </td>
+            </ng-container>
+
+            <!-- Name Column -->
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header class="name-header">
+                <mat-icon>person_outline</mat-icon>
+                <span>Name</span>
+              </th>
+              <td mat-cell *matCellDef="let row" class="name-cell">
+                <div class="student-name">{{ row.name }}</div>
+              </td>
+            </ng-container>
+
+            <!-- Gender Column -->
+            <ng-container matColumnDef="gender">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header class="gender-header">
+                <mat-icon>wc</mat-icon>
+                <span>Gender</span>
+              </th>
+              <td mat-cell *matCellDef="let row" class="gender-cell">
+                <div class="gender-badge" [ngClass]="'gender-' + getGenderColor(row.gender)">
+                  <mat-icon>{{ getGenderIcon(row.gender) }}</mat-icon>
+                  <span>{{ row.gender }}</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Attendance Column -->
+            <ng-container matColumnDef="attendance">
+              <th mat-header-cell *matHeaderCellDef class="attendance-header">
+                <mat-icon>check_circle</mat-icon>
+                <span>Attendance</span>
+              </th>
+              <td mat-cell *matCellDef="let row" class="attendance-cell">
+                <div class="attendance-controls">
+                  <mat-checkbox
+                    color="primary"
+                    [checked]="row.present"
+                    (change)="markPresent(row, $event.checked)"
+                    class="attendance-checkbox"
+                  >
+                    <span class="checkbox-label">{{ row.present ? 'Present' : 'Absent' }}</span>
+                  </mat-checkbox>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns" class="header-row"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns; trackBy: trackByStudentNumber" class="data-row"></tr>
+
+            <!-- No data row -->
+            <tr class="mat-row no-data-row" *matNoDataRow>
+              <td class="mat-cell no-data-cell" [attr.colspan]="displayedColumns.length">
+                <div class="no-data-content">
+                  <mat-icon class="no-data-icon">event_busy</mat-icon>
+                  <p>No students found for the selected criteria</p>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <mat-paginator
+          [pageSizeOptions]="[10, 25, 50, 100]"
+          aria-label="Select page of students"
+          class="attendance-paginator"
+        ></mat-paginator>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!(classAttendance$ | async)?.length && !(isLoading$ | async)">
+    <div class="empty-card">
+      <div class="empty-content">
+        <mat-icon class="empty-icon">event_available</mat-icon>
+        <h2>No Class Selected</h2>
+        <p>Select a class, term, and date to view and mark attendance.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading$ | async">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading attendance data...</p>
+  </div>
+</div>

@@ -1,0 +1,64 @@
+<mat-card class="bulk-invoice-card">
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon>groups</mat-icon>
+      Bulk Class Invoicing
+    </mat-card-title>
+    <mat-card-subtitle>
+      Run class-wide invoicing for a selected term in a dedicated workflow.
+    </mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="bulk-controls">
+      <mat-form-field appearance="outline">
+        <mat-label>Academic Term</mat-label>
+        <mat-select [(ngModel)]="selectedTerm">
+          <mat-option *ngFor="let term of terms$ | async" [value]="term">
+            {{ formatTerm(term) }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Class Name</mat-label>
+        <mat-select [(ngModel)]="selectedClassName">
+          <mat-option *ngFor="let clas of classes$ | async" [value]="clas.name">
+            {{ clas.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="runBulkInvoicing()"
+        [disabled]="!canRunBulkInvoicing() || (bulkInvoiceLoading$ | async)">
+        <mat-icon *ngIf="!(bulkInvoiceLoading$ | async)">playlist_add_check</mat-icon>
+        <mat-spinner *ngIf="bulkInvoiceLoading$ | async" diameter="20"></mat-spinner>
+        {{ (bulkInvoiceLoading$ | async) ? 'Running...' : 'Run Bulk Invoicing' }}
+      </button>
+    </div>
+
+    <div *ngIf="(bulkInvoiceResult$ | async) as bulkResult" class="bulk-result">
+      <strong>
+        {{ bulkResult.successCount }}/{{ bulkResult.totalStudents }} successful
+        ({{ bulkResult.failureCount }} failed)
+      </strong>
+      <span>
+        Class {{ bulkResult.className }} - Term {{ bulkResult.termNum }} {{ bulkResult.year }}
+        ({{ bulkResult.termType }})
+      </span>
+
+      <div *ngIf="bulkResult.failureCount > 0" class="bulk-failures">
+        <strong>Failed Students</strong>
+        <div *ngFor="let row of bulkResult.results">
+          <span *ngIf="!row.success">
+            {{ row.studentNumber }}{{ row.studentName ? ' (' + row.studentName + ')' : '' }}: {{ row.error }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
+

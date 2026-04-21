@@ -1,0 +1,33 @@
+<div class="balances-container-wrapper" [class.theme-dark]="currentTheme === 'dark'">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon class="title-icon">account_balance_wallet</mat-icon>
+        {{ title.getTitle() }}
+      </h1>
+      <p class="page-subtitle">Manage student balances and account adjustments</p>
+    </div>
+  </div>
+
+  <!-- Student Search Card -->
+  <mat-card class="search-card">
+    <mat-card-content>
+      <div class="search-container">
+        <app-student-search (studentSelected)="getSelectedStudent($event)"></app-student-search>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Balances Form Container -->
+  <div class="balances-form-container">
+    <app-add-edit-balances [student]="selectedStudent"></app-add-edit-balances>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!selectedStudent" class="empty-state">
+    <mat-icon class="empty-icon">account_balance_wallet</mat-icon>
+    <h2 class="empty-title">No Student Selected</h2>
+    <p class="empty-message">Search and select a student above to manage their balance</p>
+  </div>
+</div>

@@ -1,0 +1,45 @@
+<h2 mat-dialog-title>Transfer stock</h2>
+
+<div mat-dialog-content>
+  <div class="context">
+    <mat-icon>swap_horiz</mat-icon>
+    <div>
+      <div class="context-title">{{ data.item.name }}</div>
+      <div class="context-subtitle">
+        Available: {{ data.item.quantityOnHand }}{{ data.item.unit ? ' ' + data.item.unit : '' }}
+      </div>
+    </div>
+  </div>
+
+  <form [formGroup]="form" class="dialog-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Destination room</mat-label>
+      <mat-select formControlName="toRoomId">
+        <mat-option *ngFor="let r of data.rooms" [value]="r.id">
+          {{ r.name }}<span *ngIf="r.code"> ({{ r.code }})</span>
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Quantity to transfer</mat-label>
+      <input matInput type="number" formControlName="quantity" min="1" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Reference (optional)</mat-label>
+      <input matInput formControlName="reference" placeholder="e.g. moved to lab" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Notes (optional)</mat-label>
+      <textarea matInput rows="3" formControlName="notes"></textarea>
+    </mat-form-field>
+  </form>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Cancel</button>
+  <button mat-raised-button color="primary" type="button" (click)="save()">Transfer</button>
+</div>
+

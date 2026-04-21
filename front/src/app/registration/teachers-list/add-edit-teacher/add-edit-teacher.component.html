@@ -1,0 +1,253 @@
+<mat-card>
+  <!-- Loading Overlay -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <mat-spinner class="loading-spinner" diameter="60"></mat-spinner>
+  </div>
+
+  <form [formGroup]="addTeacherForm" (ngSubmit)="addTeacher()">
+    <!-- Header -->
+    <mat-card-header>
+      <mat-card-title>
+        <h2>{{ data ? 'Edit Teacher' : 'Add New Teacher' }}</h2>
+        <mat-card-subtitle *ngIf="data">
+          Editing {{ data.title }} {{ data.name }} {{ data.surname }}
+        </mat-card-subtitle>
+        <mat-card-subtitle *ngIf="!data">
+          Fill in the details below to add a new teacher
+        </mat-card-subtitle>
+      </mat-card-title>
+    </mat-card-header>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMsg$ | async as errorMsg" class="error">
+      {{ errorMsg }}
+    </div>
+
+    <!-- Form Content -->
+    <mat-card-content>
+      <!-- Personal Information Section -->
+      <div class="form-section">
+        <div class="section-title">
+          <mat-icon>person</mat-icon>
+          Personal Information
+        </div>
+        
+        <div class="form-group three-column">
+          <div>
+            <mat-form-field appearance="outline">
+              <mat-label>Title</mat-label>
+              <mat-select formControlName="title">
+                <mat-option *ngFor="let title of titles" [value]="title">{{ title }}</mat-option>
+              </mat-select>
+              <mat-error *ngIf="title?.hasError('required')">Title is required</mat-error>
+            </mat-form-field>
+          </div>
+          
+          <div>
+            <mat-form-field appearance="outline">
+              <mat-label>First Name</mat-label>
+              <input formControlName="name" matInput type="text" placeholder="Enter first name" />
+              <mat-error *ngIf="name?.hasError('required')">First name is required</mat-error>
+              <mat-error *ngIf="name?.hasError('minlength')">At least 2 characters required</mat-error>
+              <mat-hint>e.g. John</mat-hint>
+            </mat-form-field>
+          </div>
+          
+          <div>
+            <mat-form-field appearance="outline">
+              <mat-label>Surname</mat-label>
+              <input formControlName="surname" matInput type="text" placeholder="Enter surname" />
+              <mat-error *ngIf="surname?.hasError('required')">Surname is required</mat-error>
+              <mat-error *ngIf="surname?.hasError('minlength')">At least 2 characters required</mat-error>
+              <mat-hint>e.g. Smith</mat-hint>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="form-group two-column">
+          <div>
+            <mat-form-field appearance="outline">
+              <mat-label>National ID</mat-label>
+              <input formControlName="id" matInput type="text" placeholder="Enter national ID" />
+              <mat-error *ngIf="id?.hasError('required')">National ID is required</mat-error>
+              <mat-error *ngIf="id?.hasError('minlength')">At least 10 characters required</mat-error>
+              <mat-error *ngIf="id?.hasError('pattern')">Invalid ID format</mat-error>
+              <mat-hint>e.g. 02086982F22</mat-hint>
+            </mat-form-field>
+          </div>
+          
+          <div>
+            <mat-form-field appearance="outline">
+              <mat-label>Date of Birth</mat-label>
+              <input formControlName="dob" matInput [matDatepicker]="picker" placeholder="Select date of birth" />
+              <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+              <mat-hint>MM/DD/YYYY</mat-hint>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div>
+            <div class="section-title">Gender</div>
+            <mat-radio-group formControlName="gender">
+              <mat-radio-button *ngFor="let gender of genders" [value]="gender">
+                <mat-icon>{{ gender === 'Male' ? 'male' : 'female' }}</mat-icon>
+                {{ gender }}
+              </mat-radio-button>
+            </mat-radio-group>
+            <mat-error *ngIf="gender?.hasError('required')">Please select gender</mat-error>
+          </div>
+        </div>
+      </div>
+
+      <!-- Employment Information Section -->
+      <div class="form-section">
+        <div class="section-title">
+          <mat-icon>work</mat-icon>
+          Employment Information
+        </div>
+        
+        <div class="form-group two-column">
+          <div>
+            <mat-form-field appearance="outline">
+              <mat-label>Role</mat-label>
+              <mat-select formControlName="role">
+                <mat-option *ngFor="let role of roles" [value]="role">{{ role | titlecase }}</mat-option>
+              </mat-select>
+              <mat-error *ngIf="role?.hasError('required')">Role is required</mat-error>
+            </mat-form-field>
+          </div>
+          
+          <div>
+            <mat-form-field appearance="outline">
+              <mat-label>Date of Joining</mat-label>
+              <input formControlName="dateOfJoining" matInput [matDatepicker]="picker1" placeholder="Select joining date" />
+              <mat-datepicker-toggle matIconSuffix [for]="picker1"></mat-datepicker-toggle>
+              <mat-datepicker #picker1></mat-datepicker>
+              <mat-hint>MM/DD/YYYY</mat-hint>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div>
+            <mat-form-field appearance="outline">
+              <mat-label>Date of Leaving (Optional)</mat-label>
+              <input formControlName="dateOfLeaving" matInput [matDatepicker]="picker2" placeholder="Select leaving date" />
+              <mat-datepicker-toggle matIconSuffix [for]="picker2"></mat-datepicker-toggle>
+              <mat-datepicker #picker2></mat-datepicker>
+              <mat-hint>Leave blank if still employed</mat-hint>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div>
+            <div class="section-title">Employment Status</div>
+            <mat-radio-group formControlName="active">
+              <mat-radio-button *ngFor="let activeValue of activeValues" [value]="activeValue">
+                <mat-icon>{{ activeValue ? 'check_circle' : 'cancel' }}</mat-icon>
+                {{ activeValue ? 'Active' : 'Inactive' }}
+              </mat-radio-button>
+            </mat-radio-group>
+            <mat-error *ngIf="active?.hasError('required')">Please select employment status</mat-error>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Information Section -->
+      <div class="form-section">
+        <div class="section-title">
+          <mat-icon>contact_phone</mat-icon>
+          Contact Information
+        </div>
+        
+        <div class="form-group three-column">
+          <div>
+            <mat-form-field appearance="outline">
+              <mat-label>Cell Phone</mat-label>
+              <input formControlName="cell" matInput type="tel" placeholder="Enter cell number" />
+              <mat-error *ngIf="cell?.hasError('required')">Cell number is required</mat-error>
+              <mat-error *ngIf="cell?.hasError('minlength')">At least 10 characters required</mat-error>
+              <mat-hint>e.g. 263778261057</mat-hint>
+            </mat-form-field>
+          </div>
+          
+          <div>
+            <mat-form-field appearance="outline">
+              <mat-label>Email Address</mat-label>
+              <input formControlName="email" matInput type="email" placeholder="Enter email address" />
+              <mat-error *ngIf="email?.hasError('required')">Email is required</mat-error>
+              <mat-error *ngIf="email?.hasError('email')">Invalid email format</mat-error>
+              <mat-hint>e.g. john.smith@school.com</mat-hint>
+            </mat-form-field>
+          </div>
+          
+          <div>
+            <mat-form-field appearance="outline">
+              <mat-label>Address</mat-label>
+              <input formControlName="address" matInput type="text" placeholder="Enter address" />
+              <mat-hint>e.g. 123 Main Street, City</mat-hint>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+
+      <!-- Qualifications Section -->
+      <div class="form-section qualifications-section">
+        <div class="qualifications-header">
+          <div class="section-title">
+            <mat-icon>school</mat-icon>
+            Qualifications
+          </div>
+          <button mat-mini-fab (click)="addControl()" class="add-qualification-btn" type="button" 
+                  matTooltip="Add Qualification" aria-label="Add Qualification">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+        
+        <div formArrayName="qualifications">
+          <div *ngFor="let qual of qualifications.controls; let i = index" class="qualification-item">
+            <div class="qualification-input">
+              <mat-form-field appearance="outline">
+                <mat-label>Qualification {{ i + 1 }}</mat-label>
+                <input matInput [formControlName]="i" placeholder="Enter qualification" />
+                <mat-hint>e.g. Bachelor of Education, Master of Arts</mat-hint>
+              </mat-form-field>
+            </div>
+            <mat-icon class="delete-qualification-btn" (click)="delete(i)" 
+                      matTooltip="Remove Qualification" aria-label="Remove Qualification">
+              delete_forever
+            </mat-icon>
+          </div>
+        </div>
+        
+        <div *ngIf="qualifications.length === 0" class="no-qualifications">
+          <mat-icon>info</mat-icon>
+          <p>No qualifications added yet. Click the + button to add qualifications.</p>
+        </div>
+      </div>
+    </mat-card-content>
+
+    <!-- Actions -->
+    <mat-card-actions>
+      <div class="button-group">
+        <button type="button" color="warn" mat-raised-button class="btn-grp-item" (click)="closeDialog()">
+          <mat-icon>cancel</mat-icon>
+          Cancel
+        </button>
+        <button
+          class="btn-grp-item"
+          type="submit"
+          color="primary"
+          mat-raised-button
+          [disabled]="isLoading"
+        >
+          <mat-icon>{{ data ? 'update' : 'save' }}</mat-icon>
+          {{ data ? 'Update Teacher' : 'Add Teacher' }}
+        </button>
+      </div>
+    </mat-card-actions>
+  </form>
+</mat-card>

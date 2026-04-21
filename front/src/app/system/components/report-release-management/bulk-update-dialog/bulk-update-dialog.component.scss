@@ -1,0 +1,28 @@
+.dialog-form {
+  min-width: 500px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.update-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr auto auto;
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 16px;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  position: relative;
+}
+
+.remove-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.add-btn {
+  margin-top: 16px;
+  width: 100%;
+}

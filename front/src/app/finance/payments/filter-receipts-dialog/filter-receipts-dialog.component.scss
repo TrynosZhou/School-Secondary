@@ -1,0 +1,25 @@
+.filter-form-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* Space between form fields */
+  padding: 20px;
+  min-width: 300px; /* Adjust as needed */
+  max-width: 500px;
+}
+
+.filter-form-content mat-form-field {
+  width: 100%;
+}
+
+.amount-range-group {
+  display: flex;
+  gap: 16px; /* Space between min/max amount fields */
+}
+
+.amount-range-group .amount-field {
+  flex: 1; /* Allow fields to grow and share space */
+}
+
+mat-dialog-actions button {
+  margin-left: 8px; /* Space between buttons */
+}

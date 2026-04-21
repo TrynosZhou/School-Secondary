@@ -1,0 +1,204 @@
+.reconciliation-container {
+  padding: 24px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.reconciliation-card {
+  mat-card-header {
+    margin-bottom: 24px;
+
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 24px;
+      font-weight: 500;
+    }
+
+    mat-card-subtitle {
+      margin-top: 8px;
+      color: rgba(0, 0, 0, 0.6);
+    }
+  }
+}
+
+.search-section {
+  margin-bottom: 24px;
+
+  .selected-student-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    margin-top: 16px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    border: 1px solid #e0e0e0;
+
+    .student-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .student-name {
+        font-weight: 500;
+        font-size: 16px;
+      }
+
+      .student-number {
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.6);
+      }
+    }
+  }
+}
+
+.action-section {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+
+  .reconcile-button {
+    min-width: 200px;
+    height: 48px;
+    font-size: 16px;
+
+    .button-spinner {
+      margin-right: 8px;
+    }
+
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+.info-section {
+  .info-card {
+    background-color: #f9f9f9;
+    border-left: 4px solid #2196f3;
+
+    h3 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    ul {
+      margin: 16px 0;
+      padding-left: 24px;
+
+      li {
+        margin-bottom: 8px;
+        line-height: 1.6;
+      }
+    }
+
+    .warning-text {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-top: 16px;
+      padding: 12px;
+      background-color: #fff3cd;
+      border-radius: 4px;
+      border-left: 4px solid #ffc107;
+      color: #856404;
+
+      mat-icon {
+        color: #ffc107;
+      }
+    }
+  }
+}
+
+.results-section {
+  margin-bottom: 24px;
+
+  .results-card {
+    background-color: #e8f5e9;
+    border-left: 4px solid #4caf50;
+
+    mat-card-header {
+      mat-card-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #2e7d32;
+        font-size: 20px;
+        font-weight: 500;
+      }
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+
+      .summary-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background-color: white;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+        mat-icon {
+          color: #4caf50;
+        }
+
+        .label {
+          display: block;
+          font-size: 12px;
+          color: rgba(0, 0, 0, 0.6);
+          margin-bottom: 4px;
+        }
+
+        .value {
+          display: block;
+          font-size: 18px;
+          font-weight: 500;
+          color: #2e7d32;
+        }
+      }
+    }
+
+    .details-panel {
+      margin-top: 16px;
+      background-color: white;
+
+      mat-panel-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .detail-content {
+        padding: 16px;
+
+        p {
+          margin: 8px 0;
+          line-height: 1.6;
+        }
+      }
+
+      .invoice-detail {
+        padding: 12px 0;
+
+        .detail-text {
+          font-size: 14px;
+          color: rgba(0, 0, 0, 0.7);
+          margin: 4px 0;
+        }
+      }
+    }
+  }
+}
+

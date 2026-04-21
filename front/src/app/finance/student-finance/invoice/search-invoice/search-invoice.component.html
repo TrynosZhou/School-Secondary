@@ -1,0 +1,18 @@
+<mat-form-field class="invoice-search-field" 
+                [class.theme-light]="currentTheme === 'light'"
+                [class.theme-dark]="currentTheme === 'dark'">
+  <mat-label>Search for Invoice</mat-label>
+  <mat-icon matPrefix>search</mat-icon>
+  <input type="text" matInput [formControl]="searchControl" [matAutocomplete]="auto" 
+         placeholder="Search by student name, number, or invoice number" />
+  <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectInvoice($event.option.value)">
+    <mat-option *ngFor="let invoice of searchResults$ | async" [value]="invoice">
+      <div style="display: flex; flex-direction: column;">
+        <span style="font-weight: 600;">{{ invoice.invoiceNumber }}</span>
+        <span style="font-size: 0.875rem; color: var(--text-secondary);">
+          {{ invoice.student.name }} {{ invoice.student.surname }} ({{ invoice.student.studentNumber }})
+        </span>
+      </div>
+    </mat-option>
+  </mat-autocomplete>
+</mat-form-field>

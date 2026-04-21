@@ -1,0 +1,17 @@
+.chip-list {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+}
+.students-to-bill {
+  display: flex;
+  flex-flow: column nowrap;
+  padding: 1rem;
+  height: 80vh;
+  overflow-y: scroll;
+}
+mat-form-field {
+  /* width: 80%; */
+  margin: 0 auto;
+  padding: 0.5rem;
+}

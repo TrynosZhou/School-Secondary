@@ -1,0 +1,115 @@
+.continuous-assessment-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.filters-card,
+.roster-card {
+  padding: 1.5rem;
+}
+
+.filters-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.form-row mat-form-field {
+  flex: 1 1 220px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.subtitle {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.roster-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.roster-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+}
+
+.roster-row.header {
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.student-cell .name {
+  font-weight: 600;
+}
+
+.student-cell .number {
+  font-size: 0.85rem;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.score-cell input,
+.max-cell input {
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.status-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+}
+
+.status-cell mat-icon {
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+}
+
+.status-cell .saved {
+  color: #2e7d32;
+}
+
+.status-cell .error {
+  color: #c62828;
+}
+
+.empty-state {
+  text-align: center;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.loading-overlay {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+}

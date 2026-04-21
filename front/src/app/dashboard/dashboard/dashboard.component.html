@@ -1,0 +1,24 @@
+<mat-toolbar class="title">
+
+  <div *ngIf="currentTerm$ |async as currentTerm">{{ today.toDateString() }}, Term {{ currentTerm.num }} {{
+    currentTerm.year}}</div>
+</mat-toolbar>
+
+<!-- Teachers, Admins and HODs dashboard -->
+<app-teachers-dashboard *ngIf="canAccessTeachersDashboard$ | async"></app-teachers-dashboard>
+<!-- End Teacher, Admin and HODs dashboard -->
+
+<!-- Reception Dashboard -->
+<app-finance-dashboard *ngIf="canAccessFinanceDashboard$ | async"></app-finance-dashboard>
+
+<!-- End Reception Dashboard -->
+
+
+
+<!-- Student Dashboard -->
+<app-student-dashboard *ngIf="canAccessStudentDashboard$ | async"></app-student-dashboard>
+<!-- End Student Dashboard -->
+
+<!-- Parent Dashboard -->
+<app-parent-dashboard *ngIf="canAccessParentDashboard$ | async"></app-parent-dashboard>
+<!-- End Parent Dashboard -->

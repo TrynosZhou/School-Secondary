@@ -1,0 +1,145 @@
+<div class="reconciliation-container">
+  <mat-card class="reconciliation-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>groups</mat-icon>
+        Class Finance Reconciliation
+      </mat-card-title>
+      <mat-card-subtitle>
+        Reconcile all students in a class for a term. Select class and term, then run to see the report.
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="selectors-section">
+        <mat-form-field appearance="outline" class="selector-field">
+          <mat-label>Class</mat-label>
+          <mat-select [value]="selectedClass" (selectionChange)="selectedClass = $event.value" placeholder="Select class">
+            <mat-option *ngFor="let c of classes" [value]="c">{{ c.name }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="selector-field">
+          <mat-label>Term</mat-label>
+          <mat-select [value]="selectedTerm" (selectionChange)="selectedTerm = $event.value" placeholder="Select term">
+            <mat-option *ngFor="let t of terms" [value]="t">{{ termLabel(t) }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="action-section">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="runReconciliation()"
+          [disabled]="!selectedClass || !selectedTerm || isReconciling"
+          class="reconcile-button"
+        >
+          <mat-spinner *ngIf="isReconciling" diameter="20" class="button-spinner"></mat-spinner>
+          <mat-icon *ngIf="!isReconciling">sync</mat-icon>
+          {{ isReconciling ? 'Reconciling...' : 'Reconcile Class' }}
+        </button>
+        <button
+          *ngIf="report"
+          mat-stroked-button
+          (click)="clearReport()"
+          class="clear-button"
+        >
+          <mat-icon>clear</mat-icon>
+          Clear
+        </button>
+      </div>
+
+      <!-- Report summary -->
+      <div *ngIf="report" class="results-section">
+        <mat-card class="results-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>check_circle</mat-icon>
+              Reconciliation Report — {{ report.className }}, Term {{ report.termNum }} {{ report.year }}
+            </mat-card-title>
+            <mat-card-subtitle>
+              {{ report.succeeded }} succeeded, {{ report.failed }} failed of {{ report.totalStudents }} students
+            </mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="summary-row">
+              <div class="summary-item">
+                <span class="label">Total students</span>
+                <span class="value">{{ report.totalStudents }}</span>
+              </div>
+              <div class="summary-item success">
+                <span class="label">Succeeded</span>
+                <span class="value">{{ report.succeeded }}</span>
+              </div>
+              <div class="summary-item failed">
+                <span class="label">Failed</span>
+                <span class="value">{{ report.failed }}</span>
+              </div>
+            </div>
+            <div class="table-actions">
+              <button mat-stroked-button (click)="downloadReport()">
+                <mat-icon>download</mat-icon>
+                Download JSON
+              </button>
+            </div>
+            <div class="table-wrapper">
+              <table mat-table [dataSource]="resultsDataSource" class="results-table">
+                <ng-container matColumnDef="studentNumber">
+                  <th mat-header-cell *matHeaderCellDef>Student number</th>
+                  <td mat-cell *matCellDef="let row">{{ row.studentNumber }}</td>
+                </ng-container>
+                <ng-container matColumnDef="studentName">
+                  <th mat-header-cell *matHeaderCellDef>Name</th>
+                  <td mat-cell *matCellDef="let row">{{ row.studentName || '—' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef>Status</th>
+                  <td mat-cell *matCellDef="let row">
+                    <mat-chip-set>
+                      <mat-chip [class.success-chip]="row.success" [class.error-chip]="!row.success">
+                        {{ row.success ? 'OK' : 'Failed' }}
+                      </mat-chip>
+                    </mat-chip-set>
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="details">
+                  <th mat-header-cell *matHeaderCellDef>Details</th>
+                  <td mat-cell *matCellDef="let row">
+                    <span *ngIf="row.error" class="error-text">{{ row.error }}</span>
+                    <span *ngIf="row.success && row.reconciliationSummary" class="detail-text">
+                      Invoices: {{ row.reconciliationSummary.invoicesProcessed }},
+                      Receipts: {{ row.reconciliationSummary.receiptsProcessed }},
+                      Credit: {{ row.reconciliationSummary.totalCreditBalance | number:'1.2-2' }}
+                    </span>
+                  </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+              </table>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="info-section">
+        <mat-card class="info-card">
+          <mat-card-content>
+            <h3>
+              <mat-icon>info</mat-icon>
+              What does class reconciliation do?
+            </h3>
+            <ul>
+              <li>Runs full finance reconciliation for every student enrolled in the selected class and term.</li>
+              <li>Corrects overpayments, verifies balances, applies credit, and reallocates receipts to invoices.</li>
+              <li>The report shows success/failure per student and can be downloaded as JSON.</li>
+            </ul>
+            <p class="warning-text">
+              <mat-icon>warning</mat-icon>
+              <strong>Note:</strong> This may take a while for large classes. Do not close the page until it finishes.
+            </p>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

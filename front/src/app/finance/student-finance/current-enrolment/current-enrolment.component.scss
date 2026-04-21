@@ -1,0 +1,162 @@
+// Theme variables (aligned with theme.scss and app dialog pattern)
+$primary-blue: #2196f3;
+$primary-blue-dark: #1976d2;
+$accent-gold: #ffc107;
+$text-primary: #2c3e50;
+$text-secondary: #7f8c8d;
+$bg-light: #f8f9fa;
+$border-color: #e9ecef;
+$white: #ffffff;
+
+.current-enrolment-dialog {
+  min-width: 360px;
+  max-width: 480px;
+}
+
+.dialog-header {
+  background: linear-gradient(135deg, $primary-blue 0%, $primary-blue-dark 100%);
+  color: $white;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .close-btn {
+    color: $white;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: rotate(90deg);
+    }
+  }
+}
+
+.dialog-content {
+  padding: 1.5rem 1.5rem 1rem;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.enrolment-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem 1.25rem;
+  align-items: center;
+}
+
+.enrolment-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $text-secondary;
+}
+
+.enrolment-value {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  gap: 0.5rem;
+  font-size: 1rem;
+  color: $text-primary;
+}
+
+.display-mode {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .value-text {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: $text-primary;
+  }
+
+  mat-icon {
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+    color: $accent-gold;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+}
+
+.edit-mode {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  gap: 0.5rem;
+
+  mat-form-field {
+    margin: 0;
+    width: 100%;
+    max-width: 260px;
+  }
+}
+
+.dialog-actions {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid $border-color;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  background: $bg-light;
+
+  button {
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
+  }
+
+  .save-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  mat-spinner {
+    margin-right: 0.25rem;
+  }
+}
+
+// Use CSS custom properties for dark theme (when .dark-theme is on body)
+:host-context(.dark-theme) {
+  .dialog-header {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, #1565c0 100%);
+  }
+
+  .enrolment-label {
+    color: var(--text-secondary);
+  }
+
+  .enrolment-value,
+  .display-mode .value-text {
+    color: var(--text-primary);
+  }
+
+  .dialog-content {
+    background: var(--surface);
+  }
+
+  .dialog-actions {
+    background: var(--background);
+    border-top-color: rgba(255, 255, 255, 0.12);
+  }
+}

@@ -1,0 +1,297 @@
+/* You might have other global imports here, e.g., Angular Material themes: */
+/* @import '@angular/material/prebuilt-themes/indigo-pink.css'; */
+
+/* Basic reset/global font-sizing if not already handled */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+/* Global Snackbar Styles */
+.error-snackbar {
+  background-color: #f44336 !important;
+  color: white !important;
+}
+
+.error-snackbar .mat-mdc-snack-bar-action {
+  color: white !important;
+}
+
+/* Success Snackbar Styles */
+.success-snackbar {
+  background-color: #4caf50 !important;
+  color: white !important;
+}
+
+.success-snackbar .mat-mdc-snack-bar-action {
+  color: white !important;
+}
+
+/* Info Snackbar Styles */
+.info-snackbar {
+  background-color: #2196f3 !important;
+  color: white !important;
+}
+
+.info-snackbar .mat-mdc-snack-bar-action {
+  color: white !important;
+}
+
+/* Enrollment Dialog Panel Styling */
+::ng-deep .enrol-dialog-panel {
+  .mat-mdc-dialog-container {
+    padding: 0 !important;
+    border-radius: 15px !important;
+    overflow: hidden !important;
+    max-width: 1200px !important;
+    max-height: 90vh !important;
+  }
+  
+  .mat-mdc-dialog-surface {
+    border-radius: 15px !important;
+    overflow: hidden !important;
+  }
+}
+
+/* Optional: Spinner/Title styles (these are general and not tied to the menu) */
+.title {
+  display: flex;
+  justify-content: center;
+}
+
+.spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 999;
+  font-size: xx-large;
+}
+/* --- GLOBAL PRINT SPECIFIC STYLES --- */
+@media print {
+  /* Ensure no scrollbars on the main document */
+  html,
+  body {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 10pt; /* Global base font size for print */
+  }
+
+  /* Common Angular Material layout elements that might cause issues */
+  .mat-sidenav-content,
+  .mat-tab-body-content,
+  .mat-drawer-content,
+  .mat-dialog-container, /* If printing from a dialog */
+  .mat-card-content {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    box-shadow: none !important;
+    background-color: transparent !important;
+  }
+
+  /* Hide elements that shouldn't be printed, including mat-paginator globally */
+  .filter-form-print,
+  .mat-paginator,
+  .chart-container,
+  mat-divider,
+  .print-hide {
+    /* Ensure any element with .print-hide is hidden */
+    display: none !important;
+  }
+
+  /* Component's card and main report container */
+  .outstanding-fees-card {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: #ffffff !important;
+    width: 100% !important; /* Ensure it takes full width for print */
+    max-width: none !important;
+  }
+
+  /* Target the component's root container */
+  app-outstanding-fees-report {
+    display: block !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Table containers - both for mat-table (summaries) and plain HTML table (student details) */
+  .table-container,
+  .student-details-table-container {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    box-shadow: none !important;
+    background-color: transparent !important;
+    padding: 0 !important;
+    display: block !important;
+    width: 100% !important;
+  }
+
+  /* Angular Material internal table elements (for summary tables) */
+  .mat-mdc-table,
+  .mat-table {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    display: table !important; /* Ensure it behaves like a table */
+    width: 100% !important;
+  }
+
+  .mat-mdc-table-wrapper, /* For MDC-based components */
+  .mat-elevation-z8 {
+    /* Common wrapper class for Material tables */
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    box-shadow: none !important;
+    background-color: transparent !important;
+  }
+
+  .mdc-data-table__content {
+    /* Directly target the tbody wrapper in MDC tables */
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  /* --- Styles for the plain HTML table (Students with Outstanding Balances) --- */
+  .full-width-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: auto !important;
+    page-break-inside: auto !important; /* Allow the table to break */
+  }
+
+  .full-width-table thead {
+    page-break-after: avoid; /* Keep header with first row */
+  }
+
+  .full-width-table tbody {
+    page-break-inside: auto; /* Allow body to break across pages */
+  }
+
+  .table-row {
+    page-break-inside: avoid !important; /* Try to keep rows from breaking across pages */
+    page-break-after: auto !important; /* Allow page break after a row */
+  }
+
+  .table-header-cell {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background-color: #e0e0e0 !important;
+    font-weight: bold !important;
+    color: #000 !important;
+    font-size: 9pt !important;
+    padding: 4px 6px !important;
+    text-align: left !important;
+    border-bottom: 1px solid #ccc !important;
+  }
+
+  .table-cell {
+    font-size: 9pt !important;
+    padding: 4px 6px !important;
+    vertical-align: top !important;
+    white-space: normal !important;
+    border: 1px solid #eee !important;
+    text-align: left !important;
+  }
+
+  .table-row:nth-child(even) {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background-color: #f0f0f0 !important;
+  }
+
+  /* --- Styles for the mat-table based summary tables --- */
+  .mat-header-cell {
+    /* Applies to mat-table headers */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background-color: #e0e0e0 !important;
+    font-weight: bold !important;
+    color: #000 !important;
+    font-size: 9pt !important;
+    padding: 4px 6px !important;
+    text-align: left !important;
+    border-bottom: 1px solid #ccc !important;
+  }
+
+  /* .mat-row { /* Applies to mat-table rows */
+  /* page-break-inside: avoid !important;
+      page-break-after: auto !important; */
+  /* } */ /* This rule is already inside the @media print block below, keep it there to avoid specificity conflicts */
+
+  /* Moved from component CSS for mat-rows in summary tables, if they still use mat-row */
+  /* If you still have mat-rows for summary tables, make sure this is targeted correctly */
+  .mat-row {
+    page-break-inside: avoid !important;
+    page-break-after: auto !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background-color: transparent !important; /* Ensure no background for mat-row, then apply nth-child */
+  }
+
+  .mat-row:nth-child(even) {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background-color: #f0f0f0 !important;
+  }
+
+  .mat-cell {
+    /* Applies to mat-table cells */
+    font-size: 9pt !important;
+    padding: 4px 6px !important;
+    vertical-align: top !important;
+    white-space: normal !important;
+    border: 1px solid #eee !important;
+    text-align: left !important;
+  }
+  /* End Styles for mat-table based summary tables */
+
+  /* General print adjustments for other elements */
+  .total-outstanding {
+    font-size: 1.2em !important;
+    color: #000 !important;
+    border-bottom: 1px solid #ccc !important;
+    padding-bottom: 5px !important;
+  }
+
+  h4 {
+    border-bottom: 1px solid #ccc !important;
+    font-size: 1.1em !important;
+    margin-bottom: 10px !important;
+    padding-bottom: 5px !important;
+  }
+
+  /* Ensure no external margins/paddings on print */
+  div,
+  h2,
+  h4,
+  table,
+  form {
+    /* Added form here */
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* Universal box-sizing for consistency */
+  *,
+  *:before,
+  *:after {
+    box-sizing: border-box !important;
+    -webkit-box-sizing: border-box !important;
+  }
+}

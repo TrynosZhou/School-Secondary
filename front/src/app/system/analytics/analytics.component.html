@@ -1,0 +1,278 @@
+<div class="analytics-container">
+  <mat-card class="analytics-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>insights</mat-icon>
+        Analytics & Reports
+      </mat-card-title>
+      <mat-card-subtitle>Comprehensive system analytics and insights</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Filters -->
+      <mat-expansion-panel [expanded]="false" class="filters-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>filter_list</mat-icon>
+            Date Range Filter
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <form [formGroup]="filterForm" class="filters-form">
+          <div class="filters-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Term</mat-label>
+              <mat-select formControlName="termNum" (selectionChange)="onTermChange()">
+                <mat-option value="">All Terms</mat-option>
+                <mat-option *ngFor="let term of getFilteredTerms()" [value]="term.num">
+                  Term {{ term.num }} {{ term.year }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Year</mat-label>
+              <mat-select formControlName="termYear" (selectionChange)="onYearChange()">
+                <mat-option value="">All Years</mat-option>
+                <mat-option *ngFor="let year of getUniqueYears()" [value]="year">
+                  {{ year }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Start Date</mat-label>
+              <input matInput [matDatepicker]="startPicker" formControlName="startDate">
+              <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+              <mat-datepicker #startPicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>End Date</mat-label>
+              <input matInput [matDatepicker]="endPicker" formControlName="endDate">
+              <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+              <mat-datepicker #endPicker></mat-datepicker>
+            </mat-form-field>
+
+            <div class="filter-actions">
+              <button mat-raised-button color="primary" (click)="onFilterChange()">
+                <mat-icon>search</mat-icon>
+                Apply Filters
+              </button>
+              <button mat-button color="warn" (click)="clearFilters()">
+                <mat-icon>clear</mat-icon>
+                Clear
+              </button>
+            </div>
+          </div>
+        </form>
+      </mat-expansion-panel>
+
+      <!-- Loading Spinner -->
+      <div *ngIf="isLoading" class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Loading analytics...</p>
+      </div>
+
+      <!-- Analytics Content -->
+      <div *ngIf="!isLoading && analyticsSummary" class="analytics-content">
+        <mat-tab-group [(selectedIndex)]="selectedTab" class="analytics-tabs">
+          <!-- Enrollment Tab -->
+          <mat-tab label="Enrollment">
+            <div class="tab-content">
+              <div class="stats-grid">
+                <mat-card class="stat-card">
+                  <mat-card-content>
+                    <div class="stat-value">{{ analyticsSummary.enrollment.totalStudents }}</div>
+                    <div class="stat-label">Total Students</div>
+                  </mat-card-content>
+                </mat-card>
+                <mat-card class="stat-card">
+                  <mat-card-content>
+                    <div class="stat-value">{{ analyticsSummary.enrollment.activeEnrollments }}</div>
+                    <div class="stat-label">Active Enrollments</div>
+                  </mat-card-content>
+                </mat-card>
+                <mat-card class="stat-card">
+                  <mat-card-content>
+                    <div class="stat-value">{{ analyticsSummary.enrollment.newStudentsThisYear }}</div>
+                    <div class="stat-label">New Students This Year</div>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+
+              <div class="charts-grid">
+                <mat-card *ngIf="enrollmentByTermChart" class="chart-card">
+                  <mat-card-content>
+                    <canvas baseChart [data]="enrollmentByTermChart.data" [options]="enrollmentByTermChart.options" [type]="enrollmentByTermChart.type"></canvas>
+                  </mat-card-content>
+                </mat-card>
+                <mat-card *ngIf="enrollmentByClassChart" class="chart-card">
+                  <mat-card-content>
+                    <canvas baseChart [data]="enrollmentByClassChart.data" [options]="enrollmentByClassChart.options" [type]="enrollmentByClassChart.type"></canvas>
+                  </mat-card-content>
+                </mat-card>
+                <mat-card *ngIf="studentsByGenderChart" class="chart-card">
+                  <mat-card-content>
+                    <canvas baseChart [data]="studentsByGenderChart.data" [options]="studentsByGenderChart.options" [type]="studentsByGenderChart.type"></canvas>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+            </div>
+          </mat-tab>
+
+          <!-- Financial Tab -->
+          <mat-tab label="Financial">
+            <div class="tab-content">
+              <div class="stats-grid">
+                <mat-card class="stat-card">
+                  <mat-card-content>
+                    <div class="stat-value">{{ formatCurrency(analyticsSummary.financial.totalRevenue) }}</div>
+                    <div class="stat-label">Total Revenue</div>
+                  </mat-card-content>
+                </mat-card>
+                <mat-card class="stat-card">
+                  <mat-card-content>
+                    <div class="stat-value">{{ formatCurrency(analyticsSummary.financial.totalOutstanding) }}</div>
+                    <div class="stat-label">Total Outstanding</div>
+                  </mat-card-content>
+                </mat-card>
+                <mat-card class="stat-card">
+                  <mat-card-content>
+                    <div class="stat-value">{{ formatCurrency(analyticsSummary.financial.totalInvoiced) }}</div>
+                    <div class="stat-label">Total Invoiced</div>
+                  </mat-card-content>
+                </mat-card>
+                <mat-card class="stat-card">
+                  <mat-card-content>
+                    <div class="stat-value">{{ analyticsSummary.financial.collectionRate }}%</div>
+                    <div class="stat-label">Collection Rate</div>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+
+              <div class="charts-grid">
+                <mat-card *ngIf="revenueByMonthChart" class="chart-card">
+                  <mat-card-content>
+                    <canvas baseChart [data]="revenueByMonthChart.data" [options]="revenueByMonthChart.options" [type]="revenueByMonthChart.type"></canvas>
+                  </mat-card-content>
+                </mat-card>
+                <mat-card *ngIf="paymentsByMethodChart" class="chart-card">
+                  <mat-card-content>
+                    <canvas baseChart [data]="paymentsByMethodChart.data" [options]="paymentsByMethodChart.options" [type]="paymentsByMethodChart.type"></canvas>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+            </div>
+          </mat-tab>
+
+          <!-- Academic Tab -->
+          <mat-tab label="Academic">
+            <div class="tab-content">
+              <div class="stats-grid">
+                <mat-card class="stat-card">
+                  <mat-card-content>
+                    <div class="stat-value">{{ analyticsSummary.academic.totalReports }}</div>
+                    <div class="stat-label">Total Reports</div>
+                  </mat-card-content>
+                </mat-card>
+                <mat-card class="stat-card">
+                  <mat-card-content>
+                    <div class="stat-value">{{ analyticsSummary.academic.averagePerformance }}%</div>
+                    <div class="stat-label">Average Performance</div>
+                  </mat-card-content>
+                </mat-card>
+                <mat-card class="stat-card">
+                  <mat-card-content>
+                    <div class="stat-value">{{ analyticsSummary.academic.passRate }}%</div>
+                    <div class="stat-label">Pass Rate</div>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+
+              <div class="charts-grid">
+                <mat-card *ngIf="reportsByTermChart" class="chart-card">
+                  <mat-card-content>
+                    <canvas baseChart [data]="reportsByTermChart.data" [options]="reportsByTermChart.options" [type]="reportsByTermChart.type"></canvas>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+            </div>
+          </mat-tab>
+
+          <!-- Users Tab -->
+          <mat-tab label="Users">
+            <div class="tab-content">
+              <div class="stats-grid">
+                <mat-card class="stat-card">
+                  <mat-card-content>
+                    <div class="stat-value">{{ analyticsSummary.userActivity.totalUsers }}</div>
+                    <div class="stat-label">Total Users</div>
+                  </mat-card-content>
+                </mat-card>
+                <mat-card class="stat-card">
+                  <mat-card-content>
+                    <div class="stat-value">{{ analyticsSummary.userActivity.activeUsers }}</div>
+                    <div class="stat-label">Active Users</div>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+
+              <div class="charts-grid">
+                <mat-card *ngIf="usersByRoleChart" class="chart-card">
+                  <mat-card-content>
+                    <canvas baseChart [data]="usersByRoleChart.data" [options]="usersByRoleChart.options" [type]="usersByRoleChart.type"></canvas>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+            </div>
+          </mat-tab>
+
+          <!-- System Tab -->
+          <mat-tab label="System">
+            <div class="tab-content">
+              <div class="stats-grid">
+                <mat-card class="stat-card">
+                  <mat-card-content>
+                    <div class="stat-value">{{ analyticsSummary.system.totalAuditLogs }}</div>
+                    <div class="stat-label">Total Audit Logs</div>
+                  </mat-card-content>
+                </mat-card>
+                <mat-card class="stat-card">
+                  <mat-card-content>
+                    <div class="stat-value">
+                      <mat-icon [style.color]="analyticsSummary.system.systemHealth.databaseConnected ? 'green' : 'red'">
+                        {{ analyticsSummary.system.systemHealth.databaseConnected ? 'check_circle' : 'error' }}
+                      </mat-icon>
+                    </div>
+                    <div class="stat-label">Database Status</div>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+
+              <div class="charts-grid">
+                <mat-card *ngIf="auditLogsByActionChart" class="chart-card">
+                  <mat-card-content>
+                    <canvas baseChart [data]="auditLogsByActionChart.data" [options]="auditLogsByActionChart.options" [type]="auditLogsByActionChart.type"></canvas>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+
+        <div class="generated-at">
+          <mat-icon>schedule</mat-icon>
+          Generated at: {{ analyticsSummary.generatedAt | date: 'medium' }}
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!isLoading && !analyticsSummary" class="empty-state">
+        <mat-icon>inbox</mat-icon>
+        <p>No analytics data available</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+

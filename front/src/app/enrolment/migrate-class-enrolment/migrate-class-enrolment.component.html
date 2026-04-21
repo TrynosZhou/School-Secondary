@@ -1,0 +1,161 @@
+<div class="migrate-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="title-toolbar">
+      <div class="toolbar-content">
+        <div class="title-section">
+          <mat-icon class="title-icon">redo</mat-icon>
+          <h1 class="page-title">{{ title.getTitle() }}</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Migration Form -->
+  <form [formGroup]="migrateForm" (ngSubmit)="migrateClass()" class="migration-form">
+    <div class="form-container">
+      <!-- Source Section -->
+      <div class="source-section">
+        <div class="section-card">
+          <div class="card-header">
+            <div class="header-content">
+              <mat-icon class="section-icon">arrow_back</mat-icon>
+              <div class="header-text">
+                <h2 class="section-title">Source</h2>
+                <p class="section-subtitle">Select the class and term to migrate from</p>
+              </div>
+            </div>
+          </div>
+          <div class="card-content">
+            <div class="form-fields">
+              <div class="form-field">
+                <mat-form-field appearance="outline">
+                  <mat-label>Source Class</mat-label>
+                  <mat-select formControlName="fromName">
+                    <mat-option
+                      *ngFor="let clas of classes$ | async"
+                      [value]="clas.name"
+                    >
+                      {{ clas.name }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matSuffix>class</mat-icon>
+                  <mat-hint>Select the class to migrate from</mat-hint>
+                  <mat-error *ngIf="fromName?.invalid && fromName?.touched">
+                    {{ getFormErrorMessage('fromName') }}
+                  </mat-error>
+                </mat-form-field>
+              </div>
+              <div class="form-field">
+                <mat-form-field appearance="outline">
+                  <mat-label>Source Term</mat-label>
+                  <mat-select formControlName="fromTerm">
+                    <mat-option *ngFor="let term of terms$ | async" [value]="term">
+                      Term {{ term.num }} {{ term.year }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matSuffix>calendar_today</mat-icon>
+                  <mat-hint>Select the term to migrate from</mat-hint>
+                  <mat-error *ngIf="fromTerm?.invalid && fromTerm?.touched">
+                    {{ getFormErrorMessage('fromTerm') }}
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Arrow Section -->
+      <div class="arrow-section">
+        <div class="arrow-container">
+          <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+        </div>
+      </div>
+
+      <!-- Destination Section -->
+      <div class="destination-section">
+        <div class="section-card">
+          <div class="card-header">
+            <div class="header-content">
+              <mat-icon class="section-icon">arrow_forward</mat-icon>
+              <div class="header-text">
+                <h2 class="section-title">Destination</h2>
+                <p class="section-subtitle">Select the class and term to migrate to</p>
+              </div>
+            </div>
+          </div>
+          <div class="card-content">
+            <div class="form-fields">
+              <div class="form-field">
+                <mat-form-field appearance="outline">
+                  <mat-label>Destination Class</mat-label>
+                  <mat-select formControlName="toName">
+                    <mat-option
+                      *ngFor="let clas of classes$ | async"
+                      [value]="clas.name"
+                    >
+                      {{ clas.name }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matSuffix>class</mat-icon>
+                  <mat-hint>Select the class to migrate to</mat-hint>
+                  <mat-error *ngIf="toName?.invalid && toName?.touched">
+                    {{ getFormErrorMessage('toName') }}
+                  </mat-error>
+                </mat-form-field>
+              </div>
+              <div class="form-field">
+                <mat-form-field appearance="outline">
+                  <mat-label>Destination Term</mat-label>
+                  <mat-select formControlName="toTerm">
+                    <mat-option *ngFor="let term of terms$ | async" [value]="term">
+                      Term {{ term.num }} {{ term.year }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matSuffix>calendar_today</mat-icon>
+                  <mat-hint>Select the term to migrate to</mat-hint>
+                  <mat-error *ngIf="toTerm?.invalid && toTerm?.touched">
+                    {{ getFormErrorMessage('toTerm') }}
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Section -->
+    <div class="action-section">
+      <div class="action-card">
+        <div class="card-content">
+          <div class="action-buttons">
+            <button
+              mat-raised-button
+              type="button"
+              color="warn"
+              (click)="migrateForm.reset()"
+              [disabled]="isLoading"
+              class="reset-button"
+            >
+              <mat-icon>refresh</mat-icon>
+              Reset
+            </button>
+            <button
+              mat-raised-button
+              type="submit"
+              color="primary"
+              [disabled]="!canMigrate() || isLoading"
+              class="migrate-button"
+            >
+              <mat-icon *ngIf="!isLoading">redo</mat-icon>
+              <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+              {{ isLoading ? 'Migrating...' : 'Migrate Class' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

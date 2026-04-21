@@ -1,0 +1,253 @@
+<div class="roles-permissions-container" [class.theme-dark]="currentTheme === 'dark'">
+  <mat-card class="roles-permissions-card">
+    <mat-card-header class="card-header">
+      <h2>
+        <mat-icon>admin_panel_settings</mat-icon>
+        Roles & Permissions Management
+      </h2>
+    </mat-card-header>
+
+    <mat-card-content>
+      <mat-tab-group [(selectedIndex)]="selectedTab">
+        <!-- Roles Tab -->
+        <mat-tab label="Roles">
+          <div class="tab-content">
+            <div class="actions-bar">
+              <button mat-raised-button color="primary" (click)="onCreateRole()" *ngIf="!isEditingRole">
+                <mat-icon>add</mat-icon>
+                Create Role
+              </button>
+              <button mat-button (click)="onCancelRole()" *ngIf="isEditingRole">
+                <mat-icon>cancel</mat-icon>
+                Cancel
+              </button>
+              <button mat-raised-button color="primary" (click)="onSaveRole()" *ngIf="isEditingRole">
+                <mat-icon>save</mat-icon>
+                {{ selectedRole ? 'Update' : 'Create' }} Role
+              </button>
+            </div>
+
+            <!-- Role Form -->
+            <mat-card *ngIf="isEditingRole" class="form-card">
+              <mat-card-content>
+                <form [formGroup]="roleForm">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Role Name</mat-label>
+                    <input matInput formControlName="name" placeholder="e.g., Finance Manager">
+                    <mat-icon matPrefix>badge</mat-icon>
+                    <mat-error *ngIf="roleForm.get('name')?.hasError('required')">Role name is required</mat-error>
+                    <mat-error *ngIf="roleForm.get('name')?.hasError('minlength')">Role name must be at least 3 characters</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Description</mat-label>
+                    <textarea matInput formControlName="description" rows="3" placeholder="Describe the role's purpose"></textarea>
+                  </mat-form-field>
+
+                  <mat-slide-toggle formControlName="active" color="primary">
+                    Active
+                  </mat-slide-toggle>
+
+                  <div class="permissions-section" *ngIf="permissions.length > 0">
+                    <h3>Permissions</h3>
+                    <div class="permissions-grid">
+                      <mat-checkbox
+                        *ngFor="let permission of permissions"
+                        [checked]="isPermissionSelected(permission.id)"
+                        (change)="togglePermission(permission.id, $event.checked)">
+                        {{ permission.name }}
+                        <span class="permission-meta" *ngIf="permission.resource || permission.action">
+                          ({{ permission.resource }}{{ permission.action ? '.' + permission.action : '' }})
+                        </span>
+                      </mat-checkbox>
+                    </div>
+                  </div>
+                </form>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Roles Table -->
+            <mat-card *ngIf="!isEditingRole" class="table-card">
+              <mat-card-content>
+                <table mat-table [dataSource]="roles" class="roles-table" *ngIf="roles.length > 0; else noRoles">
+                  <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef>Role Name</th>
+                    <td mat-cell *matCellDef="let role">
+                      <strong>{{ role.name }}</strong>
+                      <mat-chip *ngIf="role.isSystemRole" class="system-role-chip">System</mat-chip>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="description">
+                    <th mat-header-cell *matHeaderCellDef>Description</th>
+                    <td mat-cell *matCellDef="let role">{{ role.description || '-' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="permissions">
+                    <th mat-header-cell *matHeaderCellDef>Permissions</th>
+                    <td mat-cell *matCellDef="let role">{{ getRolePermissions(role) }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="active">
+                    <th mat-header-cell *matHeaderCellDef>Status</th>
+                    <td mat-cell *matCellDef="let role">
+                      <mat-chip [class]="role.active ? 'active-chip' : 'inactive-chip'">
+                        {{ role.active ? 'Active' : 'Inactive' }}
+                      </mat-chip>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef>Actions</th>
+                    <td mat-cell *matCellDef="let role">
+                      <button mat-icon-button (click)="onEditRole(role)" [disabled]="role.isSystemRole" matTooltip="Edit Role">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button color="warn" (click)="onDeleteRole(role)" [disabled]="role.isSystemRole" matTooltip="Delete Role">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="rolesDisplayedColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: rolesDisplayedColumns;"></tr>
+                </table>
+
+                <ng-template #noRoles>
+                  <div class="empty-state">
+                    <mat-icon>admin_panel_settings</mat-icon>
+                    <p>No roles found. Create your first role to get started.</p>
+                  </div>
+                </ng-template>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </mat-tab>
+
+        <!-- Permissions Tab -->
+        <mat-tab label="Permissions">
+          <div class="tab-content">
+            <div class="actions-bar">
+              <button mat-raised-button color="primary" (click)="onCreatePermission()" *ngIf="!isEditingPermission">
+                <mat-icon>add</mat-icon>
+                Create Permission
+              </button>
+              <button mat-button (click)="onCancelPermission()" *ngIf="isEditingPermission">
+                <mat-icon>cancel</mat-icon>
+                Cancel
+              </button>
+              <button mat-raised-button color="primary" (click)="onSavePermission()" *ngIf="isEditingPermission">
+                <mat-icon>save</mat-icon>
+                {{ selectedPermission ? 'Update' : 'Create' }} Permission
+              </button>
+            </div>
+
+            <!-- Permission Form -->
+            <mat-card *ngIf="isEditingPermission" class="form-card">
+              <mat-card-content>
+                <form [formGroup]="permissionForm">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Permission Name</mat-label>
+                    <input matInput formControlName="name" placeholder="e.g., user.create, finance.view">
+                    <mat-icon matPrefix>security</mat-icon>
+                    <mat-hint>Use dot notation: resource.action (e.g., user.create, finance.view)</mat-hint>
+                    <mat-error *ngIf="permissionForm.get('name')?.hasError('required')">Permission name is required</mat-error>
+                    <mat-error *ngIf="permissionForm.get('name')?.hasError('minlength')">Permission name must be at least 3 characters</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Resource</mat-label>
+                    <input matInput formControlName="resource" placeholder="e.g., user, finance, marks">
+                    <mat-hint>Optional: The resource this permission applies to</mat-hint>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Action</mat-label>
+                    <input matInput formControlName="action" placeholder="e.g., create, read, update, delete">
+                    <mat-hint>Optional: The action this permission allows</mat-hint>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Description</mat-label>
+                    <textarea matInput formControlName="description" rows="3" placeholder="Describe what this permission allows"></textarea>
+                  </mat-form-field>
+
+                  <mat-slide-toggle formControlName="active" color="primary">
+                    Active
+                  </mat-slide-toggle>
+                </form>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Permissions Table -->
+            <mat-card *ngIf="!isEditingPermission" class="table-card">
+              <mat-card-content>
+                <table mat-table [dataSource]="permissions" class="permissions-table" *ngIf="permissions.length > 0; else noPermissions">
+                  <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef>Permission Name</th>
+                    <td mat-cell *matCellDef="let permission">
+                      <strong>{{ permission.name }}</strong>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="resource">
+                    <th mat-header-cell *matHeaderCellDef>Resource</th>
+                    <td mat-cell *matCellDef="let permission">{{ permission.resource || '-' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="action">
+                    <th mat-header-cell *matHeaderCellDef>Action</th>
+                    <td mat-cell *matCellDef="let permission">{{ permission.action || '-' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="description">
+                    <th mat-header-cell *matHeaderCellDef>Description</th>
+                    <td mat-cell *matCellDef="let permission">{{ permission.description || '-' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="active">
+                    <th mat-header-cell *matHeaderCellDef>Status</th>
+                    <td mat-cell *matCellDef="let permission">
+                      <mat-chip [class]="permission.active ? 'active-chip' : 'inactive-chip'">
+                        {{ permission.active ? 'Active' : 'Inactive' }}
+                      </mat-chip>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef>Actions</th>
+                    <td mat-cell *matCellDef="let permission">
+                      <button mat-icon-button (click)="onEditPermission(permission)" matTooltip="Edit Permission">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button color="warn" (click)="onDeletePermission(permission)" matTooltip="Delete Permission">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="permissionsDisplayedColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: permissionsDisplayedColumns;"></tr>
+                </table>
+
+                <ng-template #noPermissions>
+                  <div class="empty-state">
+                    <mat-icon>security</mat-icon>
+                    <p>No permissions found. Create your first permission to get started.</p>
+                  </div>
+                </ng-template>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+
+      <!-- Loading Spinner -->
+      <div *ngIf="isLoading" class="loading-overlay">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+

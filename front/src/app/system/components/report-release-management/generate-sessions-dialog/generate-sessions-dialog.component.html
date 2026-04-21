@@ -1,0 +1,26 @@
+<h2 mat-dialog-title>Generate Exam Sessions</h2>
+
+<mat-dialog-content>
+  <p>This will generate exam sessions for the specified year (current and next year) with both Mid-Term and End of Term options for each term.</p>
+  
+  <form [formGroup]="form" class="dialog-form">
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Year</mat-label>
+      <input matInput formControlName="year" type="number" min="2020" max="2030">
+      <mat-error *ngIf="form.get('year')?.hasError('required')">Year is required</mat-error>
+      <mat-error *ngIf="form.get('year')?.hasError('min')">Year must be 2020 or later</mat-error>
+      <mat-error *ngIf="form.get('year')?.hasError('max')">Year must be 2030 or earlier</mat-error>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button 
+    mat-raised-button 
+    color="primary" 
+    (click)="onSave()"
+    [disabled]="!form.valid">
+    Generate Sessions
+  </button>
+</mat-dialog-actions>

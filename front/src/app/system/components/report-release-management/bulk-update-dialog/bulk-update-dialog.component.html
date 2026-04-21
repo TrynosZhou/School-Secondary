@@ -1,0 +1,71 @@
+<h2 mat-dialog-title>Bulk Update Report Releases</h2>
+
+<mat-dialog-content>
+  <p>Add multiple report release updates below. Each update requires an ID and the desired release status.</p>
+  
+  <form [formGroup]="form" class="dialog-form">
+    <div formArrayName="updates">
+      <div 
+        *ngFor="let update of updates.controls; let i = index" 
+        [formGroupName]="i" 
+        class="update-item">
+        
+        <mat-form-field appearance="fill">
+          <mat-label>Report Release ID</mat-label>
+          <input matInput formControlName="id" placeholder="Enter ID">
+          <mat-error *ngIf="update.get('id')?.hasError('required')">ID is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Release Status</mat-label>
+          <mat-select formControlName="isReleased">
+            <mat-option [value]="false">Not Released</mat-option>
+            <mat-option [value]="true">Released</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Release Notes</mat-label>
+          <textarea matInput formControlName="releaseNotes" placeholder="Optional notes"></textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Send Notification</mat-label>
+          <mat-select formControlName="sendNotification">
+            <mat-option [value]="false">No</mat-option>
+            <mat-option [value]="true">Yes</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button 
+          mat-icon-button 
+          color="warn" 
+          (click)="removeUpdate(i)"
+          class="remove-btn"
+          matTooltip="Remove this update">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <button 
+      type="button" 
+      mat-stroked-button 
+      (click)="addUpdate()"
+      class="add-btn">
+      <mat-icon>add</mat-icon>
+      Add Update
+    </button>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button 
+    mat-raised-button 
+    color="primary" 
+    (click)="onSave()"
+    [disabled]="!form.valid || updates.length === 0">
+    Apply Updates
+  </button>
+</mat-dialog-actions>

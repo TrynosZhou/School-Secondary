@@ -1,0 +1,36 @@
+<div class="exemptions-list-container" [class.theme-dark]="currentTheme === 'dark'">
+  <div class="list-header">
+    <mat-icon>money_off</mat-icon>
+    <span>Exemptions ({{ exemptions.length }})</span>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <mat-icon>refresh</mat-icon>
+    <p>Loading exemptions...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && exemptions.length === 0" class="empty-list">
+    <mat-icon>money_off</mat-icon>
+    <p>No exemptions found</p>
+  </div>
+
+  <!-- Exemptions List -->
+  <mat-list *ngIf="!isLoading && exemptions.length > 0" class="exemptions-list">
+    <mat-list-item
+      *ngFor="let exemption of exemptions"
+      [class.selected]="isSelected(exemption)"
+      (click)="selectExemption(exemption)"
+      class="exemption-list-item">
+      
+      <app-exemption-item 
+        [exemption]="exemption"
+        [isSelected]="isSelected(exemption)"
+        (edit)="onEdit(exemption)"
+        (delete)="onDelete(exemption)">
+      </app-exemption-item>
+    </mat-list-item>
+  </mat-list>
+</div>
+

@@ -1,0 +1,336 @@
+<div class="inventory-page">
+  <mat-card class="inventory-card" *ngIf="viewMode === 'rooms'">
+    <mat-card-header>
+      <mat-card-title>Department inventory</mat-card-title>
+      <mat-card-subtitle>
+        Rooms hold inventory lists. Quantities are tracked per room.
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <mat-tab-group
+        [selectedIndex]="roomsTab === 'rooms' ? 0 : 1"
+        (selectedIndexChange)="roomsTab = $event === 0 ? 'rooms' : 'lowStock'"
+      >
+        <mat-tab label="Rooms">
+      <div class="toolbar">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search rooms</mat-label>
+          <input matInput [formControl]="roomSearchControl" placeholder="e.g. Bio Lab, Store, Lab 1" />
+        </mat-form-field>
+
+        <mat-form-field
+          appearance="outline"
+          class="department-field"
+          *ngIf="canFilterDepartment"
+        >
+          <mat-label>Department</mat-label>
+          <mat-select [formControl]="selectedDepartmentIdControl">
+            <mat-option [value]="null">All departments</mat-option>
+            <mat-option *ngFor="let dept of departments" [value]="dept.id">
+              {{ dept.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" (click)="createRoom()" [disabled]="loadingRooms">
+          <mat-icon>add</mat-icon>
+          Add room
+        </button>
+
+        <mat-slide-toggle [formControl]="includeInactiveRoomsControl">
+          Include inactive
+        </mat-slide-toggle>
+      </div>
+
+      <table mat-table [dataSource]="rooms" class="rooms-table" *ngIf="rooms.length">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Room</th>
+          <td mat-cell *matCellDef="let room">
+            <div class="room-name">{{ room.name }}</div>
+            <div class="room-desc" *ngIf="room.description">{{ room.description }}</div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="code">
+          <th mat-header-cell *matHeaderCellDef>Code</th>
+          <td mat-cell *matCellDef="let room">{{ room.code || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="department">
+          <th mat-header-cell *matHeaderCellDef>Department</th>
+          <td mat-cell *matCellDef="let room">{{ room.department?.name || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="active">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let room">
+            <span class="pill" [class.active]="room.isActive" [class.inactive]="!room.isActive">
+              {{ room.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let room">
+            <button mat-stroked-button color="primary" (click)="openRoom(room)">
+              Open
+            </button>
+            <button
+              *ngIf="canManageInventory"
+              mat-button
+              color="primary"
+              (click)="editRoom(room)"
+            >
+              Edit
+            </button>
+            <button
+              *ngIf="canManageInventory"
+              mat-button
+              color="warn"
+              (click)="room.isActive ? archiveRoom(room) : restoreRoom(room)"
+            >
+              {{ room.isActive ? 'Archive' : 'Restore' }}
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="roomsDisplayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: roomsDisplayedColumns"></tr>
+      </table>
+
+      <div class="empty" *ngIf="!rooms.length && !loadingRooms">
+        <mat-icon>inventory_2</mat-icon>
+        <p>No rooms found.</p>
+      </div>
+
+      <mat-paginator
+        [length]="roomsTotal"
+        [pageSize]="roomPageSize"
+        [pageIndex]="roomPageIndex"
+        [pageSizeOptions]="[10, 20, 50]"
+        (page)="onRoomsPageChange($event)"
+      ></mat-paginator>
+        </mat-tab>
+
+        <mat-tab label="Low stock">
+          <div class="toolbar">
+            <mat-form-field appearance="outline" class="search-field">
+              <mat-label>Search low stock</mat-label>
+              <input matInput [formControl]="lowStockSearchControl" placeholder="e.g. paper, reagent, pen" />
+            </mat-form-field>
+
+            <mat-form-field
+              appearance="outline"
+              class="department-field"
+              *ngIf="canFilterDepartment"
+            >
+              <mat-label>Department</mat-label>
+              <mat-select [formControl]="selectedDepartmentIdControl">
+                <mat-option [value]="null">All departments</mat-option>
+                <mat-option *ngFor="let dept of departments" [value]="dept.id">
+                  {{ dept.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <table mat-table [dataSource]="lowStockItems" class="items-table" *ngIf="lowStockItems.length">
+            <ng-container matColumnDef="item">
+              <th mat-header-cell *matHeaderCellDef>Item</th>
+              <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+            </ng-container>
+            <ng-container matColumnDef="room">
+              <th mat-header-cell *matHeaderCellDef>Room</th>
+              <td mat-cell *matCellDef="let row">{{ row.room?.name || '—' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="category">
+              <th mat-header-cell *matHeaderCellDef>Category</th>
+              <td mat-cell *matCellDef="let row">{{ row.category || '—' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="quantityOnHand">
+              <th mat-header-cell *matHeaderCellDef>Qty</th>
+              <td mat-cell *matCellDef="let row">{{ row.quantityOnHand }}</td>
+            </ng-container>
+            <ng-container matColumnDef="reorderLevel">
+              <th mat-header-cell *matHeaderCellDef>Reorder</th>
+              <td mat-cell *matCellDef="let row">{{ row.reorderLevel ?? '—' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="unit">
+              <th mat-header-cell *matHeaderCellDef>Unit</th>
+              <td mat-cell *matCellDef="let row">{{ row.unit || '—' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef></th>
+              <td mat-cell *matCellDef="let row">
+                <button mat-button (click)="openHistory(row)">History</button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="lowStockDisplayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: lowStockDisplayedColumns"></tr>
+          </table>
+
+          <div class="empty" *ngIf="!lowStockItems.length && !loadingLowStock">
+            <mat-icon>warning</mat-icon>
+            <p>No low stock items found.</p>
+          </div>
+
+          <mat-paginator
+            [length]="lowStockTotal"
+            [pageSize]="lowStockPageSize"
+            [pageIndex]="lowStockPageIndex"
+            [pageSizeOptions]="[10, 25, 50]"
+            (page)="onLowStockPageChange($event)"
+          ></mat-paginator>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="inventory-card" *ngIf="viewMode === 'room' && selectedRoom">
+    <mat-card-header>
+      <mat-card-title>
+        <button mat-icon-button (click)="backToRooms()" class="back-btn">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        {{ selectedRoom.name }}
+      </mat-card-title>
+      <mat-card-subtitle>
+        {{ selectedRoom.department?.name || 'Department' }}
+        <span *ngIf="selectedRoom.code"> • {{ selectedRoom.code }}</span>
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="room-summary" *ngIf="selectedRoomSummary as summary">
+        <div class="summary-tile">
+          <div class="label">Items</div>
+          <div class="value">{{ summary.itemCount }}</div>
+        </div>
+        <div class="summary-tile">
+          <div class="label">Total quantity</div>
+          <div class="value">{{ summary.totalQuantityOnHand }}</div>
+        </div>
+        <div class="summary-tile">
+          <div class="label">Low stock</div>
+          <div class="value">{{ summary.lowStockCount }}</div>
+        </div>
+      </div>
+
+      <div class="items-toolbar">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search items</mat-label>
+          <input matInput [formControl]="itemSearchControl" placeholder="e.g. microscope, paper, reagents" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="category-field">
+          <mat-label>Category</mat-label>
+          <input matInput [formControl]="itemCategoryControl" placeholder="e.g. Chemicals" />
+        </mat-form-field>
+
+        <mat-slide-toggle [formControl]="belowReorderOnlyControl">
+          Low stock only
+        </mat-slide-toggle>
+
+        <button mat-raised-button color="primary" (click)="createItem()" [disabled]="loadingItems">
+          <mat-icon>add</mat-icon>
+          Add item
+        </button>
+
+        <button mat-stroked-button (click)="importCsv()" [disabled]="loadingItems">
+          <mat-icon>upload</mat-icon>
+          Import CSV
+        </button>
+
+        <mat-slide-toggle [formControl]="includeInactiveItemsControl">
+          Include inactive
+        </mat-slide-toggle>
+      </div>
+
+      <table mat-table [dataSource]="items" class="items-table" *ngIf="items.length">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Item</th>
+          <td mat-cell *matCellDef="let item">
+            <div class="item-name">{{ item.name }}</div>
+            <div class="item-notes" *ngIf="item.notes">{{ item.notes }}</div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="category">
+          <th mat-header-cell *matHeaderCellDef>Category</th>
+          <td mat-cell *matCellDef="let item">{{ item.category || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="quantityOnHand">
+          <th mat-header-cell *matHeaderCellDef>Qty</th>
+          <td mat-cell *matCellDef="let item">
+            <span class="qty">{{ item.quantityOnHand }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="reorderLevel">
+          <th mat-header-cell *matHeaderCellDef>Reorder</th>
+          <td mat-cell *matCellDef="let item">{{ item.reorderLevel ?? '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="unit">
+          <th mat-header-cell *matHeaderCellDef>Unit</th>
+          <td mat-cell *matCellDef="let item">{{ item.unit || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let item">
+            <button
+              *ngIf="canManageInventory"
+              mat-stroked-button
+              color="primary"
+              (click)="editItem(item)"
+            >
+              Edit
+            </button>
+            <button mat-stroked-button color="primary" (click)="adjustStock(item)">
+              Adjust
+            </button>
+            <button mat-button (click)="stocktake(item)">
+              Stocktake
+            </button>
+            <button mat-button (click)="transfer(item)">
+              Transfer
+            </button>
+            <button mat-button (click)="openHistory(item)">
+              History
+            </button>
+            <button
+              *ngIf="canManageInventory"
+              mat-button
+              color="warn"
+              (click)="item.isActive ? archiveItem(item) : restoreItem(item)"
+            >
+              {{ item.isActive ? 'Archive' : 'Restore' }}
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="itemsDisplayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: itemsDisplayedColumns"></tr>
+      </table>
+
+      <div class="empty" *ngIf="!items.length && !loadingItems">
+        <mat-icon>inventory</mat-icon>
+        <p>No items found in this room.</p>
+      </div>
+
+      <mat-paginator
+        [length]="itemsTotal"
+        [pageSize]="itemPageSize"
+        [pageIndex]="itemPageIndex"
+        [pageSizeOptions]="[10, 25, 50]"
+        (page)="onItemsPageChange($event)"
+      ></mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</div>
+

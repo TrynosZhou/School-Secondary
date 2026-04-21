@@ -1,0 +1,190 @@
+<!-- Loading Overlay -->
+<div class="loading-overlay" *ngIf="isLoading$ | async">
+  <div class="loading-content">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Generating mark sheet...</p>
+  </div>
+</div>
+
+<!-- Background Elements -->
+<div class="background-elements">
+  <div class="floating-circle circle-1"></div>
+  <div class="floating-circle circle-2"></div>
+  <div class="floating-circle circle-3"></div>
+</div>
+
+<!-- Main Container -->
+<div class="main-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="title-section">
+        <mat-icon class="header-icon">description</mat-icon>
+        <h1 class="page-title">Mark Sheets</h1>
+        <p class="page-subtitle">Generate and download comprehensive mark sheets for classes</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Card -->
+  <mat-card class="main-card">
+    <!-- Form Section -->
+    <div class="form-section">
+      <div class="form-header">
+        <mat-icon class="form-icon">filter_list</mat-icon>
+        <h2>Generate Mark Sheet</h2>
+        <p>Select term, class, and exam type to generate the mark sheet</p>
+      </div>
+
+      <form [formGroup]="markSheetForm" class="marksheet-form">
+        <div class="form-fields">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Term</mat-label>
+            <mat-select formControlName="term">
+              <mat-option *ngFor="let term of terms$ | async" [value]="term">
+                {{ term.num + " " + term.year }}
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>calendar_today</mat-icon>
+            <mat-error *ngIf="term?.invalid && term?.touched">
+              <mat-icon class="error-icon-small">error</mat-icon>
+              Term is required
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Class</mat-label>
+            <mat-select formControlName="clas">
+              <mat-option *ngFor="let clas of classes$ | async" [value]="clas.name">
+                {{ clas.name }}
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>class</mat-icon>
+            <mat-error *ngIf="clas?.invalid && clas?.touched">
+              <mat-icon class="error-icon-small">error</mat-icon>
+              Class is required
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Exam Type</mat-label>
+            <mat-select formControlName="examType">
+              <mat-option *ngFor="let type of examtype" [value]="type">
+                {{ type }}
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>quiz</mat-icon>
+            <mat-error *ngIf="examType?.invalid && examType?.touched">
+              <mat-icon class="error-icon-small">error</mat-icon>
+              Exam Type is required
+            </mat-error>
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" [disabled]="markSheetForm.invalid" (click)="fetchMarkSheet()" class="generate-button">
+            <mat-icon>add_task</mat-icon>
+            <span>Generate Mark Sheet</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Mark Sheet Display Section -->
+    <div class="marksheet-section" *ngIf="reports.length">
+      <div class="marksheet-header">
+        <div class="marksheet-title">
+          <mat-icon class="marksheet-icon">assessment</mat-icon>
+          <h3>Generated Mark Sheet</h3>
+          <span class="student-count">{{ reports.length }} students</span>
+        </div>
+        <div class="marksheet-actions">
+          <button mat-icon-button matTooltip="Download PDF" class="action-button" (click)="downloadPDF()">
+            <mat-icon>download</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="Print" class="action-button" (click)="printDocument()">
+            <mat-icon>print</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="Refresh" class="action-button" (click)="fetchMarkSheet()">
+            <mat-icon>refresh</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="marksheet-container" #pdfReportContainer>
+        <div class="marksheet-header-content" #pdfHeader>
+          <div class="logo-title-wrapper">
+            <div class="logo-wrapper">
+              <img src="../../../assets/jhs_logo.jpg" alt="School Logo">
+            </div>
+            <h1 class="marksheet-title-text">
+              {{ reports[0].examType }}, {{ reports[0].num }} {{ reports[0].year }}. {{ reports[0].name }} Mark Sheet
+            </h1>
+          </div>
+
+          <div class="marksheet-info">
+            <div class="info-item">
+              <mat-icon class="info-icon">calendar_today</mat-icon>
+              <span>Term: {{ reports[0].num }} {{ reports[0].year }}</span>
+            </div>
+            <div class="info-item">
+              <mat-icon class="info-icon">class</mat-icon>
+              <span>Class: {{ reports[0].name }}</span>
+            </div>
+            <div class="info-item">
+              <mat-icon class="info-icon">quiz</mat-icon>
+              <span>Exam Type: {{ reports[0].examType }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="marksheet-table" #marksheetTable>
+            <thead>
+              <tr #tableHeaderRow>
+                <th class="col-num">#</th>
+                <th class="col-name">Student Name</th>
+                <th class="col-subject" *ngFor="let subj of subjects">
+                  {{ subj.name.substring(0, 9) }}
+                </th>
+                <th class="col-passed">Passed</th>
+                <th class="col-symbol">A*s</th>
+                <th class="col-symbol">As</th>
+                <th class="col-symbol">Bs</th>
+                <th class="col-symbol">Cs</th>
+                <th class="col-symbol">Ds</th>
+                <th class="col-average">Mean</th>
+                <th class="col-position">Position</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let rep of reports; let i = index" class="student-row">
+                <td class="col-num">{{ i + 1 }}</td>
+                <td class="col-name student-name">{{ rep.report.name + ' ' + rep.report.surname }}</td>
+                <td class="col-subject" *ngFor="let subjInfo of rep.report.subjectsTable"
+                  [ngClass]="subjInfo ? (subjInfo.mark >= 50 ? 'passing-mark' : 'failing-mark') : 'no-mark'">
+                  {{ subjInfo?.mark ? subjInfo.mark : '' }}
+                </td>
+                <td class="col-passed">{{ rep.report.subjectsPassed }}</td>
+                <td class="col-symbol">{{ rep.report.symbols[0] }}</td>
+                <td class="col-symbol">{{ rep.report.symbols[1] }}</td>
+                <td class="col-symbol">{{ rep.report.symbols[2] }}</td>
+                <td class="col-symbol">{{ rep.report.symbols[3] }}</td>
+                <td class="col-symbol">{{ rep.report.symbols[4] }}</td>
+                <td class="col-average">{{ rep.report.percentageAverge ? rep.report.percentageAverge.toFixed(1) : '' }}</td>
+                <td class="col-position">{{ rep.report.classPosition }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Data Message -->
+    <div class="no-data-container" *ngIf="!reports.length && !(isLoading$ | async)">
+      <div class="no-data-content">
+        <mat-icon class="no-data-icon">description</mat-icon>
+        <h3>No Mark Sheet Generated</h3>
+        <p>Please select Term, Class, and Exam Type, then click "Generate Mark Sheet" to create a mark sheet.</p>
+      </div>
+    </div>
+  </mat-card>
+</div>

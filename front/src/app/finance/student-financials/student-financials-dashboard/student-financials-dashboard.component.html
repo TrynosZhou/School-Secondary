@@ -1,0 +1,78 @@
+<div class="financials-dashboard-container" [class.theme-dark]="currentTheme === 'dark'">
+  <!-- Main Content -->
+  <div class="dashboard-content">
+    <!-- Header Section -->
+    <div class="dashboard-header">
+      <div class="header-content">
+        <div class="welcome-section">
+          <h1 class="dashboard-title">Finance overview</h1>
+          <!-- Parent: tabbed by child (same view as student, one tab per child) -->
+          <ng-container *ngIf="isParent$ | async">
+            <app-no-linked-students *ngIf="(linkedChildren$ | async)?.length === 0" title="No linked students" hint="Contact the school to link your children to your account. You can also ask an admin to link students in the Parents list."></app-no-linked-students>
+            <mat-tab-group *ngIf="(linkedChildren$ | async)?.length as len" [class.hidden]="len === 0" class="parent-child-tabs"
+              (selectedTabChange)="onParentTabChange($event)" aria-label="Finance overview by child">
+              <mat-tab *ngFor="let c of linkedChildren$ | async" [label]="(c.studentNumber + ' – ' + (c.name || '') + ' ' + (c.surname || '')).trim()"
+                [attr.aria-label]="'Finance for ' + (((c.name || '') + ' ' + (c.surname || '')).trim() || c.studentNumber)">
+              </mat-tab>
+            </mat-tab-group>
+          </ng-container>
+          <!-- Student: welcome and student number -->
+          <ng-container *ngIf="(isParent$ | async) === false">
+            <p class="dashboard-subtitle" *ngIf="studentName$ | async as studentName">
+              Welcome back, {{ studentName }}
+            </p>
+            <p class="student-info" *ngIf="studentNumber$ | async as studentNumber">
+              Student Number: {{ studentNumber }}
+            </p>
+          </ng-container>
+        </div>
+        
+        <!-- Outstanding Balance Card (hidden when parent has no linked children) -->
+        <mat-card *ngIf="!(isParent$ | async) || (linkedChildren$ | async)?.length" class="balance-card" role="region" aria-label="Outstanding balance">
+          <div class="balance-content">
+            <mat-icon class="balance-icon">account_balance_wallet</mat-icon>
+            <div class="balance-details">
+              <h3 class="balance-label">Outstanding Balance</h3>
+              <div class="balance-amount">
+                <span class="balance-value">
+                  {{ (outstandingBalance$ | async) ?? 0 | currency:'USD':'symbol':'1.2-2' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Invoices | Receipts | Payment History: show for students and for parents who have linked children -->
+    <ng-container *ngIf="!(isParent$ | async) || (linkedChildren$ | async)?.length">
+      <nav class="dashboard-tabs" role="tablist" aria-label="Financial sections">
+        <div class="tab-list">
+          <a *ngFor="let link of navLinks; let i = index" 
+             [routerLink]="link.path" 
+             routerLinkActive #rla="routerLinkActive"
+             class="tab-link"
+             [class.active]="rla.isActive"
+             [attr.aria-selected]="rla.isActive"
+             [attr.aria-controls]="link.path + '-panel'"
+             role="tab">
+            <mat-icon class="tab-icon">{{ link.icon }}</mat-icon>
+            <div class="tab-content">
+              <span class="tab-label">{{ link.label }}</span>
+              <span class="tab-description">{{ link.description }}</span>
+            </div>
+          </a>
+        </div>
+      </nav>
+
+      <!-- Tab Content: Invoices / Receipts / Payment History for selected student (or own for student) -->
+      <div class="tab-panel-container" [attr.aria-busy]="(isParent$ | async) && (loadingForChild$ | async)">
+        <div *ngIf="(isParent$ | async) && (loadingForChild$ | async)" class="tab-loading-overlay" role="status" aria-label="Loading data for selected child">
+          <mat-spinner diameter="36"></mat-spinner>
+          <span class="tab-loading-text">Loading…</span>
+        </div>
+        <router-outlet></router-outlet>
+      </div>
+    </ng-container>
+  </div>
+</div>

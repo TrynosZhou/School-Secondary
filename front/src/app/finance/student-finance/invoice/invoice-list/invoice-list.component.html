@@ -1,0 +1,30 @@
+<div class="invoice-list-container" [class.theme-light]="currentTheme === 'light'" [class.theme-dark]="currentTheme === 'dark'">
+  <div class="list-header">
+    <mat-icon>receipt_long</mat-icon>
+    <span>Invoices</span>
+  </div>
+  
+  <mat-list role="list" *ngIf="invoices$ | async as invoices; else emptyTemplate">
+    <mat-list-item 
+      (click)="selectInvoice(invoice)" 
+      role="listitem" 
+      *ngFor="let invoice of invoices"
+      [class.selected]="isSelected(invoice)"
+      [class.theme-light]="currentTheme === 'light'"
+      [class.theme-dark]="currentTheme === 'dark'">
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <span>{{ invoice.invoiceNumber }}</span>
+        <span style="color: var(--text-secondary); font-size: 0.875rem;">
+          {{ invoice.student.surname }} {{ invoice.student.name }}
+        </span>
+      </div>
+    </mat-list-item>
+  </mat-list>
+  
+  <ng-template #emptyTemplate>
+    <div class="empty-list">
+      <mat-icon>inbox</mat-icon>
+      <p class="empty-message">No invoices found for this term</p>
+    </div>
+  </ng-template>
+</div>

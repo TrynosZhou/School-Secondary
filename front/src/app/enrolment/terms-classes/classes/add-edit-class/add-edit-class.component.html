@@ -1,0 +1,101 @@
+<div class="dialog-container">
+  <mat-card class="main-card">
+    <!-- Header -->
+    <mat-card-header class="card-header">
+      <div class="header-content">
+        <div class="title-section">
+          <mat-icon class="header-icon">{{ isEditMode ? 'edit' : 'add' }}</mat-icon>
+          <h2 class="dialog-title">{{ isEditMode ? 'Edit Class' : 'Add New Class' }}</h2>
+        </div>
+        <p class="dialog-subtitle">
+          {{ isEditMode ? 'Update class information' : 'Enter class details to create a new class' }}
+        </p>
+      </div>
+    </mat-card-header>
+
+    <!-- Error Message -->
+    <div class="error-message" *ngIf="errorMsg$ | async as errorMsg">
+      <mat-icon>error</mat-icon>
+      <span>{{ errorMsg }}</span>
+    </div>
+
+    <!-- Form Content -->
+    <form [formGroup]="addClassForm" (ngSubmit)="addClass()" class="form-container">
+      <mat-card-content class="card-content">
+        <div class="form-sections">
+          <!-- Class Information Section -->
+          <div class="form-section">
+            <div class="section-header">
+              <mat-icon class="section-icon">school</mat-icon>
+              <h3 class="section-title">Class Information</h3>
+            </div>
+            
+            <div class="form-fields">
+              <div class="field-group">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Class Name</mat-label>
+                  <input
+                    formControlName="name"
+                    matInput
+                    type="text"
+                    placeholder="Enter class name (e.g., 1A1, 2B2)"
+                    maxlength="20"
+                  />
+                  <mat-icon matSuffix>class</mat-icon>
+                  <mat-hint>e.g., 1A1, 2B2, 3C1</mat-hint>
+                  <mat-error>{{ getFormErrorMessage('name') }}</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="field-group">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Form Level</mat-label>
+                  <mat-select formControlName="form" placeholder="Select form level">
+                    <mat-option value="1">Form 1</mat-option>
+                    <mat-option value="2">Form 2</mat-option>
+                    <mat-option value="3">Form 3</mat-option>
+                    <mat-option value="4">Form 4</mat-option>
+                    <mat-option value="5">Form 5</mat-option>
+                    <mat-option value="6">Form 6</mat-option>
+                  </mat-select>
+                  <mat-icon matSuffix>grade</mat-icon>
+                  <mat-hint>Select the form level for this class</mat-hint>
+                  <mat-error>{{ getFormErrorMessage('form') }}</mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <!-- Actions -->
+      <mat-card-actions class="card-actions">
+        <div class="action-buttons">
+          <button
+            type="button"
+            mat-raised-button
+            color="warn"
+            (click)="closeDialog()"
+            class="cancel-button"
+            [disabled]="isLoading"
+          >
+            <mat-icon>close</mat-icon>
+            <span>Cancel</span>
+          </button>
+          
+          <button
+            type="submit"
+            mat-raised-button
+            color="primary"
+            class="save-button"
+            [disabled]="addClassForm.invalid || isLoading"
+          >
+            <mat-icon *ngIf="!isLoading">{{ isEditMode ? 'update' : 'save' }}</mat-icon>
+            <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+            <span>{{ isLoading ? 'Processing...' : (isEditMode ? 'Update Class' : 'Add Class') }}</span>
+          </button>
+        </div>
+      </mat-card-actions>
+    </form>
+  </mat-card>
+</div>

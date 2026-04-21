@@ -1,0 +1,92 @@
+<mat-card class="main-container"> <!-- FIX: Typo conatiner -> container -->
+  <!-- Selected Students Chips Container -->
+  <div class="selected-students-container mat-elevation-z2"> <!-- FIX: Typo conatiner -> container -->
+    <mat-chip-listbox aria-label="Students to enrol selection"> <!-- Use mat-chip-listbox for accessibility -->
+      <mat-chip *ngFor="let st of studentsToEnrol" color="primary" selected> <!-- Added selected for primary color -->
+        {{ st.surname + " " + st.name }}
+        <button matChipRemove type="button" (click)="removeFromEnrolList(st)" matTooltip="Remove from list">
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </mat-chip>
+      <div *ngIf="!studentsToEnrol.length" class="no-selected-students-message">
+        No students selected for enrollment.
+      </div>
+    </mat-chip-listbox>
+
+    <div class="bottom-btns"> <!-- FIX: Typo bottom-btn -> bottom-btns (for consistency) -->
+      <button *ngIf="studentsToEnrol.length" mat-mini-fab color="primary" type="button" (click)="enrolStudents()"
+        matTooltip="Enrol Selected Students">
+        <mat-icon>done</mat-icon>
+      </button>
+      <button mat-mini-fab color="warn" type="button" (click)="closeDialog()" matTooltip="Cancel">
+        <mat-icon>cancel</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Available Students Table Container -->
+  <div class="table-container"> <!-- FIX: Typo conatiner -> container -->
+    <mat-card>
+      <div class="top-panel">
+        <mat-form-field appearance="outline"> <!-- Added appearance="outline" -->
+          <mat-label>Filter</mat-label>
+          <input matInput (keyup)="applyFilter($event)" placeholder="Ex. Mia" #input />
+          <mat-icon matSuffix>search</mat-icon> <!-- Added search icon -->
+        </mat-form-field>
+      </div>
+
+      <div class="mat-elevation-z2">
+        <table mat-table [dataSource]="dataSource" matSort>
+          <!-- StudentNumber Column -->
+          <ng-container matColumnDef="studentNumber">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>
+              Student Number
+            </th>
+            <td mat-cell *matCellDef="let row">{{ row.studentNumber }}</td>
+          </ng-container>
+
+          <!-- Surname Column -->
+          <ng-container matColumnDef="surname">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Surname</th>
+            <td mat-cell *matCellDef="let row">{{ row.surname }}</td>
+          </ng-container>
+
+          <!-- Name Column -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+            <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+          </ng-container>
+
+          <!-- gender Column -->
+          <ng-container matColumnDef="gender">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Gender</th>
+            <td mat-cell *matCellDef="let row">{{ row.gender }}</td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="action">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Action</th>
+            <td mat-cell *matCellDef="let row" class="btns">
+              <button mat-mini-fab color="primary" type="button" (click)="addToEnrolList(row)"
+                matTooltip="Add to Enrolment List">
+                <mat-icon>add</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+          <!-- Row shown when there is no matching data. -->
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell" [attr.colspan]="displayedColumns.length"> <!-- Use displayedColumns.length -->
+              No data matching the filter "{{ input.value }}"
+            </td>
+          </tr>
+        </table>
+
+        <mat-paginator [pageSizeOptions]="[10, 15, 50]" aria-label="Select page of users"></mat-paginator>
+      </div>
+    </mat-card>
+  </div>
+</mat-card>

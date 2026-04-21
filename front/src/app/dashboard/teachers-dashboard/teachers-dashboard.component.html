@@ -1,0 +1,87 @@
+<!-- Teachers, Admins and HODs dashboard -->
+<div *ngIf="role === 'teacher' || role === 'admin' || role === 'hod'">
+  <div class="summaries-row">
+    <mat-card class="summaries-container" (click)="navigateToTeachersSummary()">
+
+      <mat-icon class="icon summary-icon">school</mat-icon>
+
+      <div class="total">
+
+        <span class="big-total"> {{ (teachers$ |
+          async)?.length }}</span>
+      </div>
+      <div class="breakdown">
+        <mat-chip color="accent">Male <mat-icon>male</mat-icon> : {{ maleTeachers
+          }}</mat-chip>
+        <mat-chip color="warn">Female <mat-icon>female</mat-icon> : {{ femaleTeachers }}</mat-chip>
+      </div>
+      <div class="heading">
+        TEACHERS
+      </div>
+    </mat-card>
+    <mat-card class="summaries-container" (click)="navigateToStudentsSummary()">
+
+      <mat-icon class="icon summary-icon">group</mat-icon>
+
+      <div class="total">
+
+        <span class="big-total"> {{ (termEnrols$ |
+          async)?.length }}</span>
+      </div>
+      <div class="breakdown">
+        <mat-chip color="accent">Male <mat-icon>male</mat-icon> : {{ maleStudents }}</mat-chip>
+        <mat-chip color="warn">Female <mat-icon>female</mat-icon> : {{ femaleStudents }}</mat-chip>
+        <mat-chip color="warn">Day <mat-icon>home</mat-icon> : {{ dayScholars }}</mat-chip>
+        <mat-chip color="warn">Boarders <mat-icon>hotel</mat-icon> : {{ boarders }}</mat-chip>
+
+
+      </div>
+      <div class="heading">
+        STUDENTS
+      </div>
+    </mat-card>
+    <mat-card class="summaries-container" (click)="navigateToClassLists()">
+
+      <mat-icon class="icon summary-icon">groups</mat-icon>
+
+      <div class="total">
+
+        <span class="big-total"> {{ (classes$ |
+          async)?.length }}</span>
+      </div>
+      <div class="breakdown">
+        <!-- <mat-chip color="accent">Male <mat-icon>male</mat-icon> : {{ (enrolsSummary$ | async)?.boys }}</mat-chip> -->
+
+
+      </div>
+      <div class="heading">
+        CLASSES
+      </div>
+    </mat-card>
+    <mat-card class="summaries-container" (click)="navigateToSubjects()">
+
+      <mat-icon class="icon summary-icon">library_books</mat-icon>
+
+      <div class="total">
+
+        <span class="big-total"> {{ (subjects$ |
+          async)?.length }}</span>
+      </div>
+      <div class="breakdown">
+        <!-- <mat-chip color="accent">Male <mat-icon>male</mat-icon> : {{ (enrolsSummary$ | async)?.boys }}</mat-chip> -->
+
+
+      </div>
+      <div class="heading">
+        SUBJECTS
+      </div>
+    </mat-card>
+  </div>
+  <div class="enrolment-graph">
+    <app-enrolment-chart></app-enrolment-chart>
+    <!-- <div class="accounts-graph">
+      <app-accounts-chart></app-accounts-chart>
+    </div> -->
+  </div>
+</div>
+<!-- End Teacher, Admin and HODs dashboard -->

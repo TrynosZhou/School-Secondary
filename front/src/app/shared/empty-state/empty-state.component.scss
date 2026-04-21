@@ -1,0 +1,32 @@
+.empty-state {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  max-width: 480px;
+  margin: 0 auto;
+
+  .empty-state-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    opacity: 0.6;
+    color: var(--text-secondary, #666);
+  }
+
+  .empty-state-title {
+    margin: 1rem 0 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary, #333);
+  }
+
+  .empty-state-message {
+    margin: 0 0 1rem;
+    font-size: 0.95rem;
+    color: var(--text-secondary, #666);
+    line-height: 1.5;
+  }
+
+  .empty-state-actions {
+    margin-top: 1rem;
+  }
+}

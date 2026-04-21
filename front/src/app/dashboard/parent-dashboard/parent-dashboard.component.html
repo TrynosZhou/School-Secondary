@@ -1,0 +1,251 @@
+<div class="header">
+    <h2><mat-icon>family_restroom</mat-icon> Parent Dashboard</h2>
+    <p class="subtitle">View details, marks, and performance for each child</p>
+  </div>
+
+  <div class="quick-actions">
+    <a routerLink="/student-financials" class="quick-action-card">
+      <mat-icon>account_balance_wallet</mat-icon>
+      <div>
+        <h4>Finance Overview</h4>
+        <p>Open invoices, receipts, and balances per child.</p>
+      </div>
+    </a>
+    <a routerLink="/reports" class="quick-action-card">
+      <mat-icon>receipt_long</mat-icon>
+      <div>
+        <h4>Progress Reports</h4>
+        <p>Review report cards and performance trends.</p>
+      </div>
+    </a>
+    <a routerLink="/messaging" class="quick-action-card">
+      <mat-icon>message</mat-icon>
+      <div>
+        <h4>Messages</h4>
+        <p>Check announcements and teacher updates.</p>
+      </div>
+    </a>
+  </div>
+
+  <div class="section-loading" *ngIf="summaryLoading$ | async">
+    <mat-spinner diameter="40"></mat-spinner>
+    <span>Loading dashboard...</span>
+  </div>
+
+  <mat-card class="error-state" *ngIf="(summaryError$ | async) as err">
+    <mat-icon>error_outline</mat-icon>
+    <h3>Could not load summary</h3>
+    <p>{{ err }}</p>
+    <button mat-flat-button color="primary" (click)="retrySummary()">Retry</button>
+  </mat-card>
+
+  <ng-container *ngIf="!(summaryLoading$ | async) && !(summaryError$ | async)">
+    <ng-container *ngIf="linkedChildren$ | async as children">
+      <ng-container *ngIf="children.length === 0">
+        <mat-card class="empty-state">
+          <mat-icon>child_care</mat-icon>
+          <h3>No linked children</h3>
+          <p>Your account has no linked students. Contact the school to link your children.</p>
+        </mat-card>
+      </ng-container>
+
+      <ng-container *ngIf="children.length > 0">
+        <mat-tab-group (selectedTabChange)="onChildTabChange($event)" animationDuration="200ms" class="child-tabs">
+          <mat-tab *ngFor="let child of children; let i = index">
+            <ng-template mat-tab-label>
+              <span class="tab-label">{{ child.name }} {{ child.surname }} ({{ child.studentNumber }})</span>
+            </ng-template>
+            <div class="tab-content-wrapper">
+              <ng-container *ngIf="(selectedChildIndex$ | async) === i">
+                <!-- Overview from summary API -->
+                <section class="overview-section">
+                  <h3><mat-icon>person</mat-icon> Overview</h3>
+                  <div class="summary-cards" *ngIf="selectedChildSummary$ | async as childSummary">
+                    <mat-card class="summary-card">
+                      <h4>Student &amp; Enrolment</h4>
+                      <div class="data-item">
+                        <label>Name:</label>
+                        <span>{{ childSummary.name }} {{ childSummary.surname }}</span>
+                      </div>
+                      <div class="data-item">
+                        <label>Student Number:</label>
+                        <span>{{ childSummary.studentNumber }}</span>
+                      </div>
+                      <ng-container *ngIf="childSummary.enrolment">
+                        <div class="data-item">
+                          <label>Class:</label>
+                          <span>{{ childSummary.enrolment.className }}</span>
+                        </div>
+                        <div class="data-item">
+                          <label>Term:</label>
+                          <span>{{ childSummary.enrolment.term }} {{ childSummary.enrolment.year }}</span>
+                        </div>
+                        <div class="data-item">
+                          <label>Residence:</label>
+                          <span>{{ childSummary.enrolment.residence }}</span>
+                        </div>
+                      </ng-container>
+                    </mat-card>
+                    <mat-card class="summary-card financial-card">
+                      <h4>Financial Overview</h4>
+                      <div class="data-item">
+                        <label>Total Billed:</label>
+                        <span>{{ childSummary.finance.totalBilled | currency:'USD':'symbol':'1.2-2' }}</span>
+                      </div>
+                      <div class="data-item">
+                        <label>Total Paid:</label>
+                        <span>{{ childSummary.finance.totalPaid | currency:'USD':'symbol':'1.2-2' }}</span>
+                      </div>
+                      <div class="data-item amount-owed">
+                        <label>Amount Owed:</label>
+                        <span [class.positive]="childSummary.finance.amountOwed <= 0" [class.negative]="childSummary.finance.amountOwed > 0">
+                          {{ childSummary.finance.amountOwed | currency:'USD':'symbol':'1.2-2' }}
+                        </span>
+                      </div>
+                      <div class="data-item" *ngIf="childSummary.finance.creditBalance > 0">
+                        <label>Credit Balance:</label>
+                        <span>{{ childSummary.finance.creditBalance | currency:'USD':'symbol':'1.2-2' }}</span>
+                      </div>
+                      <div class="data-item" *ngIf="childSummary.finance.lastReceipt as lr">
+                        <label>Last Receipt:</label>
+                        <span>{{ lr.receiptNumber }} – {{ lr.amount | currency:'USD':'symbol':'1.2-2' }} ({{ lr.date | date:'shortDate' }})</span>
+                      </div>
+                    </mat-card>
+                    <mat-card class="summary-card academic-card">
+                      <h4>Academic Summary</h4>
+                      <div class="data-item">
+                        <label>Report Cards:</label>
+                        <span>{{ childSummary.academics.numberOfReportCards }}</span>
+                      </div>
+                      <div class="data-item">
+                        <label>Best Position:</label>
+                        <span *ngIf="childSummary.academics.bestPosition as bp">
+                          {{ bp.position }} ({{ bp.term }} {{ bp.year }}, {{ bp.class }})
+                        </span>
+                        <span *ngIf="!childSummary.academics.bestPosition">N/A</span>
+                      </div>
+                      <div class="data-item">
+                        <label>Worst Position:</label>
+                        <span *ngIf="childSummary.academics.worstPosition as wp">
+                          {{ wp.position }} ({{ wp.term }} {{ wp.year }}, {{ wp.class }})
+                        </span>
+                        <span *ngIf="!childSummary.academics.worstPosition">N/A</span>
+                      </div>
+                    </mat-card>
+                    <mat-card class="summary-card">
+                      <h4>Advisory Insight</h4>
+                      <p>{{ buildParentAdvisory(childSummary) }}</p>
+                    </mat-card>
+                  </div>
+                  <div class="continuous-assessment" *ngIf="caLoading">
+                    <mat-spinner diameter="32"></mat-spinner>
+                    <span>Loading continuous assessment...</span>
+                  </div>
+                  <mat-card class="summary-card ca-card" *ngIf="!caLoading && caAnalytics as analytics">
+                    <h4>Continuous Assessment</h4>
+                    <div class="data-item">
+                      <label>Average Score:</label>
+                      <span>{{ analytics.averageScore | number:'1.0-1' }}%</span>
+                    </div>
+                    <div class="data-item">
+                      <label>Total Entries:</label>
+                      <span>{{ analytics.totalEntries }}</span>
+                    </div>
+                  </mat-card>
+                </section>
+
+                <!-- Performance overview (primary view for marks) -->
+                <section class="performance-section">
+                  <h3><mat-icon>show_chart</mat-icon> Performance overview</h3>
+                  <div class="marks-insights" *ngIf="marksInsights">
+                    <mat-card class="insight-card">
+                      <h4>Average mark</h4>
+                      <p class="insight-value">
+                        {{ marksInsights.average | number:'1.0-1' }}%
+                      </p>
+                      <p class="insight-caption">
+                        Across {{ marksInsights.totalCount }} assessments
+                      </p>
+                    </mat-card>
+
+                    <mat-card class="insight-card" *ngIf="marksInsights.bestSubject">
+                      <h4>Strongest subject</h4>
+                      <p class="insight-value">
+                        {{ marksInsights.bestSubject }}
+                      </p>
+                      <p class="insight-caption">
+                        Best mark {{ marksInsights.bestMark | number:'1.0-0' }}%
+                      </p>
+                    </mat-card>
+
+                    <mat-card class="insight-card warning" *ngIf="marksInsights.weakestSubject">
+                      <h4>Needs attention</h4>
+                      <p class="insight-value">
+                        {{ marksInsights.weakestSubject }}
+                      </p>
+                      <p class="insight-caption">
+                        Lowest mark {{ marksInsights.weakestMark | number:'1.0-0' }}%
+                      </p>
+                    </mat-card>
+                  </div>
+                  <mat-card *ngIf="performanceChartData$ | async as chartDataArray; else noPerf">
+                    <div class="chart-container" *ngIf="chartDataArray.length && chartDataArray[0].chartData">
+                      <canvas baseChart
+                        [data]="chartDataArray[0].chartData"
+                        [options]="lineChartOptions"
+                        [type]="lineChartType">
+                      </canvas>
+                    </div>
+                  </mat-card>
+                  <ng-template #noPerf>
+                    <mat-card class="no-data-card">
+                      <p>No performance data yet. Report cards may not have been generated for this student.</p>
+                    </mat-card>
+                  </ng-template>
+                </section>
+
+                <!-- Marks table (secondary view) -->
+                <section class="marks-section">
+                  <h3><mat-icon>assignment</mat-icon> Detailed marks</h3>
+                  <div class="marks-loading" *ngIf="studentMarksLoading$ | async">
+                    <mat-spinner diameter="36"></mat-spinner>
+                    <span>Loading marks...</span>
+                  </div>
+                  <mat-card class="marks-card" *ngIf="!(studentMarksLoading$ | async)">
+                    <div class="marks-table-wrapper">
+                      <table mat-table [dataSource]="marksDataSource" class="marks-table">
+                        <ng-container matColumnDef="subject">
+                          <th mat-header-cell *matHeaderCellDef>Subject</th>
+                          <td mat-cell *matCellDef="let row">{{ row.subject?.name ?? row.subject?.code }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="term">
+                          <th mat-header-cell *matHeaderCellDef>Term</th>
+                          <td mat-cell *matCellDef="let row">{{ row.num }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="year">
+                          <th mat-header-cell *matHeaderCellDef>Year</th>
+                          <td mat-cell *matCellDef="let row">{{ row.year }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="mark">
+                          <th mat-header-cell *matHeaderCellDef>Mark</th>
+                          <td mat-cell *matCellDef="let row">{{ row.mark != null ? row.mark : '–' }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="examType">
+                          <th mat-header-cell *matHeaderCellDef>Exam</th>
+                          <td mat-cell *matCellDef="let row">{{ row.examType ?? '–' }}</td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="marksDisplayedColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: marksDisplayedColumns"></tr>
+                        <tr class="mat-row" *matNoDataRow>
+                          <td class="mat-cell" colspan="5">No marks on record.</td>
+                        </tr>
+                      </table>
+                    </div>
+                  </mat-card>
+                </section>
+            </ng-container>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </ng-container>
+  </ng-container>

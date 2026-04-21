@@ -1,0 +1,117 @@
+<!-- Loading Overlay -->
+<div class="loading-overlay" *ngIf="isLoading$ | async">
+  <div class="loading-content">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p class="loading-text">{{ isEditMode ? 'Updating subject...' : 'Adding subject...' }}</p>
+  </div>
+</div>
+
+<!-- Main Container -->
+<div class="dialog-container">
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-content">
+      <mat-icon class="header-icon">{{ isEditMode ? 'edit' : 'add' }}</mat-icon>
+      <div class="header-text">
+        <h2 class="dialog-title">{{ isEditMode ? 'Edit Subject' : 'Add New Subject' }}</h2>
+        <p class="dialog-subtitle">
+          {{ isEditMode ? 'Update the subject information' : 'Enter the subject details below' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div class="error-container" *ngIf="errorMsg$ | async as errorMsg">
+    <mat-icon class="error-icon">error_outline</mat-icon>
+    <span class="error-message">{{ errorMsg }}</span>
+  </div>
+
+  <!-- Form -->
+  <form [formGroup]="addSubjectForm" (ngSubmit)="addSubject()" class="subject-form">
+    <div class="form-content">
+      <!-- Code Field -->
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Subject Code</mat-label>
+        <input
+          formControlName="code"
+          matInput
+          type="text"
+          placeholder="Enter subject code"
+          autocomplete="off"
+          [class.error]="code?.invalid && code?.touched" />
+        <mat-icon matPrefix class="field-icon">code</mat-icon>
+        <mat-hint *ngIf="!code?.invalid || !code?.touched">e.g., 9618, MATH101</mat-hint>
+        
+        <mat-error *ngIf="code?.hasError('required') && code?.touched">
+          <mat-icon class="error-icon-small">error</mat-icon>
+          Subject code is required
+        </mat-error>
+        <mat-error *ngIf="code?.hasError('minlength') && code?.touched">
+          <mat-icon class="error-icon-small">error</mat-icon>
+          Code must be at least 2 characters ({{ code?.value?.length || 0 }}/2)
+        </mat-error>
+        <mat-error *ngIf="code?.hasError('maxlength') && code?.touched">
+          <mat-icon class="error-icon-small">error</mat-icon>
+          Code must be less than 20 characters ({{ code?.value?.length || 0 }}/20)
+        </mat-error>
+        <mat-error *ngIf="code?.hasError('pattern') && code?.touched">
+          <mat-icon class="error-icon-small">error</mat-icon>
+          Code can only contain letters, numbers, and spaces
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Name Field -->
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Subject Name</mat-label>
+        <input
+          formControlName="name"
+          matInput
+          type="text"
+          placeholder="Enter subject name"
+          autocomplete="off"
+          [class.error]="name?.invalid && name?.touched" />
+        <mat-icon matPrefix class="field-icon">book</mat-icon>
+        <mat-hint *ngIf="!name?.invalid || !name?.touched">e.g., Computer Science, Mathematics</mat-hint>
+        
+        <mat-error *ngIf="name?.hasError('required') && name?.touched">
+          <mat-icon class="error-icon-small">error</mat-icon>
+          Subject name is required
+        </mat-error>
+        <mat-error *ngIf="name?.hasError('minlength') && name?.touched">
+          <mat-icon class="error-icon-small">error</mat-icon>
+          Name must be at least 3 characters ({{ name?.value?.length || 0 }}/3)
+        </mat-error>
+        <mat-error *ngIf="name?.hasError('maxlength') && name?.touched">
+          <mat-icon class="error-icon-small">error</mat-icon>
+          Name must be less than 100 characters ({{ name?.value?.length || 0 }}/100)
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="form-actions">
+      <button
+        type="button"
+        mat-stroked-button
+        (click)="closeDialog()"
+        class="cancel-button"
+        [disabled]="isLoading$ | async">
+        <mat-icon>close</mat-icon>
+        Cancel
+      </button>
+      
+      <button
+        type="submit"
+        mat-raised-button
+        color="primary"
+        class="save-button"
+        [disabled]="addSubjectForm.invalid || (isLoading$ | async)"
+        [class.loading]="isLoading$ | async">
+        <mat-icon *ngIf="!(isLoading$ | async)">{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+        <mat-spinner *ngIf="isLoading$ | async" diameter="20"></mat-spinner>
+        {{ (isLoading$ | async) ? (isEditMode ? 'Updating...' : 'Adding...') : (isEditMode ? 'Update Subject' : 'Add Subject') }}
+      </button>
+    </div>
+  </form>
+</div>

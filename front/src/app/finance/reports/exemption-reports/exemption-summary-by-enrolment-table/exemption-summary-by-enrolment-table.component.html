@@ -1,0 +1,28 @@
+<div class="mat-elevation-z2 report-table-container">
+  <table mat-table [dataSource]="dataSource" matSort>
+    <ng-container matColumnDef="enrolName">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Enrolment Name</th>
+      <td mat-cell *matCellDef="let element">{{ element.enrolName }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="totalExempted">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Total Exempted Amount</th>
+      <td mat-cell *matCellDef="let element">${{ element.totalExempted | number : '1.2-2' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="invoiceCount">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Number of Exemptions</th>
+      <td mat-cell *matCellDef="let element">{{ element.invoiceCount }}</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell" colspan="3">No exemption data by enrolment available for the selected filters.</td>
+    </tr>
+  </table>
+
+  <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"
+    aria-label="Select page of enrolment summary data"></mat-paginator>
+</div>

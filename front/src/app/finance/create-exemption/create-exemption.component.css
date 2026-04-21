@@ -1,0 +1,44 @@
+mat-card {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 20px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+mat-form-field {
+  margin-bottom: 15px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+/* Style for the student name display input */
+.selected-student-display input[disabled] {
+  color: rgba(0, 0, 0, 0.87); /* Adjust as needed for better visibility */
+  background-color: #f5f5f5; /* Light grey background for disabled input */
+  cursor: default; /* Indicate it's not directly editable */
+}
+
+/* Container for student search */
+.student-search-container {
+  margin-bottom: 20px; /* Space below the search */
+}
+
+/* Styles for radio buttons */
+.exemption-type-radio-group {
+  display: flex; /* Arrange radio buttons horizontally */
+  flex-wrap: wrap; /* Allow wrapping on smaller screens */
+  gap: 15px; /* Space between radio buttons */
+  margin-top: 10px; /* Space below the label */
+  margin-bottom: 20px; /* Space before next field */
+}
+
+.exemption-radio-button {
+  margin-right: 10px; /* Adjust spacing between individual radio buttons if not using gap */
+}

@@ -1,0 +1,398 @@
+/* Dialog Container */
+::ng-deep .mat-mdc-dialog-container {
+  padding: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  max-height: 95vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 0;
+}
+
+/* Dialog Toolbar */
+.dialog-toolbar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1rem 1.5rem;
+  margin: 0;
+  border-radius: 0;
+}
+
+.toolbar-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.title-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.title-icon {
+  font-size: 1.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #ffd700;
+}
+
+.dialog-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.toolbar-actions button {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.toolbar-actions button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Loading Container */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+}
+
+.loading-text {
+  margin-top: 1rem;
+  color: #666;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* ID Card Wrapper */
+.id-card-wrapper {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* ID Card Container */
+.id-card-container {
+  width: 3.375in;
+  height: 2.125in;
+  border: 3px solid #333;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transform: scale(1.5);
+  transform-origin: center;
+  margin: 2rem 0;
+}
+
+.id-card-content {
+  padding: 12px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.school-name {
+  font-size: 12px;
+  font-weight: bold;
+  margin: 0;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.school-subtitle {
+  font-size: 8px;
+  margin: 2px 0 0 0;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+/* Student Information */
+.student-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex: 1;
+  gap: 10px;
+}
+
+.student-details {
+  flex: 1;
+}
+
+.student-name {
+  font-size: 14px;
+  font-weight: bold;
+  margin: 0 0 4px 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  line-height: 1.2;
+}
+
+.student-number,
+.student-id,
+.student-gender,
+.student-class {
+  font-size: 9px;
+  margin: 2px 0;
+  opacity: 0.9;
+  line-height: 1.1;
+}
+
+.student-number {
+  font-weight: 600;
+  color: #ffd700;
+}
+
+/* QR Code Section */
+.qr-section {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.qr-code {
+  width: 60px;
+  height: 60px;
+  border: 2px solid white;
+  border-radius: 8px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.qr-code img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.qr-label {
+  font-size: 7px;
+  margin: 4px 0 0 0;
+  opacity: 0.8;
+  font-weight: 500;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  font-size: 8px;
+  opacity: 0.8;
+  margin-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  padding-top: 6px;
+}
+
+.valid-until {
+  font-size: 7px;
+  margin: 0 0 2px 0;
+  font-weight: 600;
+}
+
+.school-address {
+  font-size: 6px;
+  margin: 0;
+  opacity: 0.7;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  min-width: 140px;
+  justify-content: center;
+}
+
+.print-button {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+}
+
+.print-button:hover {
+  background: linear-gradient(135deg, #5a6fd8, #6a4190);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.download-button {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+  border: none;
+}
+
+.download-button:hover {
+  background: linear-gradient(135deg, #45a049, #3d8b40);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+}
+
+/* Instructions */
+.instructions {
+  width: 100%;
+  max-width: 600px;
+}
+
+.instructions-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.instructions-card mat-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem 0.5rem;
+}
+
+.instructions-icon {
+  color: #667eea;
+  font-size: 1.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.instructions-card mat-card-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #495057;
+}
+
+.instructions-card mat-card-content {
+  padding: 0 1.5rem 1.5rem;
+}
+
+.instructions-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: #666;
+  line-height: 1.6;
+}
+
+.instructions-list li {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .id-card-wrapper {
+    padding: 1rem;
+  }
+
+  .id-card-container {
+    transform: scale(1.2);
+    margin: 1rem 0;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .action-button {
+    width: 100%;
+    max-width: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .id-card-container {
+    transform: scale(1);
+    margin: 0.5rem 0;
+  }
+
+  .id-card-wrapper {
+    padding: 0.5rem;
+  }
+
+  .instructions-card mat-card-header {
+    padding: 0.75rem 1rem 0.25rem;
+  }
+
+  .instructions-card mat-card-content {
+    padding: 0 1rem 1rem;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .dialog-toolbar,
+  .action-buttons,
+  .instructions {
+    display: none !important;
+  }
+
+  .id-card-wrapper {
+    padding: 0;
+    background: white;
+  }
+
+  .id-card-container {
+    transform: none !important;
+    margin: 0;
+    box-shadow: none;
+    border: 2px solid #000;
+  }
+
+  .dialog-container {
+    background: white;
+  }
+}

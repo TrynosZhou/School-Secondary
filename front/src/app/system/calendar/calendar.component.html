@@ -1,0 +1,32 @@
+<div class="calendar-container">
+  <mat-card class="calendar-header">
+    <mat-card-title>
+      <mat-icon>calendar_today</mat-icon>
+      School Calendar
+    </mat-card-title>
+    <mat-card-content>
+      <p>View and manage upcoming school activities and events.</p>
+    </mat-card-content>
+    <mat-card-actions *ngIf="isAdmin$ | async">
+      <button mat-raised-button color="primary" (click)="createNewEvent()">
+        <mat-icon>add</mat-icon>
+        Add Event
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  <mat-card class="calendar-card">
+    <mat-card-content>
+      <div class="loading-spinner" *ngIf="isLoading">
+        <mat-spinner></mat-spinner>
+      </div>
+      
+      <full-calendar
+        #calendar
+        [options]="calendarOptions"
+        class="calendar-view">
+      </full-calendar>
+    </mat-card-content>
+  </mat-card>
+</div>
+

@@ -1,0 +1,43 @@
+import { forwardRef, Module, OnModuleInit, Logger } from '@nestjs/common';
+import { EnrolmentController } from './enrolment.controller';
+import { EnrolmentService } from './enrolment.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { TermsEntity } from './entities/term.entity';
+import { ClassEntity } from './entities/class.entity';
+import { AuthModule } from '../auth/auth.module';
+import { EnrolEntity } from './entities/enrol.entity';
+import { ResourceByIdModule } from '../resource-by-id/resource-by-id.module';
+import { AttendanceEntity } from '../attendance/entities/attendance.entity';
+import { BillsEntity } from 'src/finance/entities/bills.entity';
+import { ReceiptEntity } from 'src/payment/entities/payment.entity';
+import { FinanceModule } from 'src/finance/finance.module';
+import { ProfilesModule } from 'src/profiles/profiles.module';
+import { FinanceService } from 'src/finance/finance.service';
+
+@Module({
+  imports: [
+    AuthModule,
+    ResourceByIdModule,
+    ProfilesModule,
+    // FinanceModule,
+    forwardRef(() => FinanceModule),
+    TypeOrmModule.forFeature([
+      TermsEntity,
+      ClassEntity,
+      EnrolEntity,
+      AttendanceEntity,
+      BillsEntity,
+      ReceiptEntity,
+    ]),
+  ],
+  controllers: [EnrolmentController],
+  providers: [EnrolmentService],
+  exports: [EnrolmentService],
+})
+export class EnrolmentModule implements OnModuleInit {
+  private readonly logger = new Logger(EnrolmentModule.name);
+
+  onModuleInit() {
+    this.logger.log('EnrolmentModule initialized successfully');
+  }
+}

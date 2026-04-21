@@ -1,0 +1,128 @@
+<div class="create-user-dialog">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <mat-icon>person_add</mat-icon>
+      Create New User
+    </h2>
+    <button mat-icon-button (click)="onCancel()" class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    <form [formGroup]="createUserForm" (ngSubmit)="onSubmit()" class="create-user-form">
+      
+      <!-- Basic Information Section -->
+      <div class="form-section">
+        <h3 class="section-title">Basic Information</h3>
+        
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Username *</mat-label>
+            <input matInput formControlName="username" placeholder="Enter username">
+            <mat-icon matSuffix>person</mat-icon>
+            <mat-error *ngIf="getFieldError('username')">{{ getFieldError('username') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Role *</mat-label>
+            <mat-select formControlName="role">
+              <mat-option *ngFor="let role of roles" [value]="role">
+                {{ getRoleDisplayName(role) }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="getFieldError('role')">{{ getFieldError('role') }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Full Name *</mat-label>
+            <input matInput formControlName="name" placeholder="Enter full name">
+            <mat-icon matSuffix>badge</mat-icon>
+            <mat-error *ngIf="getFieldError('name')">{{ getFieldError('name') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Profile ID *</mat-label>
+            <input matInput formControlName="profileId" placeholder="Enter profile ID">
+            <mat-icon matSuffix>fingerprint</mat-icon>
+            <mat-error *ngIf="getFieldError('profileId')">{{ getFieldError('profileId') }}</mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Contact Information Section -->
+      <div class="form-section">
+        <h3 class="section-title">Contact Information</h3>
+        
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" placeholder="Enter email address" type="email">
+            <mat-icon matSuffix>email</mat-icon>
+            <mat-error *ngIf="getFieldError('email')">{{ getFieldError('email') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Phone</mat-label>
+            <input matInput formControlName="phone" placeholder="Enter phone number">
+            <mat-icon matSuffix>phone</mat-icon>
+            <mat-error *ngIf="getFieldError('phone')">{{ getFieldError('phone') }}</mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Security Section -->
+      <div class="form-section">
+        <h3 class="section-title">Security</h3>
+        
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Password *</mat-label>
+            <input matInput formControlName="password" placeholder="Enter password" type="password">
+            <mat-icon matSuffix>lock</mat-icon>
+            <mat-error *ngIf="getFieldError('password')">{{ getFieldError('password') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Confirm Password *</mat-label>
+            <input matInput formControlName="confirmPassword" placeholder="Confirm password" type="password">
+            <mat-icon matSuffix>lock_outline</mat-icon>
+            <mat-error *ngIf="getFieldError('confirmPassword')">{{ getFieldError('confirmPassword') }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="password-requirements">
+          <p class="requirements-title">Password Requirements:</p>
+          <ul class="requirements-list">
+            <li>At least 8 characters long</li>
+            <li>Contains uppercase letter</li>
+            <li>Contains lowercase letter</li>
+            <li>Contains number</li>
+            <li>Contains special character (@$!%*?&)</li>
+          </ul>
+        </div>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-button (click)="onCancel()" class="cancel-button">
+      <mat-icon>cancel</mat-icon>
+      Cancel
+    </button>
+    <button 
+      mat-raised-button 
+      color="primary" 
+      (click)="onSubmit()" 
+      [disabled]="createUserForm.invalid || (loading$ | async)"
+      class="submit-button">
+      <mat-icon *ngIf="!(loading$ | async)">save</mat-icon>
+      <mat-spinner *ngIf="loading$ | async" diameter="20"></mat-spinner>
+      {{ (loading$ | async) ? 'Creating...' : 'Create User' }}
+    </button>
+  </mat-dialog-actions>
+</div>
+
+

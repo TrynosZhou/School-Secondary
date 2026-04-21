@@ -1,0 +1,74 @@
+<div class="student-reports-dashboard">
+  <h2>My Report Cards</h2>
+
+  <!-- Parent: select which child's reports to view (hidden when used inside tab with studentNumberInput) -->
+  <ng-container *ngIf="(isParent$ | async) && !studentNumberInput">
+    <div *ngIf="(linkedChildren$ | async)?.length === 0" class="no-children-msg">
+      No linked students. Contact the school to link your children to your account.
+    </div>
+    <div *ngIf="(linkedChildren$ | async)?.length as len" [class.hidden]="len === 0">
+      <mat-form-field appearance="fill" class="child-select" *ngIf="len > 1">
+        <mat-label>View report cards for</mat-label>
+        <mat-select [value]="selectedChildStudentNumber$ | async" (selectionChange)="onParentSelectChild($event.value)">
+          <mat-option *ngFor="let c of linkedChildren$ | async" [value]="c.studentNumber">
+            {{ c.studentNumber }} – {{ c.name }} {{ c.surname }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <p *ngIf="len === 1 && (effectiveStudentNumber$ | async) as sn" class="child-info">Viewing reports for: {{ sn }}</p>
+    </div>
+  </ng-container>
+
+  <mat-card *ngIf="!(isParent$ | async) || (linkedChildren$ | async)?.length" class="filter-card">
+    <mat-card-header>
+      <mat-card-title>Select a Report</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="form-row">
+        <mat-form-field appearance="fill">
+          <mat-label>Term Number</mat-label>
+          <mat-select [(ngModel)]="selectedTerm" (selectionChange)="onReportSelect()">
+            <mat-option *ngFor="let term of availableTerms" [value]="term">Term {{ term }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Year</mat-label>
+          <mat-select [(ngModel)]="selectedYear" (selectionChange)="onReportSelect()">
+            <mat-option *ngFor="let year of availableYears" [value]="year">{{ year }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Exam Type</mat-label>
+          <mat-select [(ngModel)]="selectedExamType" (selectionChange)="onReportSelect()">
+            <mat-option *ngFor="let type of availableExamTypes" [value]="type">{{ type }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <button mat-stroked-button color="warn" (click)="clearSelection()" [disabled]="!(selectedReport$ | async)">
+        Clear Selection
+      </button>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-spinner *ngIf="isLoading$ | async"></mat-spinner>
+  <div *ngIf="errorMessage$ | async" class="error-message" role="alert" aria-live="assertive">
+    {{ errorMessage$ | async }}
+  </div>
+
+  <div *ngIf="selectedReport$ | async as currentReport; else noReportSelected" class="report-container">
+    <div class="report-wrapper">
+      <app-report [report]="currentReport"></app-report>
+    </div>
+  </div>
+
+  <ng-template #noReportSelected>
+    <app-empty-state
+      *ngIf="!(isLoading$ | async) && !(errorMessage$ | async)"
+      icon="description"
+      title="Select a report"
+      [message]="(emptyStateMessage$ | async) ?? ''">
+    </app-empty-state>
+  </ng-template>
+</div>

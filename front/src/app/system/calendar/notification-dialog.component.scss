@@ -1,0 +1,47 @@
+.event-info {
+  margin-bottom: 20px;
+  padding: 16px;
+  background-color: var(--background-card, #f5f5f5);
+  border-radius: 8px;
+
+  h3 {
+    margin-top: 0;
+    color: var(--text-color-primary);
+  }
+
+  p {
+    margin: 8px 0;
+    color: var(--text-color-secondary);
+  }
+}
+
+.notification-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.enable-checkbox {
+  margin-bottom: 16px;
+}
+
+.reminder-options {
+  h4 {
+    margin: 16px 0 8px 0;
+    color: var(--text-color-primary);
+  }
+}
+
+.reminder-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.reminder-button {
+  &.selected {
+    background-color: var(--primary-color, #2196f3);
+    color: white;
+  }
+}
+

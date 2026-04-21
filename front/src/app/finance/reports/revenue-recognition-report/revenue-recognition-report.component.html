@@ -1,0 +1,74 @@
+<div class="report-container">
+  <h1>Revenue Recognition Report</h1>
+
+  <form [formGroup]="filterForm" class="report-filters">
+    <mat-form-field appearance="fill" class="filter-field">
+      <mat-label>Select Term</mat-label>
+      <mat-select formControlName="termFilter">
+        <mat-option [value]="null">-- Select a Term --</mat-option> <mat-option *ngFor="let term of (terms$ | async)"
+          [value]="term">
+          Term {{ term.num }} ({{ term.year }})
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="filter-field">
+      <mat-label>Select Class (Optional)</mat-label>
+      <mat-select formControlName="classFilter">
+        <mat-option [value]="null">All Classes</mat-option>
+        <mat-option *ngFor="let class of (classes$ | async)" [value]="class">
+          {{ class.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-raised-button color="warn" (click)="onClearFilters()">Clear Filters</button>
+  </form>
+
+  <div *ngIf="reportData$ | async as report; else loadingOrError">
+    <table mat-table [dataSource]="report.reportData" class="report-table">
+
+      <ng-container matColumnDef="termName">
+        <th mat-header-cell *matHeaderCellDef>Term</th>
+        <td mat-cell *matCellDef="let element">{{ element.termName }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="className">
+        <th mat-header-cell *matHeaderCellDef>Class</th>
+        <td mat-cell *matCellDef="let element">{{ element.className || 'All Classes' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="totalInvoiced">
+        <th mat-header-cell *matHeaderCellDef>Total Invoiced</th>
+        <td mat-cell *matCellDef="let element">{{ element.totalInvoiced | currency }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="totalOutstanding">
+        <th mat-header-cell *matHeaderCellDef>Total Outstanding</th>
+        <td mat-cell *matCellDef="let element">{{ element.totalOutstanding | currency }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="studentCount">
+        <th mat-header-cell *matHeaderCellDef>Student Count</th>
+        <td mat-cell *matCellDef="let element">{{ element.studentCount }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" [attr.colspan]="displayedColumns.length">No revenue data for the selected criteria.</td>
+      </tr>
+    </table>
+  </div>
+
+  <ng-template #loadingOrError>
+    <div *ngIf="isLoading$ | async" class="loading-spinner">
+      <mat-spinner></mat-spinner>
+      <p>Loading Revenue Recognition Report...</p>
+    </div>
+    <div *ngIf="!(isLoading$ | async) && !(reportData$ | async)" class="no-data-message">
+      <p>Select filters and generate the Revenue Recognition Report.</p>
+    </div>
+  </ng-template>
+</div>

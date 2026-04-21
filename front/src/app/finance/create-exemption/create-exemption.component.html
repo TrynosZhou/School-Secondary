@@ -1,0 +1,79 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Create New Exemption</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="student-search-container">
+      <app-student-search (studentSelected)="studentSelected($event)"></app-student-search>
+    </div>
+
+    <form [formGroup]="exemptionForm" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="outline" class="full-width selected-student-display">
+        <mat-label>Selected Student</mat-label>
+        <input matInput formControlName="studentName" readonly />
+        <mat-error
+          *ngIf="exemptionForm.get('studentId')?.hasError('required') && exemptionForm.get('studentId')?.touched">
+          A student must be selected.
+        </mat-error>
+      </mat-form-field>
+
+      <div class="full-width">
+        <mat-label>Exemption Type</mat-label>
+        <mat-radio-group formControlName="type" class="exemption-type-radio-group">
+          <mat-radio-button *ngFor="let type of exemptionTypes" [value]="type" class="exemption-radio-button">
+            {{ type | titlecase | replaceUnderscores }}
+          </mat-radio-button>
+        </mat-radio-group>
+        <mat-error *ngIf="exemptionForm.get('type')?.hasError('required') && exemptionForm.get('type')?.touched">
+          Exemption type is required.
+        </mat-error>
+      </div>
+
+
+      <mat-form-field *ngIf="
+            exemptionForm.get('type')?.value === 'FIXED_AMOUNT' ||
+            exemptionForm.get('type')?.value === 'STAFF_SIBLING'
+          " appearance="outline" class="full-width">
+        <mat-label>Fixed Amount</mat-label>
+        <input matInput type="number" formControlName="fixedAmount" />
+        <mat-error
+          *ngIf="exemptionForm.get('fixedAmount')?.hasError('required') && exemptionForm.get('fixedAmount')?.touched">
+          Fixed amount is required.
+        </mat-error>
+        <mat-error *ngIf="exemptionForm.get('fixedAmount')?.hasError('min')">
+          Amount must be positive.
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field *ngIf="exemptionForm.get('type')?.value === 'PERCENTAGE'" appearance="outline" class="full-width">
+        <mat-label>Percentage Amount</mat-label>
+        <input matInput type="number" formControlName="percentageAmount" />
+        <mat-error
+          *ngIf="exemptionForm.get('percentageAmount')?.hasError('required') && exemptionForm.get('percentageAmount')?.touched">
+          Percentage amount is required.
+        </mat-error>
+        <mat-error *ngIf="exemptionForm.get('percentageAmount')?.hasError('min')">
+          Percentage must be between 0.01 and 100.
+        </mat-error>
+        <mat-error *ngIf="exemptionForm.get('percentageAmount')?.hasError('max')">
+          Percentage must be between 0.01 and 100.
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Description (Optional)</mat-label>
+        <textarea matInput formControlName="description"></textarea>
+      </mat-form-field>
+
+      <mat-slide-toggle formControlName="isActive">
+        Is Active Exemption
+      </mat-slide-toggle>
+
+      <mat-card-actions class="form-actions">
+        <button mat-raised-button color="primary" type="submit" [disabled]="exemptionForm.invalid || !selectedStudent">
+          Create Exemption
+        </button>
+      </mat-card-actions>
+    </form>
+  </mat-card-content>
+</mat-card>

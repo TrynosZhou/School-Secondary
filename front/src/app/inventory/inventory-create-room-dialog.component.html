@@ -1,0 +1,26 @@
+<h2 mat-dialog-title>{{ title }}</h2>
+
+<div mat-dialog-content>
+  <form [formGroup]="form" class="dialog-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Room name</mat-label>
+      <input matInput formControlName="name" placeholder="e.g. Biology Lab" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Code (optional)</mat-label>
+      <input matInput formControlName="code" placeholder="e.g. BIO-LAB" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Description (optional)</mat-label>
+      <textarea matInput rows="3" formControlName="description"></textarea>
+    </mat-form-field>
+  </form>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Cancel</button>
+  <button mat-raised-button color="primary" type="button" (click)="save()">{{ saveLabel }}</button>
+</div>
+

@@ -1,0 +1,48 @@
+<h2 mat-dialog-title>Adjust stock</h2>
+
+<div mat-dialog-content>
+  <div class="context">
+    <mat-icon>inventory</mat-icon>
+    <div>
+      <div class="context-title">{{ data.item.name }}</div>
+      <div class="context-subtitle">
+        Current: {{ data.item.quantityOnHand }}{{ data.item.unit ? ' ' + data.item.unit : '' }}
+      </div>
+    </div>
+  </div>
+
+  <form [formGroup]="form" class="dialog-form">
+    <div class="row">
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Delta</mat-label>
+        <input matInput type="number" formControlName="delta" />
+        <mat-hint>Use negative values to reduce stock.</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Reason</mat-label>
+        <mat-select formControlName="reason">
+          <mat-option *ngFor="let r of reasons" [value]="r.value">
+            {{ r.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Reference (optional)</mat-label>
+      <input matInput formControlName="reference" placeholder="e.g. Req #123" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Notes (optional)</mat-label>
+      <textarea matInput rows="3" formControlName="notes"></textarea>
+    </mat-form-field>
+  </form>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Cancel</button>
+  <button mat-raised-button color="primary" type="button" (click)="save()">Save</button>
+</div>
+

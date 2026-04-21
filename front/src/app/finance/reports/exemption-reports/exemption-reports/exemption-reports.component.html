@@ -1,0 +1,82 @@
+<div class="exemption-reports-container">
+  <h1>Exemption Reports</h1>
+
+  <mat-card class="filters-card">
+    <mat-card-header>
+      <mat-card-title>Filter Reports</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <app-exemption-report-filters [currentFilters]="filters"
+        (applyFilters)="onApplyFilters($event)"></app-exemption-report-filters>
+    </mat-card-content>
+  </mat-card>
+
+  <ng-container *ngIf="reportData$ | async as reportData; else loadingOrNoData">
+    <div *ngIf="reportData.totalExemptedAmount > 0 || reportData.detailedExemptions.length > 0; else noData">
+      <mat-card class="summary-card">
+        <mat-card-header>
+          <mat-card-title>Report Summary</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <app-total-exemption-amount-card
+            [totalAmount]="reportData.totalExemptedAmount"></app-total-exemption-amount-card>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="report-section-card">
+        <mat-card-header>
+          <mat-card-title>Exemption Breakdown by Type</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <app-exemption-summary-by-type-table
+            [summaryData]="reportData.summaryByType"></app-exemption-summary-by-type-table>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="report-section-card">
+        <mat-card-header>
+          <mat-card-title>Exemptions by Student</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <app-exemption-summary-by-student-table [summaryData]="reportData.summaryByStudent">
+          </app-exemption-summary-by-student-table>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="report-section-card">
+        <mat-card-header>
+          <mat-card-title>Exemptions by Enrolment</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <app-exemption-summary-by-enrolment-table
+            [summaryData]="reportData.summaryByEnrolment"></app-exemption-summary-by-enrolment-table>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="report-section-card">
+        <mat-card-header>
+          <mat-card-title>Detailed Exemption List</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <app-exemption-detailed-list-table
+            [detailedItems]="reportData.detailedExemptions"></app-exemption-detailed-list-table>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    <ng-template #noData>
+      <mat-card class="no-data-card">
+        <mat-card-content>
+          <p>No exemption data available for the selected filters.</p>
+        </mat-card-content>
+      </mat-card>
+    </ng-template>
+  </ng-container>
+
+  <ng-template #loadingOrNoData>
+    <mat-card class="loading-card">
+      <mat-card-content>
+        <p>Loading report data, or no data available yet...</p>
+      </mat-card-content>
+    </mat-card>
+  </ng-template>
+</div>

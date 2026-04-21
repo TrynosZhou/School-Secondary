@@ -1,0 +1,235 @@
+/* src/app/receipts-page/receipts-page.component.css */
+
+.receipts-toolbar {
+  display: flex;
+  justify-content: space-between; /* Distribute items horizontally */
+  align-items: center; /* Vertically align items */
+  height: 64px; /* Standard Material toolbar height */
+  padding: 0 16px; /* Standard Material padding */
+}
+
+.toolbar-left-content {
+  display: flex; /* Make this a flex container too */
+  align-items: center;
+  flex-grow: 1; /* Allow it to take available space */
+  /* This ensures that when the search is hidden, the title sits where the search would be */
+}
+
+.receipts-toolbar .toolbar-title {
+  font-size: 1.25rem; /* Standard Material title size */
+  font-weight: 500;
+  /* flex-shrink: 0; Prevent title from shrinking if search appears */
+}
+
+.receipts-toolbar .toolbar-search-container {
+  flex-grow: 1;
+  /*Allowsthecontainertotakeupavailablespace*/
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  /*Hidetheinputwhennotvisible*/
+  max-width: 0;
+  /*Starthidden*/
+  transition: max-width 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  opacity: 0;
+  -webkit-transition: max-width 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  -moz-transition: max-width 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  -ms-transition: max-width 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  -o-transition: max-width 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+.receipts-toolbar .toolbar-search-container.visible {
+  max-width: 500px; /* Max width when visible */
+  opacity: 1;
+  margin-left: 16px; /* Add some space from the title */
+}
+
+.receipts-toolbar .toolbar-search-container .search-input {
+  width: 100%;
+}
+
+/* Overriding Material's default styling for better integration */
+.receipts-toolbar
+  .toolbar-search-container
+  .search-input
+  .mat-form-field-wrapper {
+  padding-bottom: 0;
+}
+
+.receipts-toolbar .toolbar-search-container .search-input .mat-form-field-flex {
+  align-items: center;
+}
+
+.receipts-toolbar
+  .toolbar-search-container
+  .search-input
+  .mat-form-field-infix {
+  border-top: none;
+  padding: 0.5em 0; /* Adjust padding to center text vertically */
+}
+
+.receipts-toolbar
+  .toolbar-search-container
+  .search-input
+  .mat-form-field-appearance-outline
+  .mat-form-field-outline {
+  color: rgba(255, 255, 255, 0.7); /* Light outline for dark toolbar */
+}
+
+.receipts-toolbar .toolbar-search-container .search-input input {
+  color: white; /* Text color */
+}
+
+.receipts-toolbar
+  .toolbar-search-container
+  .search-input
+  .mat-form-field-label {
+  color: rgba(255, 255, 255, 0.7); /* Placeholder color */
+}
+
+.receipts-toolbar .toolbar-search-container .search-input .mat-icon-button {
+  color: rgba(255, 255, 255, 0.7); /* Icon color */
+}
+
+.receipts-toolbar .toolbar-icons {
+  display: flex;
+  flex-shrink: 0; /* Prevent icons from shrinking */
+  margin-left: 16px; /* Space between search/title and icons */
+}
+
+.receipts-toolbar .toolbar-icons .mat-icon-button {
+  color: white; /* Icon color */
+}
+
+.receipts-toolbar .toolbar-icons .mat-icon-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Style for the checkmark in the sort menu */
+mat-menu mat-icon {
+  margin-left: 8px; /* Space from text */
+  vertical-align: middle;
+}
+
+.receipts-content {
+  padding: 16px;
+  display: flex; /* Use flexbox for layout */
+  flex-wrap: wrap; /* Allow cards to wrap to the next line */
+  gap: 20px; /* Space between cards */
+  /* justify-content: flex-start; Align cards to the start */
+}
+
+.receipts-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px; /* Space between card components */
+  justify-content: flex-start; /* Or center, space-around etc. */
+  width: 100%; /* Take full width of parent */
+}
+
+.no-receipts-message {
+  text-align: center;
+  width: 100%;
+  color: rgba(0, 0, 0, 0.6);
+  margin-top: 50px;
+}
+
+.selected-receipt-display {
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  width: 100%;
+  /* Take full width */
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -ms-border-radius: 4px;
+  -o-border-radius: 4px;
+}
+
+/* FLOATING ACTION BUTTON (FAB) STYLES */
+.add-receipt-fab {
+  position: fixed; /* Fixes it relative to the viewport */
+  bottom: 20px; /* 20px from the bottom edge */
+  right: 20px; /* 20px from the right edge */
+  z-index: 1000; /* Ensure it stays on top of other content */
+  /* Add any additional styles if you used the round FAB */
+}
+
+/* If you chose the round FAB: */
+/*
+.add-receipt-fab-round {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+*/
+
+.receipts-container {
+  display: flex;
+  gap: 1rem;
+}
+
+.receipts-list {
+  flex-basis: 70%;
+}
+
+.selected-receipt-details {
+  flex-basis: 600px;
+  position: relative;
+  padding: 1rem;
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ======================================= */
+/* Styles for Printing (AFFECTS THE ENTIRE PAGE) */
+/* ======================================= */
+@media print {
+  /* Hide the elements of the PARENT COMPONENT */
+  .receipts-toolbar, /* The top toolbar */
+  .receipts-list,    /* The list of receipts on the left */
+  .add-receipt-fab   /* The floating action button */ {
+    display: none !important; /* Hide these elements completely when printing */
+  }
+
+  @page {
+    size: A4 portrait; /* Or Letter portrait, depending on region */
+    margin: 0; /* IMPORTANT: Remove default page margins to let your content control it */
+  }
+
+  /* More specific target for the FAB button */
+  button.add-receipt-fab {
+    /* Targeting the element type AND class */
+    display: none !important;
+  }
+
+  /* Ensure the selected receipt details take full width for printing */
+  .selected-receipt-details {
+    flex-basis: auto !important; /* Remove flex sizing */
+    width: 100% !important; /* Take full width */
+    max-width: 100% !important; /* Ensure it expands */
+    padding: 0 !important; /* Adjust padding for print */
+    margin: 0 !important; /* Remove margins */
+    box-shadow: none !important; /* Remove shadows */
+    background-color: transparent !important; /* No background color on print */
+    border: none !important; /* Remove border */
+  }
+
+  /* Make the main content area occupy the full page */
+  body {
+    margin: 0;
+    padding: 0;
+    -webkit-print-color-adjust: exact; /* Ensure backgrounds/colors print if desired */
+    print-color-adjust: exact;
+  }
+
+  /* Optional: Set page size and margins for print */
+  @page {
+    size: A4 portrait; /* Or Letter portrait */
+    margin: 10mm; /* Smaller margins around the printed content */
+  }
+}

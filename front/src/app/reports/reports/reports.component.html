@@ -1,0 +1,257 @@
+<!-- Loading Overlay -->
+<div class="loading-overlay" *ngIf="isLoading$ | async">
+  <div class="loading-content">
+    <mat-spinner diameter="60"></mat-spinner>
+    <p class="loading-text">Processing Reports...</p>
+  </div>
+</div>
+
+<!-- Background Elements -->
+<div class="background-elements">
+  <div class="floating-circle circle-1"></div>
+  <div class="floating-circle circle-2"></div>
+  <div class="floating-circle circle-3"></div>
+</div>
+
+<!-- Main Container -->
+<div class="main-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="title-section">
+        <mat-icon class="header-icon">assessment</mat-icon>
+        <div class="page-title">Reports Management</div>
+        <div class="page-subtitle">Generate, view, and manage student academic reports</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Staff Reports (teachers, admins, auditor, director, dev): form, generate, view, analytics, grid -->
+  <div class="main-card" *ngIf="isStaffReportsView$ | async">
+    <!-- Form Section -->
+    <div class="form-section">
+      <div class="form-header">
+        <mat-icon class="form-icon">tune</mat-icon>
+        <h3>Report Parameters</h3>
+      </div>
+      
+      <form [formGroup]="reportsForm" (ngSubmit)="fetchReportsBasedOnForm()" class="reports-form">
+        <div class="form-fields">
+          <div class="form-field">
+            <mat-form-field appearance="outline">
+              <mat-label>Choose Term</mat-label>
+              <mat-select formControlName="term">
+                <mat-option *ngFor="let term of terms$ | async" [value]="term">
+                  {{ formatTerm(term) }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="reportsForm.get('term')?.invalid && reportsForm.get('term')?.touched">Term is required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-field">
+            <mat-form-field appearance="outline">
+              <mat-label>Choose Class</mat-label>
+              <mat-select formControlName="clas">
+                <mat-option *ngFor="let clas of classes$ | async" [value]="clas.name">
+                  {{ clas.name }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="reportsForm.get('clas')?.invalid && reportsForm.get('clas')?.touched">Class is required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-field">
+            <mat-form-field appearance="outline">
+              <mat-label>Exam Type</mat-label>
+              <mat-select formControlName="examType">
+                <mat-option *ngFor="let type of examtype" [value]="type">
+                  {{ type }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="reportsForm.get('examType')?.invalid && reportsForm.get('examType')?.touched">Exam Type is required</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button mat-flat-button type="button" class="generate-button" 
+                  [disabled]="reportsForm.invalid || !(canGenerateReports$ | async)"
+                  (click)="generate()">
+            <mat-icon>add_circle</mat-icon>
+            <span>Generate</span>
+          </button>
+          
+          <button mat-flat-button type="button" class="save-button" 
+                  *ngIf="isAdmin$ | async"
+                  [disabled]="reportsForm.invalid || (reports$ | async)?.length === 0 || !(reportsGenerated$ | async)"
+                  (click)="saveReports()">
+            <mat-icon>save</mat-icon>
+            <span>Save</span>
+          </button>
+          
+          <button mat-flat-button type="button" class="view-button" 
+                  [disabled]="reportsForm.invalid"
+                  (click)="viewReports()">
+            <mat-icon>visibility</mat-icon>
+            <span>View</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Reports Display Area -->
+    <div class="reports-section">
+      <!-- Analytics Summary -->
+      <div class="analytics-section" *ngIf="(reports$ | async)!.length > 0 && !(isLoading$ | async)">
+        <div class="section-header">
+          <mat-icon class="section-icon">analytics</mat-icon>
+          <h3>Reports Analytics</h3>
+        </div>
+        
+        <div class="analytics-cards">
+          <div class="analytics-card total-students">
+            <div class="card-header">
+              <mat-icon class="card-icon">people</mat-icon>
+              <h4>Total Students</h4>
+            </div>
+            <div class="card-content">
+              <div class="card-value">{{ totalStudents }}</div>
+              <div class="card-label">Students Covered</div>
+            </div>
+          </div>
+
+          <div class="analytics-card total-subjects">
+            <div class="card-header">
+              <mat-icon class="card-icon">subject</mat-icon>
+              <h4>Total Subjects</h4>
+            </div>
+            <div class="card-content">
+              <div class="card-value">{{ totalSubjects }}</div>
+              <div class="card-label">Subjects Assessed</div>
+            </div>
+          </div>
+
+          <div class="analytics-card average-mark">
+            <div class="card-header">
+              <mat-icon class="card-icon">trending_up</mat-icon>
+              <h4>Average Mark</h4>
+            </div>
+            <div class="card-content">
+              <div class="card-value">{{ averageMark }}%</div>
+              <div class="card-label">Overall Performance</div>
+            </div>
+          </div>
+
+          <div class="analytics-card pass-rate">
+            <div class="card-header">
+              <mat-icon class="card-icon">check_circle</mat-icon>
+              <h4>Pass Rate</h4>
+            </div>
+            <div class="card-content">
+              <div class="card-value">{{ passRate }}%</div>
+              <div class="card-label">Students Passing</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-header" *ngIf="(reports$ | async)!.length > 0 && !(isLoading$ | async)">
+        <div class="header-left">
+          <mat-icon class="section-icon">description</mat-icon>
+          <h3>Generated Reports</h3>
+          <div class="report-count">
+            {{ (filteredReports$ | async)?.length || 0 }} of {{ (reports$ | async)?.length || 0 }} Report{{ ((reports$ | async)?.length || 0) !== 1 ? 's' : '' }}
+          </div>
+        </div>
+        
+        <!-- Search/Filter Input -->
+        <div class="search-container" *ngIf="(reports$ | async)!.length > 0">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Search reports</mat-label>
+            <input matInput 
+                   [formControl]="searchControl" 
+                   placeholder="Search by name, surname, or student number"
+                   autocomplete="off">
+            <mat-icon matPrefix>search</mat-icon>
+            <button mat-icon-button 
+                    matSuffix 
+                    *ngIf="searchControl.value"
+                    (click)="searchControl.setValue('')"
+                    aria-label="Clear search">
+              <mat-icon>clear</mat-icon>
+            </button>
+            <mat-hint>Type to filter reports by student name or number</mat-hint>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- No Reports Message -->
+      <div class="no-reports-container" *ngIf="!(isLoading$ | async) && (reports$ | async)?.length === 0">
+        <mat-icon class="no-reports-icon">description</mat-icon>
+        <h3>No Reports Found</h3>
+        <p>No reports found for the selected criteria. Please generate or view reports using the form above.</p>
+        <div class="no-reports-actions">
+          <button mat-flat-button class="generate-button" 
+                  [disabled]="reportsForm.invalid || !(canGenerateReports$ | async)"
+                  (click)="generate()">
+            <mat-icon>add_circle</mat-icon>
+            <span>Generate Reports</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- No Results Message (when search returns no results) -->
+      <div class="no-results-container" *ngIf="((reports$ | async)?.length ?? 0) > 0 && ((filteredReports$ | async)?.length ?? 0) === 0 && !(isLoading$ | async)">
+        <mat-icon class="no-results-icon">search_off</mat-icon>
+        <h3>No Reports Match Your Search</h3>
+        <p>No reports found matching "{{ searchControl.value }}". Try a different search term.</p>
+        <button mat-flat-button color="primary" (click)="searchControl.setValue('')">
+          <mat-icon>clear</mat-icon>
+          <span>Clear Search</span>
+        </button>
+      </div>
+
+      <!-- Reports Grid -->
+      <div class="reports-grid" *ngIf="((filteredReports$ | async)?.length ?? 0) > 0 && !(isLoading$ | async)">
+        <app-report *ngFor="let report of filteredReports$ | async; trackBy: trackByReport" [report]="report" class="report-card"></app-report>
+      </div>
+    </div>
+  </div>
+
+  <!-- Student Reports Section (student viewing own reports) -->
+  <div class="student-reports-section" *ngIf="isStudent$ | async">
+    <app-student-report-cards></app-student-report-cards>
+  </div>
+
+  <!-- Parent Reports Section: tabs per child; in each tab the same view students see (term/year/exam filter + report card) -->
+  <div class="parent-reports-section" *ngIf="(isParent$ | async) && !(isStudent$ | async)">
+    <div class="header-section parent-header">
+      <div class="header-content">
+        <div class="title-section">
+          <mat-icon class="header-icon">assessment</mat-icon>
+          <div class="page-title">Progress Reports</div>
+          <div class="page-subtitle">View report cards for each child — same view as when the student logs in</div>
+        </div>
+      </div>
+    </div>
+    <ng-container *ngIf="(linkedChildren$ | async)?.length === 0">
+      <app-no-linked-students title="No linked students" hint="Contact the school to link your children to your account. You can also ask an admin to link students in the Parents list."></app-no-linked-students>
+    </ng-container>
+    <ng-container *ngIf="(linkedChildren$ | async)?.length">
+      <mat-tab-group class="parent-report-tabs" (selectedTabChange)="onParentTabChange($event)" aria-label="Report cards by child">
+        <mat-tab *ngFor="let child of linkedChildren$ | async" [label]="(child.studentNumber + ' – ' + (child.name || '') + ' ' + (child.surname || '')).trim()"
+          [attr.aria-label]="'Report cards for ' + (((child.name || '') + ' ' + (child.surname || '')).trim() || child.studentNumber)">
+        </mat-tab>
+      </mat-tab-group>
+      <div class="tab-content" [attr.aria-busy]="isLoading$ | async">
+        <div *ngIf="isLoading$ | async" class="tab-loading-overlay" role="status" aria-label="Loading reports for selected child">
+          <mat-spinner diameter="36"></mat-spinner>
+          <span class="tab-loading-text">Loading…</span>
+        </div>
+        <!-- Same component and view students see: Select a Report (term/year/exam) + report display -->
+        <app-student-report-cards [studentNumberInput]="selectedChildStudentNumber$ | async"></app-student-report-cards>
+      </div>
+    </ng-container>
+  </div>
+</div>

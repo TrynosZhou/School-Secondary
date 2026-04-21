@@ -1,0 +1,318 @@
+<div class="system-settings-container" [class.theme-dark]="currentTheme === 'dark'">
+  <mat-card class="settings-card">
+    <mat-card-header class="card-header">
+      <h2>
+        <mat-icon>settings</mat-icon>
+        System Settings
+      </h2>
+      <p>Configure system-wide settings, preferences, and integrations</p>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div *ngIf="isLoading" class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Loading settings...</p>
+      </div>
+
+      <form [formGroup]="settingsForm" *ngIf="!isLoading" (ngSubmit)="onSave()">
+        <mat-tab-group [(selectedIndex)]="selectedTab">
+          <!-- School Information Tab -->
+          <mat-tab label="School Information">
+            <div class="tab-content">
+              <h3>
+                <mat-icon>business</mat-icon>
+                School Details
+              </h3>
+              <p class="section-description">Configure your school's basic information</p>
+
+              <div class="form-section">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>School Name</mat-label>
+                  <input matInput formControlName="schoolName" placeholder="Enter school name">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>School Address</mat-label>
+                  <textarea matInput formControlName="schoolAddress" rows="3" placeholder="Enter school address"></textarea>
+                </mat-form-field>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Phone Number</mat-label>
+                    <input matInput formControlName="schoolPhone" placeholder="+263 XXX XXX XXX">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Email Address</mat-label>
+                    <input matInput type="email" formControlName="schoolEmail" placeholder="info@school.com">
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Website</mat-label>
+                    <input matInput formControlName="schoolWebsite" placeholder="https://www.school.com">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Logo URL</mat-label>
+                    <input matInput formControlName="schoolLogo" placeholder="URL to school logo">
+                  </mat-form-field>
+                </div>
+
+                <mat-divider style="margin: 24px 0;"></mat-divider>
+
+                <h4>
+                  <mat-icon>palette</mat-icon>
+                  Brand Colors
+                </h4>
+                <p class="section-description">Configure your school's brand colors used throughout the application</p>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Primary Color</mat-label>
+                    <div class="color-input-wrapper">
+                      <input matInput formControlName="primaryColor" placeholder="#2196f3" maxlength="7">
+                      <input type="color" [value]="settingsForm.get('primaryColor')?.value || '#2196f3'" 
+                             (input)="settingsForm.patchValue({primaryColor: $any($event.target).value})"
+                             class="color-picker">
+                    </div>
+                    <mat-hint>Main brand color (used for primary buttons, links, etc.)</mat-hint>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Accent Color</mat-label>
+                    <div class="color-input-wrapper">
+                      <input matInput formControlName="accentColor" placeholder="#ffc107" maxlength="7">
+                      <input type="color" [value]="settingsForm.get('accentColor')?.value || '#ffc107'" 
+                             (input)="settingsForm.patchValue({accentColor: $any($event.target).value})"
+                             class="color-picker">
+                    </div>
+                    <mat-hint>Accent color (used for highlights, secondary actions)</mat-hint>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Warning Color</mat-label>
+                    <div class="color-input-wrapper">
+                      <input matInput formControlName="warnColor" placeholder="#795548" maxlength="7">
+                      <input type="color" [value]="settingsForm.get('warnColor')?.value || '#795548'" 
+                             (input)="settingsForm.patchValue({warnColor: $any($event.target).value})"
+                             class="color-picker">
+                    </div>
+                    <mat-hint>Warning/error color (used for alerts, warnings)</mat-hint>
+                  </mat-form-field>
+
+                  <div class="half-width color-preview">
+                    <p class="preview-label">Color Preview:</p>
+                    <div class="color-swatches">
+                      <div class="color-swatch" [style.background-color]="settingsForm.get('primaryColor')?.value">
+                        <span>Primary</span>
+                      </div>
+                      <div class="color-swatch" [style.background-color]="settingsForm.get('accentColor')?.value">
+                        <span>Accent</span>
+                      </div>
+                      <div class="color-swatch" [style.background-color]="settingsForm.get('warnColor')?.value">
+                        <span>Warning</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-tab>
+
+          <!-- Email/SMTP Settings Tab -->
+          <mat-tab label="Email Settings">
+            <div class="tab-content">
+              <h3>
+                <mat-icon>email</mat-icon>
+                SMTP Configuration
+              </h3>
+              <p class="section-description">Configure email server settings for sending notifications</p>
+
+              <div class="form-section">
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>SMTP Host</mat-label>
+                    <input matInput formControlName="smtpHost" placeholder="smtp.gmail.com">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>SMTP Port</mat-label>
+                    <input matInput type="number" formControlName="smtpPort" placeholder="587">
+                  </mat-form-field>
+                </div>
+
+                <mat-slide-toggle formControlName="smtpSecure" class="toggle-setting">
+                  Use Secure Connection (TLS/SSL)
+                </mat-slide-toggle>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>SMTP Username</mat-label>
+                    <input matInput formControlName="smtpUser" placeholder="your-email@gmail.com">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>SMTP Password</mat-label>
+                    <input matInput type="password" formControlName="smtpPassword" placeholder="Leave blank to keep current">
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>From Email</mat-label>
+                    <input matInput type="email" formControlName="smtpFromEmail" placeholder="noreply@school.com">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>From Name</mat-label>
+                    <input matInput formControlName="smtpFromName" placeholder="School Name">
+                  </mat-form-field>
+                </div>
+              </div>
+            </div>
+          </mat-tab>
+
+          <!-- Notification Settings Tab -->
+          <mat-tab label="Notifications">
+            <div class="tab-content">
+              <h3>
+                <mat-icon>notifications</mat-icon>
+                Notification Preferences
+              </h3>
+              <p class="section-description">Configure how notifications are sent</p>
+
+              <div class="form-section">
+                <mat-slide-toggle formControlName="emailNotificationsEnabled" class="toggle-setting">
+                  Enable Email Notifications
+                </mat-slide-toggle>
+
+                <mat-slide-toggle formControlName="smsNotificationsEnabled" class="toggle-setting">
+                  Enable SMS Notifications
+                </mat-slide-toggle>
+              </div>
+            </div>
+          </mat-tab>
+
+          <!-- Session & Security Tab -->
+          <mat-tab label="Security">
+            <div class="tab-content">
+              <h3>
+                <mat-icon>security</mat-icon>
+                Security & Session Settings
+              </h3>
+              <p class="section-description">Configure security policies and session management</p>
+
+              <div class="form-section">
+                <h4>Session Settings</h4>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Session Timeout (minutes)</mat-label>
+                  <input matInput type="number" formControlName="sessionTimeoutMinutes" min="5" max="480">
+                  <mat-hint>User session will expire after this many minutes of inactivity</mat-hint>
+                </mat-form-field>
+
+                <mat-slide-toggle formControlName="requirePasswordChange" class="toggle-setting">
+                  Require Password Change on First Login
+                </mat-slide-toggle>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Password Expiry (days)</mat-label>
+                  <input matInput type="number" formControlName="passwordExpiryDays" min="0" max="365">
+                  <mat-hint>0 means passwords never expire</mat-hint>
+                </mat-form-field>
+
+                <mat-divider style="margin: 24px 0;"></mat-divider>
+
+                <h4>Login Security</h4>
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Max Login Attempts</mat-label>
+                    <input matInput type="number" formControlName="maxLoginAttempts" min="3" max="10">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Lockout Duration (minutes)</mat-label>
+                    <input matInput type="number" formControlName="lockoutDurationMinutes" min="5" max="60">
+                  </mat-form-field>
+                </div>
+
+                <mat-slide-toggle formControlName="enableTwoFactorAuth" class="toggle-setting">
+                  Enable Two-Factor Authentication
+                </mat-slide-toggle>
+              </div>
+            </div>
+          </mat-tab>
+
+          <!-- General Settings Tab -->
+          <mat-tab label="General">
+            <div class="tab-content">
+              <h3>
+                <mat-icon>tune</mat-icon>
+                General Preferences
+              </h3>
+              <p class="section-description">Configure system-wide preferences</p>
+
+              <div class="form-section">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Default Language</mat-label>
+                  <mat-select formControlName="defaultLanguage">
+                    <mat-option *ngFor="let lang of languages" [value]="lang.value">
+                      {{ lang.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Timezone</mat-label>
+                  <mat-select formControlName="timezone">
+                    <mat-option *ngFor="let tz of timezones" [value]="tz.value">
+                      {{ tz.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Currency</mat-label>
+                    <mat-select formControlName="currency">
+                      <mat-option *ngFor="let curr of currencies" [value]="curr.value">
+                        {{ curr.label }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Date Format</mat-label>
+                    <mat-select formControlName="dateFormat">
+                      <mat-option *ngFor="let fmt of dateFormats" [value]="fmt.value">
+                        {{ fmt.label }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+            </div>
+          </mat-tab>
+
+        </mat-tab-group>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+          <button mat-raised-button color="warn" type="button" (click)="onReset()" [disabled]="isSaving">
+            <mat-icon>refresh</mat-icon>
+            Reset to Defaults
+          </button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="settingsForm.invalid || isSaving">
+            <mat-icon>save</mat-icon>
+            <span *ngIf="!isSaving">Save Settings</span>
+            <span *ngIf="isSaving">Saving...</span>
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
+

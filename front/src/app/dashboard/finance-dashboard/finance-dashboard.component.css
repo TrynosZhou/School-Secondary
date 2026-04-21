@@ -1,0 +1,947 @@
+/* Styles for the main finance dashboard container */
+.finance-dashboard-container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 2rem auto;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  min-height: calc(100vh - 120px);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.loading-text {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Error State */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  background: rgba(244, 67, 54, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(244, 67, 54, 0.2);
+}
+
+.error-icon {
+  font-size: 4rem;
+  color: #f44336;
+  margin-bottom: 1rem;
+}
+
+.error-title {
+  color: #d32f2f;
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.error-message {
+  color: #666;
+  margin: 0 0 2rem 0;
+  font-size: 1rem;
+  max-width: 400px;
+}
+
+/* Dashboard Content */
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Summary Cards Grid */
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Enhanced Summary Cards */
+.summary-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.9);
+  overflow: hidden;
+  position: relative;
+}
+
+.summary-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.summary-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--card-accent-color, #667eea), var(--card-accent-color-light, #764ba2));
+}
+
+.total-invoices-card {
+  --card-accent-color: #667eea;
+  --card-accent-color-light: #764ba2;
+}
+
+.total-payments-card {
+  --card-accent-color: #4caf50;
+  --card-accent-color-light: #66bb6a;
+}
+
+.total-balance-card {
+  --card-accent-color: #ff9800;
+  --card-accent-color-light: #ffb74d;
+}
+
+.collection-rate-card {
+  --card-accent-color: #9c27b0;
+  --card-accent-color-light: #ba68c8;
+}
+
+.avg-invoice-card {
+  --card-accent-color: #2196f3;
+  --card-accent-color-light: #64b5f6;
+}
+
+.total-transactions-card {
+  --card-accent-color: #607d8b;
+  --card-accent-color-light: #90a4ae;
+}
+
+.total-enrolment-card {
+  --card-accent-color: #3f51b5;
+  --card-accent-color-light: #5c6bc0;
+}
+
+.summary-card-content {
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.card-icon {
+  font-size: 3rem;
+  width: 3rem;
+  height: 3rem;
+  color: var(--card-accent-color);
+  background: linear-gradient(135deg, var(--card-accent-color), var(--card-accent-color-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.summary-text {
+  flex: 1;
+}
+
+.card-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.card-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.2;
+  font-family: 'Roboto Mono', monospace;
+}
+
+/* Chart Card */
+.chart-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.9);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chart-card:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.chart-container {
+  padding: 1rem;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Tables Container */
+.tables-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+.enrolment-table-card {
+  grid-column: 1 / -1;
+}
+
+.enrolment-summary-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.enrolment-summary-table th,
+.enrolment-summary-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: left;
+}
+
+.enrolment-summary-table th {
+  font-weight: 600;
+  color: #555;
+}
+
+.enrolment-summary-table td {
+  color: #333;
+}
+
+.enrolment-summary-table.compact th,
+.enrolment-summary-table.compact td {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.enrolment-summary-table.compact .form-group-header td {
+  font-weight: 600;
+  color: #555;
+  background: rgba(0, 0, 0, 0.04);
+  padding-top: 0.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.enrolment-summary-table.compact .form-group-total td {
+  font-weight: 600;
+  background: rgba(102, 126, 234, 0.06);
+  border-top: 1px solid #e0e0e0;
+}
+
+.enrolment-summary-table.compact .form-grand-total td {
+  font-weight: 700;
+  background: rgba(102, 126, 234, 0.12);
+  border-top: 2px solid #d0d7ff;
+}
+
+.enrolment-summary-table.compact .form-group-header + tr td {
+  border-top: none;
+}
+
+.enrolment-table-wrapper {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+/* Table Cards */
+.table-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.9);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.table-card:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* Enhanced Table Styling */
+.finance-data-table {
+  width: 100%;
+  background: transparent;
+}
+
+.finance-data-table th {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  color: #495057;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #dee2e6;
+  padding: 1rem 0.75rem;
+}
+
+.finance-data-table td {
+  padding: 1rem 0.75rem;
+  border-bottom: 1px solid #f1f3f4;
+  transition: background-color 0.2s ease;
+}
+
+.finance-data-table tr:hover td {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.icon-cell {
+  text-align: center;
+  width: 60px;
+}
+
+.icon-invoice {
+  color: #667eea;
+  font-size: 1.5rem;
+}
+
+.icon-payment {
+  color: #4caf50;
+  font-size: 1.5rem;
+}
+
+.amount-cell {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 600;
+  text-align: right;
+}
+
+.amount-invoice {
+  color: #667eea;
+}
+
+.amount-payment {
+  color: #4caf50;
+}
+
+.status-paid {
+  color: #4caf50;
+  font-weight: 600;
+}
+
+.status-overdue {
+  color: #f44336;
+  font-weight: 600;
+}
+
+/* No Data State */
+.no-data-found {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: #666;
+}
+
+.no-data-found mat-icon {
+  font-size: 4rem;
+  color: #ccc;
+  margin-bottom: 1rem;
+}
+
+.no-data-found p {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+  .tables-container {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .finance-dashboard-container {
+    padding: 1rem;
+    margin: 1rem auto;
+    min-height: calc(100vh - 80px);
+  }
+  
+  .summary-cards {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .toolbar-title {
+    font-size: 1.4rem;
+  }
+  
+  .finance-dashboard-toolbar {
+    padding: 0 1rem;
+    height: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .finance-dashboard-container {
+    padding: 0.5rem;
+    margin: 0.5rem auto;
+  }
+  
+  .summary-cards {
+    gap: 0.75rem;
+  }
+  
+  .toolbar-title {
+    font-size: 1.2rem;
+  }
+}
+
+.finance-dashboard-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  z-index: 0;
+}
+
+.finance-dashboard-container > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Styles for the toolbar itself */
+.finance-dashboard-toolbar {
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+  height: 80px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+  border-radius: 16px;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.finance-dashboard-toolbar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  z-index: 0;
+}
+
+.finance-dashboard-toolbar > * {
+  position: relative;
+  z-index: 1;
+}
+
+.toolbar-left-content {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.toolbar-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-right: 2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.3s ease-in-out;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(45deg, #ffffff, #f0f0f0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.toolbar-search-container {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  transition: width 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  display: flex;
+  align-items: center;
+}
+
+.toolbar-search-container.visible {
+  opacity: 1;
+  width: 300px;
+  margin-left: 10px;
+}
+
+.toolbar-search-component {
+  flex-grow: 1;
+}
+
+.toolbar-icons {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* --- New Styles for Summary Cards --- */
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.summary-card {
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  padding: 2rem;
+  min-height: 140px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  border: none;
+}
+
+.summary-card:hover {
+  transform: translateY(-12px) scale(1.03);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+}
+
+.summary-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  z-index: 0;
+}
+
+.summary-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.summary-card-content {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+}
+
+.card-icon {
+  font-size: 3.5rem;
+  width: 4rem;
+  height: 4rem;
+  color: #fff;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  transition: all 0.3s ease;
+}
+
+.summary-card:hover .card-icon {
+  transform: rotate(10deg) scale(1.1);
+}
+
+.summary-text {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.card-label {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.card-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(45deg, #ffffff, #f0f0f0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.3s ease;
+}
+
+.summary-card:hover .card-value {
+  transform: scale(1.05);
+}
+
+.total-invoices-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+}
+
+.total-payments-card {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  box-shadow: 0 8px 32px rgba(240, 147, 251, 0.3);
+}
+
+.total-balance-card {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  box-shadow: 0 8px 32px rgba(79, 172, 254, 0.3);
+}
+
+/* Cards 4–7: light background — use dark text so labels and values are visible */
+.collection-rate-card,
+.avg-invoice-card,
+.total-transactions-card,
+.total-enrolment-card {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.collection-rate-card .card-label,
+.avg-invoice-card .card-label,
+.total-transactions-card .card-label,
+.total-enrolment-card .card-label {
+  color: #444;
+}
+
+.collection-rate-card .card-value,
+.avg-invoice-card .card-value,
+.total-transactions-card .card-value,
+.total-enrolment-card .card-value {
+  color: #1a1a1a;
+  background: none;
+  -webkit-text-fill-color: #1a1a1a;
+}
+
+.collection-rate-card .card-icon,
+.avg-invoice-card .card-icon,
+.total-transactions-card .card-icon,
+.total-enrolment-card .card-icon {
+  color: var(--card-accent-color);
+  -webkit-text-fill-color: initial;
+  background: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* --- New Styles for Charts and Tables --- */
+.chart-card {
+  padding: 2rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  border: none;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.chart-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+}
+
+.chart-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.chart-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 12px;
+  color: #7f8c8d;
+  font-weight: 500;
+}
+
+.tables-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.table-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  border: none;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.table-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+}
+
+.table-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #f093fb, #f5576c);
+}
+
+.table-card .mat-card-header {
+  border-bottom: 2px solid #ecf0f1;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+}
+
+.table-card .mat-card-title {
+  color: #2c3e50;
+  font-size: 1.3rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.finance-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.finance-data-table th,
+.finance-data-table td {
+  padding: 1rem 1.5rem;
+  text-align: left;
+}
+
+.finance-data-table .mat-header-row {
+  height: 60px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.finance-data-table .mat-header-cell {
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.9rem;
+}
+
+.finance-data-table .mat-row {
+  height: 56px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.finance-data-table .mat-row:hover {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  transform: translateX(4px);
+}
+
+.icon-cell {
+  width: 50px;
+  padding: 0 1rem;
+  text-align: center;
+}
+
+.icon-invoice {
+  color: #667eea;
+  font-size: 1.5rem;
+  filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.3));
+}
+
+.icon-payment {
+  color: #27ae60;
+  font-size: 1.5rem;
+  filter: drop-shadow(0 2px 4px rgba(39, 174, 96, 0.3));
+}
+
+.amount-cell {
+  text-align: right;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.amount-invoice {
+  color: #e74c3c;
+  background: linear-gradient(45deg, #e74c3c, #c0392b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.amount-payment {
+  color: #27ae60;
+  background: linear-gradient(45deg, #27ae60, #2ecc71);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.status-paid {
+  color: #27ae60;
+  font-weight: 600;
+  background: linear-gradient(45deg, #27ae60, #2ecc71);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.status-overdue {
+  color: #e74c3c;
+  font-weight: 600;
+  background: linear-gradient(45deg, #e74c3c, #c0392b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Styling for no data found message */
+.no-data-found {
+  text-align: center;
+  padding: 3rem;
+  color: #7f8c8d;
+  font-style: italic;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  margin: 1rem 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.no-data-found mat-icon {
+  font-size: 3rem;
+  height: 3rem;
+  width: 3rem;
+  color: #bdc3c7;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .summary-cards {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+  
+  .tables-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .finance-dashboard-container {
+    padding: 1rem;
+    margin: 1rem;
+  }
+  
+  .finance-dashboard-toolbar {
+    height: 70px;
+    padding: 0 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .toolbar-title {
+    font-size: 1.5rem;
+    margin-right: 1rem;
+  }
+
+  .toolbar-search-container.visible {
+    width: calc(100% - 120px);
+    margin-left: 0.5rem;
+  }
+  
+  .summary-cards {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .summary-card {
+    min-height: 120px;
+    padding: 1.5rem;
+  }
+  
+  .card-value {
+    font-size: 2rem;
+  }
+  
+  .chart-card {
+    padding: 1.5rem;
+  }
+  
+  .table-card {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .finance-dashboard-container {
+    padding: 0.5rem;
+    margin: 0.5rem;
+  }
+  
+  .finance-dashboard-toolbar {
+    height: 60px;
+    padding: 0 0.5rem;
+  }
+  
+  .toolbar-title {
+    font-size: 1.2rem;
+  }
+  
+  .summary-card {
+    padding: 1rem;
+    min-height: 100px;
+  }
+  
+  .card-value {
+    font-size: 1.8rem;
+  }
+  
+  .card-icon {
+    font-size: 2.5rem;
+    width: 3rem;
+    height: 3rem;
+  }
+}

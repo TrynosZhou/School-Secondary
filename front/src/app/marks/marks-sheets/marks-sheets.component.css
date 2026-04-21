@@ -1,0 +1,918 @@
+/* Loading Overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-content {
+  text-align: center;
+  color: #333;
+}
+
+.loading-content p {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* Background Elements */
+.background-elements {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.floating-circle {
+  position: absolute;
+  border-radius: 50%;
+  animation: float 6s ease-in-out infinite;
+}
+
+.circle-1 {
+  width: 200px;
+  height: 200px;
+  top: 10%;
+  left: 10%;
+  animation-delay: 0s;
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.3), rgba(255, 142, 83, 0.3));
+  box-shadow: 0 0 30px rgba(255, 107, 107, 0.2);
+}
+
+.circle-2 {
+  width: 150px;
+  height: 150px;
+  top: 60%;
+  right: 15%;
+  animation-delay: 2s;
+  background: linear-gradient(135deg, rgba(74, 144, 226, 0.3), rgba(80, 227, 194, 0.3));
+  box-shadow: 0 0 30px rgba(74, 144, 226, 0.2);
+}
+
+.circle-3 {
+  width: 100px;
+  height: 100px;
+  top: 30%;
+  right: 30%;
+  animation-delay: 4s;
+  background: linear-gradient(135deg, rgba(255, 99, 132, 0.3), rgba(255, 183, 77, 0.3));
+  box-shadow: 0 0 30px rgba(255, 99, 132, 0.2);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+/* Main Container */
+.main-container {
+  min-height: 100vh;
+  padding: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  position: relative;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Header Section */
+.header-section {
+  margin-bottom: 2rem;
+}
+
+.header-content {
+  text-align: center;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.header-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+  background-size: 200% 100%;
+  animation: gradientMove 3s ease infinite;
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.title-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-icon {
+  font-size: 3rem;
+  width: 3rem;
+  height: 3rem;
+  background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+  background-size: 300% 300%;
+  animation: gradientShift 4s ease infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.page-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.page-subtitle {
+  font-size: 1.1rem;
+  color: #7f8c8d;
+  margin: 0;
+  max-width: 600px;
+}
+
+/* Main Card */
+.main-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  overflow: hidden;
+  position: relative;
+}
+
+.main-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+  background-size: 200% 100%;
+  animation: gradientMove 3s ease infinite;
+}
+
+/* Form Section */
+.form-section {
+  padding: 2rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.form-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.form-icon {
+  font-size: 2rem;
+  width: 2rem;
+  height: 2rem;
+  background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.form-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.form-header p {
+  color: #7f8c8d;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.marksheet-form {
+  width: 100%;
+}
+
+.form-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  align-items: end;
+}
+
+.form-field {
+  width: 100%;
+}
+
+.form-field .mat-mdc-form-field {
+  width: 100%;
+}
+
+.generate-button {
+  height: 56px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1);
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+  transition: all 0.3s ease;
+  color: white;
+  border: none;
+}
+
+.generate-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(255, 107, 107, 0.6);
+  animation-duration: 1s;
+}
+
+.generate-button:disabled {
+  transform: none;
+  background: #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  animation: none;
+}
+
+.generate-button mat-icon {
+  margin-right: 0.5rem;
+}
+
+/* Error Icon */
+.error-icon-small {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  margin-right: 0.25rem;
+  vertical-align: middle;
+}
+
+/* Mark Sheet Section */
+.marksheet-section {
+  padding: 2rem;
+}
+
+.marksheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(255, 154, 158, 0.3);
+}
+
+.marksheet-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.marksheet-icon {
+  font-size: 2rem;
+  width: 2rem;
+  height: 2rem;
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.marksheet-title h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.student-count {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.marksheet-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-button {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.action-button:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.action-button mat-icon {
+  background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Mark Sheet Container */
+.marksheet-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.marksheet-header-content {
+  padding: 2rem;
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+}
+
+.marksheet-header-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+  background-size: 200% 100%;
+  animation: gradientMove 3s ease infinite;
+}
+
+.logo-title-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.logo-wrapper {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.logo-wrapper img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.marksheet-title-text {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0;
+  text-align: center;
+  flex: 1;
+}
+
+.marksheet-info {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 0.75rem 1.5rem;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.info-icon {
+  font-size: 1.2rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.info-item span {
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.95rem;
+}
+
+/* Table Container */
+.table-container {
+  overflow-x: auto;
+  padding: 1rem;
+}
+
+.marksheet-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.marksheet-table th,
+.marksheet-table td {
+  border: 1px solid #dee2e6;
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.marksheet-table th {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  font-weight: 700;
+  color: white;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.marksheet-table tbody tr {
+  transition: all 0.2s ease;
+}
+
+.marksheet-table tbody tr:hover {
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(78, 205, 196, 0.1));
+  transform: scale(1.01);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.student-name {
+  text-align: left !important;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* Mark Styling */
+.passing-mark {
+  color: #00b894 !important;
+  font-weight: 700;
+  background: linear-gradient(135deg, rgba(0, 184, 148, 0.15), rgba(0, 206, 201, 0.15));
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 184, 148, 0.2);
+}
+
+.failing-mark {
+  color: #e17055 !important;
+  font-weight: 700;
+  background: linear-gradient(135deg, rgba(225, 112, 85, 0.15), rgba(255, 107, 107, 0.15));
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(225, 112, 85, 0.2);
+}
+
+.no-mark {
+  color: #74b9ff;
+  font-style: italic;
+  background: linear-gradient(135deg, rgba(116, 185, 255, 0.1), rgba(129, 236, 236, 0.1));
+  border-radius: 4px;
+}
+
+/* Column Widths */
+.col-num {
+  width: 4%;
+  min-width: 40px;
+}
+
+.col-name {
+  width: 15%;
+  min-width: 150px;
+}
+
+.col-subject {
+  width: 6%;
+  min-width: 60px;
+}
+
+.col-passed {
+  width: 6%;
+  min-width: 60px;
+}
+
+.col-symbol {
+  width: 5%;
+  min-width: 50px;
+}
+
+.col-average {
+  width: 7%;
+  min-width: 70px;
+}
+
+.col-position {
+  width: 6%;
+  min-width: 60px;
+}
+
+/* No Data Container */
+.no-data-container {
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.no-data-content {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.no-data-icon {
+  font-size: 4rem;
+  width: 4rem;
+  height: 4rem;
+  background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1);
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
+}
+
+.no-data-content h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 1rem;
+}
+
+.no-data-content p {
+  color: #6c757d;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .main-container {
+    padding: 1rem;
+  }
+
+  .header-content {
+    padding: 1.5rem;
+  }
+
+  .page-title {
+    font-size: 2rem;
+  }
+
+  .page-subtitle {
+    font-size: 1rem;
+  }
+
+  .form-section {
+    padding: 1.5rem;
+  }
+
+  .form-fields {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .marksheet-section {
+    padding: 1rem;
+  }
+
+  .marksheet-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .marksheet-actions {
+    justify-content: center;
+  }
+
+  .logo-title-wrapper {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .marksheet-title-text {
+    font-size: 1.4rem;
+  }
+
+  .marksheet-info {
+    gap: 1rem;
+  }
+
+  .info-item {
+    padding: 0.5rem 1rem;
+  }
+
+  .table-container {
+    padding: 0.5rem;
+  }
+
+  .marksheet-table {
+    font-size: 0.8rem;
+  }
+
+  .marksheet-table th,
+  .marksheet-table td {
+    padding: 0.5rem 0.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-container {
+    padding: 0.5rem;
+  }
+
+  .header-content {
+    padding: 1rem;
+  }
+
+  .page-title {
+    font-size: 1.8rem;
+  }
+
+  .form-section {
+    padding: 1rem;
+  }
+
+  .marksheet-section {
+    padding: 0.5rem;
+  }
+
+  .marksheet-header-content {
+    padding: 1rem;
+  }
+
+  .logo-wrapper {
+    width: 60px;
+    height: 60px;
+  }
+
+  .marksheet-title-text {
+    font-size: 1.2rem;
+  }
+
+  .marksheet-info {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .marksheet-table {
+    font-size: 0.7rem;
+  }
+
+  .marksheet-table th,
+  .marksheet-table td {
+    padding: 0.4rem 0.2rem;
+  }
+}
+
+/* Print Styles */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 1cm;
+  }
+
+  html,
+  body {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  body > *:not(.marksheet-container) {
+    display: none !important;
+  }
+
+  .marksheet-container {
+    width: 100%;
+    height: auto !important;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    background-color: white;
+    overflow: visible !important;
+    border: none !important;
+  }
+
+  .marksheet-header-content {
+    text-align: center;
+    margin-bottom: 0.5cm;
+    padding: 0.2cm 0.5cm;
+    border-bottom: 1px solid #ccc;
+    font-size: 8pt;
+    line-height: 1.1;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+    background: white !important;
+  }
+
+  .logo-title-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5cm;
+    margin-bottom: 0.2cm;
+    flex-shrink: 0;
+    height: auto;
+    overflow: hidden;
+  }
+
+  .logo-wrapper {
+    width: 2cm;
+    height: 2cm;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white !important;
+    box-shadow: none !important;
+  }
+
+  .logo-wrapper img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .marksheet-title-text {
+    font-size: 12pt;
+    font-weight: bold;
+    margin: 0;
+    line-height: 1.1;
+    flex-grow: 1;
+    text-align: left;
+  }
+
+  .marksheet-info {
+    display: flex;
+    justify-content: center;
+    gap: 1cm;
+    font-size: 7pt;
+    margin-top: 0.1cm;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .info-item {
+    background: white !important;
+    box-shadow: none !important;
+  }
+
+  .marksheet-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 7pt;
+    line-height: 1.2;
+    table-layout: fixed;
+    height: auto !important;
+    overflow: visible !important;
+    border: 1px solid #ccc;
+    box-shadow: none !important;
+  }
+
+  .marksheet-table thead {
+    display: table-header-group;
+    page-break-inside: avoid;
+  }
+
+  .marksheet-table tbody {
+    display: table-row-group;
+  }
+
+  .marksheet-table tbody tr {
+    page-break-inside: avoid !important;
+    page-break-after: auto !important;
+    height: auto !important;
+  }
+
+  .marksheet-table th,
+  .marksheet-table td {
+    border: 1px solid #ccc;
+    padding: 2px 3px;
+    text-align: center;
+    word-wrap: break-word;
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .marksheet-table th {
+    font-weight: bold;
+    background-color: #eee !important;
+  }
+
+  .marksheet-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  .student-name {
+    width: 20%;
+    text-align: left;
+    white-space: normal;
+  }
+
+  /* Print-specific column widths */
+  .col-num {
+    width: 3%;
+  }
+
+  .col-name {
+    width: 18%;
+    text-align: left;
+    white-space: normal;
+  }
+
+  .col-subject {
+    width: 5%;
+  }
+
+  .col-passed {
+    width: 4%;
+  }
+
+  .col-symbol {
+    width: 3%;
+  }
+
+  .col-average {
+    width: 6%;
+  }
+
+  .col-position {
+    width: 4%;
+  }
+
+  /* Hide non-printable elements */
+  .loading-overlay,
+  .background-elements,
+  .form-section,
+  .marksheet-header,
+  .marksheet-actions,
+  .no-data-container {
+    display: none !important;
+  }
+}
+
+/* Table cell empty state */
+.marksheet-table td {
+  empty-cells: show;
+}

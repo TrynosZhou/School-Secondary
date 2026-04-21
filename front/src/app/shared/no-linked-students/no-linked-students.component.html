@@ -1,0 +1,12 @@
+<div class="no-linked-students empty-state" role="status" aria-live="polite">
+  <mat-icon class="empty-state-icon">people_outline</mat-icon>
+  <h3 class="empty-state-title">{{ title }}</h3>
+  <p class="empty-state-message">{{ hint }}</p>
+  <div class="empty-state-actions">
+    <a *ngIf="schoolEmail$ | async as email" [href]="'mailto:' + email" mat-flat-button color="primary" class="action-link">
+      <mat-icon>email</mat-icon>
+      Contact school
+    </a>
+    <p *ngIf="!(schoolEmail$ | async)" class="no-email-hint">Ask the school office or an administrator to link your children to your account.</p>
+  </div>
+</div>

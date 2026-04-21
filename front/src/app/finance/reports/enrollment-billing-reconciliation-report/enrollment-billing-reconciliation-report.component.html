@@ -1,0 +1,323 @@
+<div class="reconciliation-container" [class.theme-dark]="currentTheme === 'dark'">
+  <mat-card class="reconciliation-card">
+    <!-- Header -->
+    <mat-card-header class="card-header">
+      <div class="header-content">
+        <div class="title-section">
+          <h2>
+            <mat-icon>sync_alt</mat-icon>
+            Enrollment vs. Billing Reconciliation
+          </h2>
+        </div>
+        <div class="header-actions" *ngIf="(reportData$ | async) as report">
+          <button mat-icon-button (click)="toggleFilters()" matTooltip="Toggle Filters">
+            <mat-icon>{{ showFilters ? 'filter_alt' : 'filter_alt_outline' }}</mat-icon>
+          </button>
+          <button mat-icon-button (click)="onExport()" matTooltip="Export to CSV">
+            <mat-icon>download</mat-icon>
+          </button>
+          <button mat-icon-button (click)="onPrint()" matTooltip="Print Report">
+            <mat-icon>print</mat-icon>
+          </button>
+        </div>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Error State -->
+      <div *ngIf="hasError && errorMessage" class="error-state error-card">
+        <mat-icon class="error-icon" color="warn">error_outline</mat-icon>
+        <div class="error-content">
+          <h3>Error Loading Report</h3>
+          <p>{{ errorMessage }}</p>
+          <button mat-raised-button color="primary" (click)="onRetry()">
+            <mat-icon>refresh</mat-icon>
+            Retry
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="(isLoading$ | async) && !hasError" class="loading-state">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Loading reconciliation report...</p>
+        <p class="loading-hint">Please wait while we compare enrollment and billing data</p>
+      </div>
+
+      <!-- Filter Section -->
+      <div *ngIf="showFilters && !hasError" class="filter-section">
+        <form [formGroup]="filterForm" class="filter-form-print">
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Select Term</mat-label>
+            <mat-select formControlName="termFilter">
+              <mat-option [value]="null">-- Select a Term --</mat-option>
+              <mat-option *ngFor="let term of (terms$ | async)" [value]="term">
+                Term {{ term.num }} ({{ term.year }})
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>calendar_today</mat-icon>
+            <mat-hint>Select term to reconcile</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Select Class (Optional)</mat-label>
+            <mat-select formControlName="classFilter">
+              <mat-option [value]="null">All Classes</mat-option>
+              <mat-option *ngFor="let class of (classes$ | async)" [value]="class">
+                {{ class.name }}
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>class</mat-icon>
+            <mat-hint>Filter by class (optional)</mat-hint>
+          </mat-form-field>
+
+          <div class="filter-actions-print">
+            <button mat-raised-button color="warn" (click)="onClearFilters()">
+              <mat-icon>clear</mat-icon>
+              Clear
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Print Header (only visible when printing) -->
+      <div class="print-header print-only">
+        <div class="print-header-content">
+          <div class="print-logo-section">
+            <img src="assets/jhs_logo.jpg" alt="Junior High School Logo" class="print-logo" 
+                 onerror="this.style.display='none'">
+            <div class="print-school-info">
+              <h1 class="print-school-name">Junior High School</h1>
+              <p class="print-school-address">30588 Lundi Drive, Rhodene, Masvingo</p>
+            </div>
+          </div>
+          <div class="print-report-info">
+            <h2 class="print-report-title">Enrollment vs. Billing Reconciliation</h2>
+            <p class="print-report-date">Generated: {{ printDate }}</p>
+            <p class="print-report-filters" *ngIf="filterForm.dirty">Filters: {{ activeFilters }}</p>
+            <p class="print-report-filters" *ngIf="!filterForm.dirty">All Records</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Report Content -->
+      <div *ngIf="reportData$ | async as report; else noDataState">
+        <!-- Summary Statistics -->
+        <div *ngIf="reportSummary$ | async as summary" class="summary-cards">
+          <mat-card class="summary-card enrolled-card">
+            <mat-card-content>
+              <mat-icon class="summary-icon" color="primary">people</mat-icon>
+              <div class="summary-content">
+                <span class="summary-label">Total Enrolled</span>
+                <span class="summary-value enrolled">{{ summary.totalStudentsEnrolled }}</span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="summary-card invoiced-card">
+            <mat-card-content>
+              <mat-icon class="summary-icon" color="accent">receipt</mat-icon>
+              <div class="summary-content">
+                <span class="summary-label">Total Invoiced</span>
+                <span class="summary-value invoiced">{{ summary.totalStudentsInvoiced }}</span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="summary-card discrepancy-card" *ngIf="summary.totalDiscrepancies > 0">
+            <mat-card-content>
+              <mat-icon class="summary-icon" color="warn">warning</mat-icon>
+              <div class="summary-content">
+                <span class="summary-label">Discrepancies</span>
+                <span class="summary-value discrepancy">{{ summary.totalDiscrepancies }}</span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="summary-card rate-card" *ngIf="summary.totalStudentsEnrolled > 0">
+            <mat-card-content>
+              <mat-icon class="summary-icon">percent</mat-icon>
+              <div class="summary-content">
+                <span class="summary-label">Reconciliation Rate</span>
+                <span class="summary-value rate">{{ summary.reconciliationRate }}%</span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- Summary Card -->
+        <div class="summary-section-card" *ngIf="report.summary">
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>info</mat-icon>
+                Summary for {{ report.summary.termName }}
+                <span *ngIf="report.summary.className"> - {{ report.summary.className }}</span>
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="summary-details">
+                <div class="summary-item">
+                  <span class="summary-item-label">Total Students Enrolled:</span>
+                  <span class="summary-item-value">{{ report.summary.totalStudentsEnrolled }}</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-item-label">Total Students Invoiced:</span>
+                  <span class="summary-item-value">{{ report.summary.totalStudentsInvoiced }}</span>
+                </div>
+                <div class="summary-item discrepancy-item" *ngIf="report.summary.totalDiscrepancies > 0">
+                  <span class="summary-item-label">Students Not Invoiced:</span>
+                  <span class="summary-item-value discrepancy-value">{{ report.summary.totalDiscrepancies }}</span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Details Table -->
+        <div class="section-header">
+          <h4>
+            <mat-icon>list</mat-icon>
+            Detailed Reconciliation
+          </h4>
+          <span class="section-count">{{ totalRecords }} record(s)</span>
+        </div>
+
+        <div *ngIf="totalRecords > 0; else noRecordsFound">
+          <mat-paginator 
+            [length]="totalRecords" 
+            [pageSize]="pageSize" 
+            [pageSizeOptions]="pageSizeOptions"
+            [pageIndex]="pageIndex" 
+            (page)="handlePageEvent($event)" 
+            aria-label="Select page of records"
+            class="print-hide">
+          </mat-paginator>
+
+          <div class="table-container">
+            <table mat-table [dataSource]="isPrinting ? allDetails : paginatedDetails" class="full-width-table">
+              <ng-container matColumnDef="studentNumber">
+                <th mat-header-cell *matHeaderCellDef>Student No.</th>
+                <td mat-cell *matCellDef="let element">{{ element.studentNumber }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="studentName">
+                <th mat-header-cell *matHeaderCellDef>Student Name</th>
+                <td mat-cell *matCellDef="let element">{{ element.studentName }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="className">
+                <th mat-header-cell *matHeaderCellDef>Class</th>
+                <td mat-cell *matCellDef="let element">{{ element.className }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="enrolledStatus">
+                <th mat-header-cell *matHeaderCellDef>Enrolled</th>
+                <td mat-cell *matCellDef="let element" class="icon-cell">
+                  <mat-icon class="status-icon success-icon" aria-label="Enrolled">check_circle</mat-icon>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="invoicedStatus">
+                <th mat-header-cell *matHeaderCellDef>Invoiced</th>
+                <td mat-cell *matCellDef="let element" class="icon-cell">
+                  <mat-icon *ngIf="element.invoicedStatus === 'Invoiced'" 
+                           class="status-icon success-icon"
+                           aria-label="Invoiced">check_circle</mat-icon>
+                  <mat-icon *ngIf="element.invoicedStatus === 'Not Invoiced'" 
+                           class="status-icon error-icon"
+                           aria-label="Not Invoiced">cancel</mat-icon>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="invoiceNumber">
+                <th mat-header-cell *matHeaderCellDef>Invoice No.</th>
+                <td mat-cell *matCellDef="let element">{{ element.invoiceNumber || '-' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="balance">
+                <th mat-header-cell *matHeaderCellDef>Balance</th>
+                <td mat-cell *matCellDef="let element" [class]="getStatusClass(element.invoicedStatus)">
+                  {{ element.balance === null || element.balance === undefined ? '-' : (element.balance | currency:'USD':'symbol':'1.2-2') }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="discrepancyMessage">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let element" [class]="getDiscrepancyClass(element.discrepancy)">
+                  <mat-chip *ngIf="element.discrepancy" class="discrepancy-chip">
+                    <mat-icon>warning</mat-icon>
+                    {{ element.discrepancyMessage }}
+                  </mat-chip>
+                  <mat-chip *ngIf="!element.discrepancy" class="success-chip">
+                    <mat-icon>check_circle</mat-icon>
+                    Reconciled
+                  </mat-chip>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
+                  [class.discrepancy-row]="row.discrepancy"></tr>
+            </table>
+          </div>
+
+          <mat-paginator 
+            [length]="totalRecords" 
+            [pageSize]="pageSize" 
+            [pageSizeOptions]="pageSizeOptions"
+            [pageIndex]="pageIndex" 
+            (page)="handlePageEvent($event)" 
+            aria-label="Select page of records"
+            class="print-hide">
+          </mat-paginator>
+        </div>
+
+        <ng-template #noRecordsFound>
+          <div class="no-data-state">
+            <mat-icon class="empty-icon">inbox</mat-icon>
+            <h3>No Records Found</h3>
+            <p>No reconciliation data found for the selected criteria.</p>
+            <p *ngIf="filterForm.dirty" class="suggestion-text">
+              Try adjusting your filters or clearing them to see more results.
+            </p>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- No Data State -->
+      <ng-template #noDataState>
+        <div *ngIf="!(isLoading$ | async)" class="no-data-state">
+          <mat-icon class="empty-icon">sync_alt</mat-icon>
+          <h3>No Data Available</h3>
+          <p>Unable to load reconciliation data. Please check your connection and try again.</p>
+          <button *ngIf="hasError" mat-raised-button color="primary" (click)="onRetry()">
+            <mat-icon>refresh</mat-icon>
+            Retry
+          </button>
+          <div *ngIf="!hasError" class="suggestion-box">
+            <mat-icon>lightbulb</mat-icon>
+            <p>Select a term to generate the reconciliation report. This report compares enrollment records with billing invoices to identify discrepancies.</p>
+          </div>
+        </div>
+      </ng-template>
+
+      <!-- Print Footer (only visible when printing) -->
+      <div class="print-footer print-only">
+        <div class="print-footer-content">
+          <div class="print-footer-left">
+            <p class="print-footer-text">Junior High School - Enrollment vs. Billing Reconciliation</p>
+          </div>
+          <div class="print-footer-center">
+            <p class="print-footer-text">Page <span class="page-number"></span></p>
+          </div>
+          <div class="print-footer-right">
+            <p class="print-footer-text">{{ printDate }}</p>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

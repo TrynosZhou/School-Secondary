@@ -1,0 +1,42 @@
+<h2 mat-dialog-title>Import items (CSV)</h2>
+
+<div mat-dialog-content>
+  <div class="context">
+    <mat-icon>upload_file</mat-icon>
+    <div>
+      <div class="context-title">{{ data.roomName }}</div>
+      <div class="context-subtitle">Paste CSV below or upload a file.</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <button mat-stroked-button type="button" (click)="fileInput.click()">
+      <mat-icon>attach_file</mat-icon>
+      Choose CSV file
+    </button>
+    <input #fileInput type="file" accept=".csv,text/csv" style="display:none" (change)="onFileSelected($event)" />
+  </div>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>CSV</mat-label>
+    <textarea
+      matInput
+      rows="10"
+      [formControl]="csvControl"
+      (blur)="recalculatePreview()"
+      placeholder="name,category,unit,quantityOnHand,reorderLevel,notes"
+    ></textarea>
+    <mat-hint>
+      Header required. Supported columns: name, category, unit, quantityOnHand, reorderLevel, notes.
+    </mat-hint>
+  </mat-form-field>
+
+  <div class="error" *ngIf="error">{{ error }}</div>
+  <div class="context-subtitle" *ngIf="!error">Rows detected: {{ previewCount }}</div>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Cancel</button>
+  <button mat-raised-button color="primary" type="button" (click)="import()">Import</button>
+</div>
+

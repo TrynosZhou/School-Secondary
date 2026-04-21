@@ -1,0 +1,304 @@
+<!-- Loading Overlay -->
+<div class="loading-overlay" *ngIf="isLoading$ | async">
+  <div class="loading-content">
+    <mat-spinner diameter="60"></mat-spinner>
+    <p class="loading-text">Analyzing Results...</p>
+  </div>
+</div>
+
+<!-- Background Elements -->
+<div class="background-elements">
+  <div class="floating-circle circle-1"></div>
+  <div class="floating-circle circle-2"></div>
+  <div class="floating-circle circle-3"></div>
+</div>
+
+<!-- Main Container -->
+<div class="main-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="title-section">
+        <mat-icon class="header-icon">analytics</mat-icon>
+        <div class="page-title">Results Analysis</div>
+        <div class="page-subtitle">Comprehensive academic performance insights and analytics</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Card -->
+  <div class="main-card">
+    <!-- Form Section -->
+    <div class="form-section">
+      <div class="form-header">
+        <mat-icon class="form-icon">tune</mat-icon>
+        <h3>Analysis Parameters</h3>
+      </div>
+      
+      <form [formGroup]="analysisForm" (ngSubmit)="fetchAnalysisData()" class="analysis-form">
+        <div class="form-fields">
+          <div class="form-field">
+            <mat-form-field appearance="outline">
+              <mat-label>Choose Term</mat-label>
+              <mat-select formControlName="term" [compareWith]="compareFn">
+                <mat-option *ngFor="let term of terms$ | async" [value]="term">
+                  {{ term.num + " " + term.year }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="termControl?.invalid && termControl?.touched">Term is required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-field">
+            <mat-form-field appearance="outline">
+              <mat-label>Choose Class</mat-label>
+              <mat-select formControlName="clas">
+                <mat-option *ngFor="let clas of classes$ | async" [value]="clas.name">
+                  {{ clas.name }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="clasControl?.invalid && clasControl?.touched">Class is required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-field">
+            <mat-form-field appearance="outline">
+              <mat-label>Exam Type</mat-label>
+              <mat-select formControlName="examType">
+                <mat-option *ngFor="let type of examtype" [value]="type">
+                  {{ type }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="examTypeControl?.invalid && examTypeControl?.touched">Exam Type is required</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <button mat-flat-button type="submit" class="analyze-button" 
+                [disabled]="analysisForm.invalid || (isLoading$ | async)">
+          <mat-icon>analytics</mat-icon>
+          <span>Get Analysis</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Error Message -->
+    <div class="error-container" *ngIf="errorMsg$ | async as error">
+      <mat-icon class="error-icon">error</mat-icon>
+      <p class="error-message">{{ error }}</p>
+    </div>
+
+    <!-- No Data Message -->
+    <div class="no-data-container" *ngIf="!(isLoading$ | async) && (reports$ | async)?.length === 0 && analysisForm.valid && analysisForm.dirty">
+      <mat-icon class="no-data-icon">assessment</mat-icon>
+      <h3>No Data Available</h3>
+      <p>No report data available for the selected criteria. Please ensure reports have been generated for this session.</p>
+    </div>
+
+    <!-- Analysis Tabs -->
+    <div class="tabs-section" *ngIf="!(isLoading$ | async) && (reports$ | async)!.length > 0">
+      <mat-tab-group (selectedTabChange)="onTabChange($event)" animationDuration="500ms" dynamicHeight>
+        
+        <!-- Overall Class Analysis Tab -->
+        <mat-tab label="Overall Class Analysis">
+          <ng-template matTabContent>
+            <div class="tab-content">
+              <div *ngIf="overallAnalysisData$ | async as overallData" class="analysis-content">
+                
+                <!-- Overall Performance Summary -->
+                <div class="summary-section">
+                  <div class="section-header">
+                    <mat-icon class="section-icon">dashboard</mat-icon>
+                    <h3>Overall Class Performance Summary</h3>
+                  </div>
+                  
+                  <div class="summary-cards">
+                    <div class="summary-card pass-rates">
+                      <div class="card-header">
+                        <mat-icon class="card-icon">trending_up</mat-icon>
+                        <h4>Subject Pass Rates</h4>
+                      </div>
+                      <div class="card-content">
+                        <div class="pass-rate-list">
+                          <div *ngFor="let sr of overallData.subjectPassRates" class="pass-rate-item">
+                            <span class="subject-name">{{ sr.subjectName }}</span>
+                            <span class="pass-rate" [ngClass]="{'pass': sr.passRate >= 50, 'fail': sr.passRate < 50}">
+                              {{ sr?.passRate?.toFixed(1) }}%
+                            </span>
+                          </div>
+                          <div *ngIf="overallData.subjectPassRates.length === 0" class="no-data-small">
+                            No subject pass rates found.
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="summary-card top-students">
+                      <div class="card-header">
+                        <mat-icon class="card-icon">star</mat-icon>
+                        <h4>Top 5 Students</h4>
+                      </div>
+                      <div class="card-content">
+                        <div class="student-list">
+                          <div *ngFor="let student of overallData.top5StudentsOverall; let i = index" class="student-item">
+                            <span class="rank">{{ i + 1 }}</span>
+                            <span class="student-name">{{ student.student.name }} {{ student.student.surname }}</span>
+                            <span class="student-mark">{{ student?.averageMark?.toFixed(1) }}%</span>
+                          </div>
+                          <div *ngIf="overallData.top5StudentsOverall.length === 0" class="no-data-small">
+                            No top students found.
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="summary-card bottom-students">
+                      <div class="card-header">
+                        <mat-icon class="card-icon">warning</mat-icon>
+                        <h4>Bottom 5 Students</h4>
+                      </div>
+                      <div class="card-content">
+                        <div class="student-list">
+                          <div *ngFor="let student of overallData.bottom5StudentsOverall; let i = index" class="student-item">
+                            <span class="rank">{{ i + 1 }}</span>
+                            <span class="student-name">{{ student.student.name }} {{ student.student.surname }}</span>
+                            <span class="student-mark">{{ student?.averageMark?.toFixed(1) }}%</span>
+                          </div>
+                          <div *ngIf="overallData.bottom5StudentsOverall.length === 0" class="no-data-small">
+                            No bottom students found.
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Subject-Specific Analysis -->
+                <div class="subject-analysis-section">
+                  <div class="section-header">
+                    <mat-icon class="section-icon">subject</mat-icon>
+                    <h3>Subject-Specific Analysis</h3>
+                  </div>
+                  
+                  <div class="subject-selector">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Select Subject</mat-label>
+                      <mat-select [(ngModel)]="selectedSubjectCode"
+                        (selectionChange)="onSubjectSelectedForOverallAnalysis($event.value)"
+                        [ngModelOptions]="{standalone: true}">
+                        <mat-option value="">-- Select a Subject --</mat-option>
+                        <mat-option *ngFor="let subj of availableSubjectsForSelection$ | async" [value]="subj.code">
+                          {{ subj.name }} ({{ subj.code }})
+                        </mat-option>
+                      </mat-select>
+                      <mat-error *ngIf="!selectedSubjectCode && (reports$ | async)!.length > 0">Please select a subject.</mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <div *ngIf="selectedSubjectCode && (subjectAnalysisData$ | async) as subjectData" class="subject-results">
+                    <div class="subject-analysis-card">
+                      <div class="card-header">
+                        <mat-icon class="card-icon">assessment</mat-icon>
+                        <h4>Analysis for {{ selectedSubjectName$ | async }}</h4>
+                      </div>
+                      <div class="card-content">
+                        <div class="subject-details">
+                          <div class="detail-section">
+                            <h5>Top 5 Students</h5>
+                            <div class="student-list">
+                              <div *ngFor="let student of subjectData.bestStudents; let i = index" class="student-item">
+                                <span class="rank">{{ i + 1 }}</span>
+                                <span class="student-name">{{ student.student.name }} {{ student.student.surname }}</span>
+                                <span class="student-mark">{{ student.mark }}%</span>
+                              </div>
+                              <div *ngIf="subjectData.bestStudents.length === 0" class="no-data-small">No top students.</div>
+                            </div>
+                          </div>
+                          
+                          <div class="detail-section">
+                            <h5>Bottom 5 Students</h5>
+                            <div class="student-list">
+                              <div *ngFor="let student of subjectData.worstStudents; let i = index" class="student-item">
+                                <span class="rank">{{ i + 1 }}</span>
+                                <span class="student-name">{{ student.student.name }} {{ student.student.surname }}</span>
+                                <span class="student-mark">{{ student.mark }}%</span>
+                              </div>
+                              <div *ngIf="subjectData.worstStudents.length === 0" class="no-data-small">No bottom students.</div>
+                            </div>
+                          </div>
+                          
+                          <div class="detail-section">
+                            <h5>Grade Distribution</h5>
+                            <div class="grade-distribution">
+                              <div *ngFor="let gd of subjectData.gradeDistribution" class="grade-item">
+                                <span class="grade">{{ gd.grade }}</span>
+                                <span class="count">{{ gd.count }} students</span>
+                              </div>
+                              <div *ngIf="subjectData.gradeDistribution.length === 0" class="no-data-small">No grade data.</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div *ngIf="!selectedSubjectCode && (reports$ | async)!.length > 0" class="no-data-small">
+                    Select a subject above to view its detailed analysis.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+        </mat-tab>
+
+        <!-- Individual Student Performance Tab -->
+        <mat-tab label="Individual Student Performance">
+          <ng-template matTabContent>
+            <div class="tab-content">
+              <div class="student-performance-section">
+                <div class="section-header">
+                  <mat-icon class="section-icon">person</mat-icon>
+                  <h3>Individual Student Performance</h3>
+                </div>
+                
+                <div class="student-selector">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Select Student</mat-label>
+                    <mat-select [(ngModel)]="selectedStudent"
+                      (selectionChange)="onStudentSelectedForIndividualPerformance($event.value)"
+                      [ngModelOptions]="{standalone: true}" [compareWith]="compareFn">
+                      <mat-option value="">-- Select a Student --</mat-option>
+                      <mat-option *ngFor="let student of availableStudentsForSelection$ | async" [value]="student">
+                        {{ student.name }} {{ student.surname }} ({{ student.studentNumber }})
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="!selectedStudent && (reports$ | async)!.length > 0">Please select a student.</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div *ngIf="selectedStudent && (studentPerformanceDataArray$ | async) as studentDataArray" class="chart-section">
+                  <div class="chart-card">
+                    <div class="card-header">
+                      <mat-icon class="card-icon">show_chart</mat-icon>
+                      <h4>{{ selectedStudent.name }} {{ selectedStudent.surname }} - Subject Performance</h4>
+                    </div>
+                    <div class="card-content">
+                      <div class="chart-container">
+                        <canvas baseChart [data]="studentDataArray[0].chartData" [options]="lineChartOptions" [type]="lineChartType">
+                        </canvas>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div *ngIf="!selectedStudent && (reports$ | async)!.length > 0" class="no-data-small">
+                  Select a student above to view their performance chart.
+                </div>
+              </div>
+            </div>
+          </ng-template>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+  </div>
+</div>

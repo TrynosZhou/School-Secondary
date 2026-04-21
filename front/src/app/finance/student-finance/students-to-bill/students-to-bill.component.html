@@ -1,0 +1,26 @@
+<mat-form-field>
+  <mat-label>Select Term</mat-label>
+  <mat-select [(ngModel)]="currentTerm" (selectionChange)="onTermChange($event.value)">
+
+    <mat-option *ngFor="let term of terms$ | async" [value]="term">{{ term.num + ' ' + term.year }}</mat-option>
+
+  </mat-select>
+</mat-form-field>
+<mat-card class="students-to-bill" *ngIf="currentTerm &&(studentsToBill$ | async) as studentsToBill">
+  <mat-card-title>
+    <p>Students Not Yet Billed</p>
+    <p>For Term {{ currentTerm.num + ' ' + currentTerm.year }}</p>
+  </mat-card-title>
+  <mat-card-content>
+    <mat-chip-listbox [(ngModel)]="selectedEnrol" *ngIf="studentsToBill" class="chip-list">
+      <mat-chip *ngFor="let enrol of studentsToBill" [value]="enrol" (click)="changeSelectedEnrol(enrol)">
+        {{ enrol.student.surname + ' ' + enrol.student.name + ' ' + enrol.name }}
+        <mat-icon
+          *ngIf="selectedEnrol && selectedEnrol.student.studentNumber === enrol.student.studentNumber">check</mat-icon>
+      </mat-chip>
+    </mat-chip-listbox>
+    <div *ngIf="!studentsToBill">
+      No Students to Bill
+    </div>
+  </mat-card-content>
+</mat-card>

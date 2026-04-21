@@ -1,0 +1,38 @@
+<mat-card class="student-details" *ngIf="studentEnrol && studentEnrol.student">
+  <mat-card-title>
+    {{ studentEnrol.student.surname + ' ' + studentEnrol.student.name }}
+  </mat-card-title>
+  <mat-card-subtitle>
+    <span>{{ 'Enrolled in : ' + studentEnrol.name + ' Term ' + studentEnrol.num + ' ' + studentEnrol.year }}</span>
+  </mat-card-subtitle>
+  <mat-card-content>
+    <div>
+      <label>Student Number: </label>
+      <span>{{ studentEnrol.student.studentNumber }}</span>
+    </div>
+    <div>
+      <label>I.D Number: </label>
+      <span>{{ studentEnrol.student.idnumber }}</span>
+    </div>
+    <div>
+      <label>Gender: </label>
+      <span>{{ studentEnrol.student.gender }}</span>
+    </div>
+    <div>
+      <label>Residence: </label>
+      <span>{{ studentEnrol.residence }}</span>
+    </div>
+    <div>
+      <label>Cell: </label>
+      <span>{{ studentEnrol.student.cell }}</span>
+    </div>
+    <div>
+      <label>Email: </label>
+      <span>{{ studentEnrol.student.email }}</span>
+    </div>
+    <div>
+      <label>Address: </label>
+      <address>{{ studentEnrol.student.address }}</address>
+    </div>
+  </mat-card-content>
+</mat-card>

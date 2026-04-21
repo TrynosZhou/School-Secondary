@@ -1,0 +1,133 @@
+<div class="edit-user-dialog">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <mat-icon>edit</mat-icon>
+      Edit User
+    </h2>
+    <button mat-icon-button (click)="onCancel()" class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    <form [formGroup]="editUserForm" (ngSubmit)="onSubmit()" class="edit-user-form">
+      
+      <!-- Account Information -->
+      <div class="form-section">
+        <h3 class="section-title">Account Information</h3>
+        
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Username *</mat-label>
+          <input matInput formControlName="username" placeholder="Enter username">
+          <mat-icon matSuffix>person</mat-icon>
+          <mat-error *ngIf="getFieldError('username')">{{ getFieldError('username') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Role *</mat-label>
+          <mat-select formControlName="role">
+            <mat-option *ngFor="let role of roles" [value]="role">
+              {{ role }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Profile Information -->
+      <div class="form-section">
+        <h3 class="section-title">Profile Information</h3>
+        
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Name *</mat-label>
+            <input matInput formControlName="name" placeholder="Enter first name">
+            <mat-icon matSuffix>badge</mat-icon>
+            <mat-error *ngIf="getFieldError('name')">{{ getFieldError('name') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Surname</mat-label>
+            <input matInput formControlName="surname" placeholder="Enter surname">
+            <mat-icon matSuffix>badge</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" placeholder="Enter email address" type="email">
+            <mat-icon matSuffix>email</mat-icon>
+            <mat-error *ngIf="getFieldError('email')">{{ getFieldError('email') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Phone</mat-label>
+            <input matInput formControlName="cell" placeholder="Enter phone number">
+            <mat-icon matSuffix>phone</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field full-width">
+            <mat-label>Department</mat-label>
+            <mat-select formControlName="departmentId">
+              <mat-option [value]="''">Unassigned</mat-option>
+              <mat-option *ngFor="let dept of departments" [value]="dept.id">
+                {{ dept.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="form-field full-width">
+          <mat-label>Address</mat-label>
+          <textarea matInput formControlName="address" placeholder="Enter address" rows="2"></textarea>
+          <mat-icon matSuffix>home</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <!-- Account Status Section -->
+      <div class="form-section">
+        <h3 class="section-title">Account Status</h3>
+        
+        <div class="account-status-section">
+          <mat-slide-toggle 
+            formControlName="active" 
+            color="primary"
+            class="status-toggle">
+            <div class="toggle-label">
+              <mat-icon>{{ editUserForm.get('active')?.value ? 'check_circle' : 'cancel' }}</mat-icon>
+              <span class="toggle-text">
+                {{ editUserForm.get('active')?.value ? 'Account Active' : 'Account Inactive' }}
+              </span>
+            </div>
+            <div class="toggle-description">
+              {{ editUserForm.get('active')?.value 
+                ? 'User can sign in and access the system' 
+                : 'User cannot sign in and is soft-deleted' }}
+            </div>
+          </mat-slide-toggle>
+        </div>
+      </div>
+
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-button (click)="onCancel()" class="cancel-button">
+      <mat-icon>cancel</mat-icon>
+      Cancel
+    </button>
+    <button 
+      mat-raised-button 
+      color="primary" 
+      (click)="onSubmit()" 
+      [disabled]="!hasFormChanges() || editUserForm.invalid || loading"
+      class="submit-button">
+      <mat-icon *ngIf="!loading">save</mat-icon>
+      <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+      {{ loading ? 'Updating...' : 'Update User' }}
+    </button>
+  </mat-dialog-actions>
+</div>
+

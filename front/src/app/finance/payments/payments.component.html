@@ -1,0 +1,50 @@
+<mat-toolbar color="primary" class="receipts-toolbar">
+  <div class="toolbar-left-content">
+    <span class="toolbar-title" *ngIf="!isSearchBarVisible">Receipts</span>
+
+    <div class="toolbar-search-container" [class.visible]="isSearchBarVisible">
+      <app-search-receipt *ngIf="isSearchBarVisible" (receiptSelected)="onReceiptSelectedFromSearch($event)"
+        class="toolbar-search-component"></app-search-receipt>
+    </div>
+  </div>
+
+  <div class="toolbar-icons">
+    <button mat-icon-button (click)="toggleSearchBar()" aria-label="Toggle search">
+      <mat-icon>{{ isSearchBarVisible ? 'close' : 'search' }}</mat-icon>
+    </button>
+    <button mat-icon-button (click)="onFilter()" aria-label="Filter receipts">
+      <mat-icon>filter_list</mat-icon>
+    </button>
+    <button mat-icon-button [matMenuTriggerFor]="sortMenu" aria-label="Sort receipts">
+      <mat-icon>sort</mat-icon>
+    </button>
+    <mat-menu #sortMenu="matMenu">
+      <button mat-menu-item *ngFor="let option of sortOptions" (click)="onSortChange(option.value)">
+        {{ option.label }}
+        <mat-icon *ngIf="(currentSort$ | async) === option.value">done</mat-icon>
+      </button>
+    </mat-menu>
+  </div>
+</mat-toolbar>
+
+<div class="receipts-container">
+  <div *ngIf="(filteredAndSortedReceipts$ | async) as receipts" class="receipts-list">
+    <div *ngIf="receipts.length > 0; else noReceiptsFound" class="receipts-content">
+      <app-receipt-summary-card *ngFor="let receipt of receipts" [receipt]="receipt"
+        (viewDetails)="onViewReceiptDetails(receipt)"></app-receipt-summary-card>
+    </div>
+
+    <ng-template #noReceiptsFound>
+      <p>No receipts found matching your criteria.</p>
+    </ng-template>
+  </div>
+
+  <div *ngIf="selectedReceipt" class="selected-receipt-details">
+    <app-receipt-item [receipt]="selectedReceipt"></app-receipt-item>
+  </div>
+</div>
+
+<button mat-fab extended color="accent" class="add-receipt-fab" (click)="onAddReceipt()">
+  <mat-icon>add</mat-icon>
+  Add New Receipt
+</button>

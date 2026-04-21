@@ -1,0 +1,168 @@
+<div class="reconciliation-container">
+  <mat-card class="reconciliation-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>account_balance_wallet</mat-icon>
+        Student Finance Reconciliation
+      </mat-card-title>
+      <mat-card-subtitle>
+        Reconcile and verify student financial data, correct overpayments, and apply credits
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="search-section">
+        <app-student-search (studentSelected)="onStudentSelected($event)"></app-student-search>
+
+        <div *ngIf="selectedStudent" class="selected-student-info">
+          <mat-icon>person</mat-icon>
+          <div class="student-details">
+            <span class="student-name">
+              {{ selectedStudent.name }} {{ selectedStudent.surname }}
+            </span>
+            <span class="student-number">{{ selectedStudent.studentNumber }}</span>
+          </div>
+          <button mat-icon-button (click)="clearSelection()" matTooltip="Clear Selection">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="action-section">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="reconcileStudent()"
+          [disabled]="!selectedStudent || isReconciling"
+          class="reconcile-button"
+        >
+          <mat-spinner *ngIf="isReconciling" diameter="20" class="button-spinner"></mat-spinner>
+          <mat-icon *ngIf="!isReconciling">sync</mat-icon>
+          {{ isReconciling ? 'Reconciling...' : 'Reconcile Student Finances' }}
+        </button>
+      </div>
+
+      <!-- Reconciliation Results -->
+      <div *ngIf="reconciliationResult" class="results-section">
+        <mat-card class="results-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>check_circle</mat-icon>
+              Reconciliation Results
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="summary-grid">
+              <div class="summary-item">
+                <mat-icon>receipt_long</mat-icon>
+                <div>
+                  <span class="label">Invoices Processed</span>
+                  <span class="value">{{ reconciliationResult.summary.invoicesProcessed }}</span>
+                </div>
+              </div>
+              <div class="summary-item">
+                <mat-icon>build</mat-icon>
+                <div>
+                  <span class="label">Invoices Corrected</span>
+                  <span class="value">{{ reconciliationResult.summary.invoicesCorrected }}</span>
+                </div>
+              </div>
+              <div class="summary-item">
+                <mat-icon>payment</mat-icon>
+                <div>
+                  <span class="label">Receipts Processed</span>
+                  <span class="value">{{ reconciliationResult.summary.receiptsProcessed }}</span>
+                </div>
+              </div>
+              <div class="summary-item">
+                <mat-icon>link_off</mat-icon>
+                <div>
+                  <span class="label">Voided Invoices Unlinked</span>
+                  <span class="value">{{ reconciliationResult.summary.voidedInvoicesUnlinked }}</span>
+                </div>
+              </div>
+              <div class="summary-item">
+                <mat-icon>account_balance</mat-icon>
+                <div>
+                  <span class="label">Credit Balance</span>
+                  <span class="value">{{ reconciliationResult.summary.totalCreditBalance | number:'1.2-2' }}</span>
+                </div>
+              </div>
+              <div class="summary-item">
+                <mat-icon>description</mat-icon>
+                <div>
+                  <span class="label">Invoices with Balance</span>
+                  <span class="value">{{ reconciliationResult.summary.invoicesWithBalance }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Credit Application Details -->
+            <mat-expansion-panel *ngIf="reconciliationResult.summary.creditApplied" class="details-panel">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <mat-icon>credit_card</mat-icon>
+                  Credit Applied
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              <div class="detail-content">
+                <p>
+                  <strong>Amount:</strong> {{ reconciliationResult.summary.creditAmount | number:'1.2-2' }}
+                </p>
+                <p *ngIf="reconciliationResult.summary.creditAppliedToInvoice">
+                  <strong>Applied to Invoice:</strong> {{ reconciliationResult.summary.creditAppliedToInvoice }}
+                </p>
+              </div>
+            </mat-expansion-panel>
+
+            <!-- Corrected Invoices Details -->
+            <mat-expansion-panel *ngIf="correctedInvoices.length > 0" class="details-panel">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <mat-icon>edit</mat-icon>
+                  Corrected Invoices ({{ correctedInvoices.length }})
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              <mat-list>
+                <mat-list-item *ngFor="let invoice of correctedInvoices">
+                  <div class="invoice-detail">
+                    <div>
+                      <strong>{{ invoice.invoiceNumber }}</strong>
+                      <p class="detail-text">Overpayment: {{ invoice.overpaymentAmount | number:'1.2-2' }}</p>
+                      <p class="detail-text">Credit Created: {{ invoice.creditCreated | number:'1.2-2' }}</p>
+                    </div>
+                  </div>
+                </mat-list-item>
+              </mat-list>
+            </mat-expansion-panel>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="info-section">
+        <mat-card class="info-card">
+          <mat-card-content>
+            <h3>
+              <mat-icon>info</mat-icon>
+              What does reconciliation do?
+            </h3>
+            <ul>
+              <li>Corrects invoice overpayments (amountPaidOnInvoice > totalBill)</li>
+              <li>Verifies and recalculates all invoice balances</li>
+              <li>Verifies credit balances</li>
+              <li>Applies credit to oldest invoice with balance if both exist</li>
+              <li>Verifies receipt allocations</li>
+              <li>Unlinks enrols from voided invoices</li>
+            </ul>
+            <p class="warning-text">
+              <mat-icon>warning</mat-icon>
+              <strong>Note:</strong> This operation may take a few moments and will persist all
+              changes to the database.
+            </p>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
