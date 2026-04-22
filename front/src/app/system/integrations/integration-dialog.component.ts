@@ -72,12 +72,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
           <div class="config-fields">
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>API Key</mat-label>
-              <input matInput type="password" formControlName="apiKey" placeholder="Enter API key">
+              <input matInput type="password" formControlName="apiKey" placeholder="Enter API key" autocomplete="new-password">
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>API Secret</mat-label>
-              <input matInput type="password" formControlName="apiSecret" placeholder="Enter API secret">
+              <input matInput type="password" formControlName="apiSecret" placeholder="Enter API secret" autocomplete="new-password">
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="full-width">

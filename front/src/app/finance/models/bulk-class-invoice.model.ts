@@ -1,6 +1,7 @@
 export interface BulkClassInvoiceRequest {
   dryRun?: boolean;
   termId?: number;
+  studentNumber?: string;
 }
 
 export interface BulkClassInvoiceStudentResult {
@@ -18,6 +19,7 @@ export interface BulkClassInvoiceResponse {
   termNum: number;
   year: number;
   termType: 'regular' | 'vacation';
+  requestedStudentNumber?: string;
   totalStudents: number;
   successCount: number;
   failureCount: number;

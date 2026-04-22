@@ -40,6 +40,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   canAccessParentDashboard$ = this.roleAccess.getCurrentRole$().pipe(
     map(role => this.roleAccess.hasRole(ROLES.parent, role))
   );
+  roleClass$ = this.roleAccess.getCurrentRole$().pipe(
+    map((role) => this.getRoleClass(role as ROLES | undefined))
+  );
 
   currentTermNum!: number;
   currentTermYear!: number;
@@ -110,5 +113,25 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next(); // Emit a value to complete all subscriptions
     this.destroy$.complete(); // Complete the subject
+  }
+
+  private getRoleClass(role?: ROLES): string {
+    if ([ROLES.teacher, ROLES.admin, ROLES.hod].includes(role as ROLES)) {
+      return 'role-teaching';
+    }
+
+    if ([ROLES.reception, ROLES.auditor, ROLES.director].includes(role as ROLES)) {
+      return 'role-finance';
+    }
+
+    if (role === ROLES.student) {
+      return 'role-student';
+    }
+
+    if (role === ROLES.parent) {
+      return 'role-parent';
+    }
+
+    return 'role-default';
   }
 }

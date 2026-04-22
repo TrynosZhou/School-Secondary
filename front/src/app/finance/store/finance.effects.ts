@@ -82,9 +82,19 @@ export class FinanceEffects {
               fees: sortedFees,
             });
           }),
-          catchError((error: HttpErrorResponse) =>
-            of(feesActions.fetchFeesFail({ ...error }))
-          )
+          catchError((error: HttpErrorResponse) => {
+            const errorMessage =
+              error?.error?.message ||
+              error?.message ||
+              'Failed to load fees.';
+            this.snackBar.open(`Error: ${errorMessage}`, 'Close', {
+              duration: 5000,
+              verticalPosition: 'top',
+              horizontalPosition: 'center',
+              panelClass: ['error-snackbar'],
+            });
+            return of(feesActions.fetchFeesFail({ ...error }));
+          })
         )
       )
     )
@@ -108,11 +118,17 @@ export class FinanceEffects {
           catchError((error: HttpErrorResponse) =>
             of(feesActions.addFeeFail({ ...error })).pipe(
               tap(() =>
-                this.snackBar.open(error.message, 'OK', {
+                this.snackBar.open(
+                  error.error?.message?.join?.(', ') ||
+                    error.error?.message ||
+                    error.message,
+                  'OK',
+                  {
                   duration: 3000,
                   verticalPosition: 'top',
                   horizontalPosition: 'center',
-                })
+                  }
+                )
               )
             )
           )
@@ -512,9 +528,9 @@ export class FinanceEffects {
   bulkInvoiceClass$ = createEffect(() =>
     this.actions$.pipe(
       ofType(invoiceActions.bulkInvoiceClass),
-      switchMap(({ className, num, year, termId, dryRun }) =>
+      switchMap(({ className, num, year, termId, dryRun, studentNumber }) =>
         this.paymentsService
-          .bulkInvoiceClass(className, num, year, { termId, dryRun })
+          .bulkInvoiceClass(className, num, year, { termId, dryRun, studentNumber })
           .pipe(
             tap((result) => {
               const message = `Bulk invoicing complete: ${result.successCount}/${result.totalStudents} succeeded`;

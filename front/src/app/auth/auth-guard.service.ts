@@ -47,6 +47,11 @@ export class AuthGuardService {
           return this.router.parseUrl('/signin');
         }
 
+        // Admin and dev have full frontend route access.
+        if ([ROLES.admin, ROLES.dev].includes(user.role as ROLES)) {
+          return true;
+        }
+
         if (!allowedRoles || allowedRoles.length === 0) {
           if (!requiredPermissions || requiredPermissions.length === 0) {
             return true;

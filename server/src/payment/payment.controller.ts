@@ -212,7 +212,7 @@ export class PaymentController {
   }
 
   @Post('receipt')
-  @Roles(ROLES.reception, ROLES.auditor)
+  @Roles(ROLES.reception, ROLES.auditor, ROLES.admin, ROLES.dev)
   createReceipt(
     @Body() createReceiptDto: CreateReceiptDto,
     @GetUser() profile: TeachersEntity,
@@ -415,7 +415,7 @@ export class PaymentController {
   }
 
   @Patch('invoice/:invoiceId/fix-balance-bfwd')
-  @Roles(ROLES.reception, ROLES.auditor, ROLES.director, ROLES.dev)
+  @Roles(ROLES.reception, ROLES.auditor, ROLES.director, ROLES.admin, ROLES.dev)
   fixInvoiceTotalToIncludeBalanceBfwd(
     @Param('invoiceId', ParseIntPipe) invoiceId: number,
   ) {
@@ -423,7 +423,7 @@ export class PaymentController {
   }
 
   @Post('reconcile/:studentNumber')
-  @Roles(ROLES.reception, ROLES.auditor, ROLES.director)
+  @Roles(ROLES.reception, ROLES.auditor, ROLES.director, ROLES.admin, ROLES.dev)
   reconcileStudentFinances(
     @Param('studentNumber') studentNumber: string,
     @GetUser() profile: TeachersEntity,
@@ -432,7 +432,7 @@ export class PaymentController {
   }
 
   @Post('reconcile/class/:name/:num/:year')
-  @Roles(ROLES.director, ROLES.auditor, ROLES.reception, ROLES.dev)
+  @Roles(ROLES.director, ROLES.auditor, ROLES.reception, ROLES.admin, ROLES.dev)
   reconcileClassTerm(
     @Param('name') name: string,
     @Param('num', ParseIntPipe) num: number,

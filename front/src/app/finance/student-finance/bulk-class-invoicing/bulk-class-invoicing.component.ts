@@ -55,6 +55,7 @@ export class BulkClassInvoicingComponent implements OnInit, OnDestroy {
   bulkInvoiceLoading$: Observable<boolean>;
   selectedTerm: TermsModel | null = null;
   selectedClassName = '';
+  selectedStudentNumber = '';
   private destroy$ = new Subject<void>();
 
   constructor(private store: Store, private cdr: ChangeDetectorRef) {
@@ -90,6 +91,7 @@ export class BulkClassInvoicingComponent implements OnInit, OnDestroy {
 
   runBulkInvoicing(): void {
     const className = this.selectedClassName.trim();
+    const studentNumber = this.selectedStudentNumber.trim();
     if (!this.selectedTerm || !className) {
       return;
     }
@@ -100,6 +102,7 @@ export class BulkClassInvoicingComponent implements OnInit, OnDestroy {
         num: this.selectedTerm.num,
         year: this.selectedTerm.year,
         termId: this.selectedTerm.id,
+        studentNumber: studentNumber || undefined,
       })
     );
   }

@@ -44,8 +44,8 @@ export class PermissionsGuard implements CanActivate {
 
     // 4. Check if the user has all required permissions
     const role = (user as any).role as string | undefined;
-    // Dev role bypasses permission check (full access)
-    if (role === ROLES.dev) {
+    // Dev and admin roles bypass permission checks (full access).
+    if (role === ROLES.dev || role === ROLES.admin) {
       return true;
     }
     for (const permission of requiredPermissions) {

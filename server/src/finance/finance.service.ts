@@ -47,7 +47,6 @@ export class FinanceService {
 
   async createFees(createFeesDto: CreateFeesDto, profile: TeachersEntity) {
     switch (profile.role) {
-      case ROLES.admin:
       case ROLES.teacher:
       case ROLES.student:
       case ROLES.parent:
@@ -86,7 +85,6 @@ export class FinanceService {
     profile: TeachersEntity,
   ) {
     switch (profile.role) {
-      case ROLES.admin:
       case ROLES.parent:
       case ROLES.hod:
       case ROLES.student:

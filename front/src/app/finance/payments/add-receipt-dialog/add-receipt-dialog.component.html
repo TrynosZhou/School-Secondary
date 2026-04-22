@@ -1,6 +1,6 @@
 <div class="add-receipt-dialog" [class.theme-dark]="currentTheme === 'dark'">
   <!-- Loading Overlay -->
-  <div *ngIf="isLoading$ | async" class="loading-overlay">
+  <div *ngIf="isSaving" class="loading-overlay">
     <div class="loading-content">
       <mat-spinner diameter="50"></mat-spinner>
       <p>Saving receipt...</p>
@@ -130,25 +130,14 @@
       <mat-icon>close</mat-icon>
       Cancel
     </button>
-    <ng-container *ngIf="isLoading$ | async as isLoading">
-      <button 
-        mat-raised-button 
-        color="primary" 
-        [disabled]="addReceiptForm.invalid || !student || isLoading"
-        (click)="onSubmit()">
-        <mat-icon *ngIf="!isLoading">save</mat-icon>
-        <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
-        <span>{{ isLoading ? 'Saving...' : 'Save Receipt' }}</span>
-      </button>
-    </ng-container>
     <button 
-      *ngIf="!(isLoading$ | async)"
       mat-raised-button 
       color="primary" 
-      [disabled]="addReceiptForm.invalid || !student"
+      [disabled]="addReceiptForm.invalid || !student || isSaving"
       (click)="onSubmit()">
-      <mat-icon>save</mat-icon>
-      <span>Save Receipt</span>
+      <mat-icon *ngIf="!isSaving">save</mat-icon>
+      <mat-spinner *ngIf="isSaving" diameter="20"></mat-spinner>
+      <span>{{ isSaving ? 'Saving...' : 'Save Receipt' }}</span>
     </button>
   </mat-dialog-actions>
 </div>

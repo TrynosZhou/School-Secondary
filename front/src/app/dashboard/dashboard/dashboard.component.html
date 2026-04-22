@@ -1,24 +1,64 @@
-<mat-toolbar class="title">
+<div class="dashboard-shell" [ngClass]="roleClass$ | async">
+  <section class="dashboard-hero">
+    <div class="hero-main">
+      <p class="eyebrow">School insights</p>
+      <h1>Welcome to your dashboard</h1>
+      <p class="hero-subtitle">
+        Monitor activity, track progress, and take action from one clean workspace.
+      </p>
+    </div>
 
-  <div *ngIf="currentTerm$ |async as currentTerm">{{ today.toDateString() }}, Term {{ currentTerm.num }} {{
-    currentTerm.year}}</div>
-</mat-toolbar>
+    <div class="hero-pills" *ngIf="currentTerm$ | async as currentTerm">
+      <div class="pill">
+        <mat-icon>calendar_month</mat-icon>
+        <span>{{ today | date:'fullDate' }}</span>
+      </div>
+      <div class="pill pill-highlight">
+        <mat-icon>school</mat-icon>
+        <span>Term {{ currentTerm.num }} {{ currentTerm.year }}</span>
+      </div>
+      <div class="pill">
+        <mat-icon>insights</mat-icon>
+        <span>Live overview</span>
+      </div>
+    </div>
+  </section>
 
-<!-- Teachers, Admins and HODs dashboard -->
-<app-teachers-dashboard *ngIf="canAccessTeachersDashboard$ | async"></app-teachers-dashboard>
-<!-- End Teacher, Admin and HODs dashboard -->
+  <section class="quick-features">
+    <article class="feature-card">
+      <mat-icon>flash_on</mat-icon>
+      <h3>Fast access</h3>
+      <p>Role-based widgets surface the data you need first.</p>
+    </article>
+    <article class="feature-card">
+      <mat-icon>auto_graph</mat-icon>
+      <h3>Smart trends</h3>
+      <p>Track attendance, finance, and student performance in one place.</p>
+    </article>
+    <article class="feature-card">
+      <mat-icon>verified_user</mat-icon>
+      <h3>Focused workspace</h3>
+      <p>Clean visual hierarchy helps teams work faster with less clutter.</p>
+    </article>
+  </section>
 
-<!-- Reception Dashboard -->
-<app-finance-dashboard *ngIf="canAccessFinanceDashboard$ | async"></app-finance-dashboard>
+  <section class="dashboard-panel" *ngIf="canAccessTeachersDashboard$ | async">
+    <h2>Teaching & administration</h2>
+    <app-teachers-dashboard></app-teachers-dashboard>
+  </section>
 
-<!-- End Reception Dashboard -->
+  <section class="dashboard-panel" *ngIf="canAccessFinanceDashboard$ | async">
+    <h2>Finance operations</h2>
+    <app-finance-dashboard></app-finance-dashboard>
+  </section>
 
+  <section class="dashboard-panel" *ngIf="canAccessStudentDashboard$ | async">
+    <h2>Student space</h2>
+    <app-student-dashboard></app-student-dashboard>
+  </section>
 
-
-<!-- Student Dashboard -->
-<app-student-dashboard *ngIf="canAccessStudentDashboard$ | async"></app-student-dashboard>
-<!-- End Student Dashboard -->
-
-<!-- Parent Dashboard -->
-<app-parent-dashboard *ngIf="canAccessParentDashboard$ | async"></app-parent-dashboard>
-<!-- End Parent Dashboard -->
+  <section class="dashboard-panel" *ngIf="canAccessParentDashboard$ | async">
+    <h2>Parent overview</h2>
+    <app-parent-dashboard></app-parent-dashboard>
+  </section>
+</div>

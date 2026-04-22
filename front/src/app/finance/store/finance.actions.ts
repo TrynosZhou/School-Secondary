@@ -58,7 +58,7 @@ export const invoiceActions = createActionGroup({
     saveInvoiceSuccess: props<{ invoice: InvoiceModel }>(),
     saveInvoiceFail: props<{ error: HttpErrorResponse }>(),
 
-    bulkInvoiceClass: props<{ className: string; num: number; year: number; termId?: number; dryRun?: boolean }>(),
+    bulkInvoiceClass: props<{ className: string; num: number; year: number; termId?: number; dryRun?: boolean; studentNumber?: string }>(),
     bulkInvoiceClassSuccess: props<{ result: BulkClassInvoiceResponse }>(),
     bulkInvoiceClassFail: props<{ error: HttpErrorResponse }>(),
 

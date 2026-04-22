@@ -21,6 +21,16 @@ export class BulkClassInvoiceRequestDto {
   @IsOptional()
   @IsBoolean()
   dryRun?: boolean;
+
+  @ApiProperty({
+    description:
+      'Optional student number to run invoicing for only one student in the selected class and term.',
+    required: false,
+    example: 'STD-0001',
+  })
+  @IsOptional()
+  @IsString()
+  studentNumber?: string;
 }
 
 export class BulkClassInvoiceStudentResultDto {
@@ -58,6 +68,9 @@ export class BulkClassInvoiceResponseDto {
 
   @ApiProperty()
   termType: 'regular' | 'vacation';
+
+  @ApiProperty({ required: false })
+  requestedStudentNumber?: string;
 
   @ApiProperty()
   totalStudents: number;

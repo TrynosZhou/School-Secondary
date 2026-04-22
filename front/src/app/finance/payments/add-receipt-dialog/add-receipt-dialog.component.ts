@@ -14,12 +14,10 @@ import { StudentsModel } from 'src/app/registration/models/students.model';
 import { PaymentMethods } from '../../enums/payment-methods.enum';
 import { Store } from '@ngrx/store';
 import {
-  getStudentLedger,
-  LedgerEntry,
-  selectIsLoading,
+  selectAmountDue,
 } from '../../store/finance.selector';
-import { receiptActions, invoiceActions } from '../../store/finance.actions';
-import { filter, map, combineLatest, Observable, Subject, takeUntil } from 'rxjs';
+import { receiptActions } from '../../store/finance.actions';
+import { map, combineLatest, Observable, Subject, takeUntil } from 'rxjs';
 import { State } from '../../store/finance.reducer';
 import { ReceiptModel } from '../../models/payment.model';
 import { ThemeService, Theme } from 'src/app/services/theme.service';
@@ -54,7 +52,7 @@ export class AddReceiptDialogComponent implements OnInit, OnDestroy {
 
   // Observables for state from NgRx Store
   amountDue$: Observable<number> = new Observable<number>();
-  isLoading$!: Observable<boolean>;
+  isSaving = false;
   isLoadingBalance$: Observable<boolean> = new Observable<boolean>();
   
   // Computed observables for suggestions
@@ -79,8 +77,6 @@ export class AddReceiptDialogComponent implements OnInit, OnDestroy {
       description: [''],
     });
 
-    this.isLoading$ = this.store.select(selectIsLoading);
-    
     // Watch for form changes to calculate suggestions
     this.setupSuggestionObservables();
   }
@@ -134,14 +130,21 @@ export class AddReceiptDialogComponent implements OnInit, OnDestroy {
     // Clear any stale state so the dialog doesn't react to a previous save
     this.store.dispatch(receiptActions.clearCreatedReceipt());
 
-    // Ensure invoices and receipts are loaded in the store for balance calculation
-    this.store.dispatch(invoiceActions.fetchAllInvoices());
-    this.store.dispatch(receiptActions.fetchAllReceipts());
-
     // Close dialog only after the backend confirms save success
     this.actions$
       .pipe(ofType(receiptActions.saveReceiptSuccess), takeUntil(this.destroy$))
-      .subscribe(({ receipt }) => this.dialogRef.close(receipt));
+      .subscribe(({ receipt }) => {
+        this.isSaving = false;
+        this.cdr.markForCheck();
+        this.dialogRef.close(receipt);
+      });
+
+    this.actions$
+      .pipe(ofType(receiptActions.saveReceiptFail), takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.isSaving = false;
+        this.cdr.markForCheck();
+      });
 
     // Subscribe to theme changes
     this.themeService.theme$
@@ -187,6 +190,8 @@ export class AddReceiptDialogComponent implements OnInit, OnDestroy {
           description: description,
         })
       );
+      this.isSaving = true;
+      this.cdr.markForCheck();
     } else {
       this.addReceiptForm.markAllAsTouched();
     }
@@ -195,17 +200,12 @@ export class AddReceiptDialogComponent implements OnInit, OnDestroy {
   getSelectedStudent(student: StudentsModel) {
     this.student = student;
     if (this.student.studentNumber) {
-      // Calculate balance from store using the same ledger calculation
-      this.amountDue$ = this.store.select(
-        getStudentLedger(this.student.studentNumber)
-      ).pipe(
-        map((ledger: LedgerEntry[]) => {
-          if (!ledger || ledger.length === 0) {
-            return 0;
-          }
-          return ledger[ledger.length - 1].runningBalance;
+      this.store.dispatch(
+        receiptActions.fetchStudentOutstandingBalance({
+          studentNumber: this.student.studentNumber,
         })
       );
+      this.amountDue$ = this.store.select(selectAmountDue);
       
       // Re-setup suggestions when student changes
       this.setupSuggestionObservables();

@@ -78,7 +78,7 @@ export class PaymentService {
     );
 
     const userRole = await this.getUserRoleByEmail(voidedByEmail);
-    const allowedRoles = [ROLES.auditor, ROLES.director, ROLES.dev];
+    const allowedRoles = [ROLES.auditor, ROLES.director, ROLES.admin, ROLES.dev];
     if (!allowedRoles.includes(userRole)) {
       logStructured(
         this.logger,
@@ -88,7 +88,7 @@ export class PaymentService {
         { receiptId, voidedByEmail, userRole },
       );
       throw new UnauthorizedException(
-        'Only auditors, directors, and developers can void receipts.',
+        'Only auditors, directors, admins, and developers can void receipts.',
       );
     }
 
@@ -154,7 +154,7 @@ export class PaymentService {
 
     // Authorization check: Only auditors, directors, and developers can void invoices
     const userRole = await this.getUserRoleByEmail(voidedByEmail);
-    const allowedRoles = [ROLES.auditor, ROLES.director, ROLES.dev];
+    const allowedRoles = [ROLES.auditor, ROLES.director, ROLES.admin, ROLES.dev];
     if (!allowedRoles.includes(userRole)) {
       logStructured(
         this.logger,
@@ -164,7 +164,7 @@ export class PaymentService {
         { invoiceId, voidedByEmail, userRole },
       );
       throw new UnauthorizedException(
-        'Only auditors, directors, and developers can void invoices.',
+        'Only auditors, directors, admins, and developers can void invoices.',
       );
     }
 
@@ -734,7 +734,47 @@ export class PaymentService {
       templates.set(Residence.Boarder, new Set([boarderFee.id]));
     }
 
+    this.ensureBothResidenceTemplates(templates);
     return templates;
+  }
+
+  private buildDefaultRegularFeeTemplateByResidence(
+    fees: Awaited<ReturnType<FinanceService['getAllFees']>>,
+  ): Map<Residence, Set<number>> {
+    const templates = new Map<Residence, Set<number>>();
+    const dayTuition = fees.find(
+      (fee) =>
+        fee.name === FeesNames.oLevelTuitionDay ||
+        fee.name === FeesNames.aLevelTuitionDay,
+    );
+    const boarderTuition = fees.find(
+      (fee) =>
+        fee.name === FeesNames.oLevelTuitionBoarder ||
+        fee.name === FeesNames.aLevelTuitionBoarder,
+    );
+
+    if (dayTuition?.id) {
+      templates.set(Residence.Day, new Set([dayTuition.id]));
+    }
+    if (boarderTuition?.id) {
+      templates.set(Residence.Boarder, new Set([boarderTuition.id]));
+    }
+
+    this.ensureBothResidenceTemplates(templates);
+    return templates;
+  }
+
+  private ensureBothResidenceTemplates(
+    templates: Map<Residence, Set<number>>,
+  ): void {
+    if (templates.has(Residence.Day) && !templates.has(Residence.Boarder)) {
+      templates.set(Residence.Boarder, new Set(templates.get(Residence.Day)));
+    } else if (
+      templates.has(Residence.Boarder) &&
+      !templates.has(Residence.Day)
+    ) {
+      templates.set(Residence.Day, new Set(templates.get(Residence.Boarder)));
+    }
   }
 
   async bulkInvoiceClassTerm(
@@ -764,6 +804,19 @@ export class PaymentService {
       );
     }
 
+    const requestedStudentNumber = request.studentNumber?.trim();
+    const targetEnrolments = requestedStudentNumber
+      ? enrolments.filter(
+          (enrol) => enrol.student?.studentNumber === requestedStudentNumber,
+        )
+      : enrolments;
+
+    if (!targetEnrolments.length) {
+      throw new NotFoundException(
+        `Student ${requestedStudentNumber} is not enrolled in class ${className} for term ${termNum}/${termYear}.`,
+      );
+    }
+
     const allFees = await this.financeService.getAllFees();
     const billsForTerm =
       termType === TermType.VACATION
@@ -781,14 +834,37 @@ export class PaymentService {
           `Vacation fee definitions are missing. Configure ${FeesNames.vacationTuitionDay} and ${FeesNames.vacationTuitionBoarder} first.`,
         );
       }
-      throw new BadRequestException(
-        `No configured bills were found for class ${className} in term ${termNum}/${termYear}. Configure bills first.`,
+
+      // Helper fallback: auto-seed minimal class template from tuition fee definitions.
+      // This prevents hard failure for first-time class setup and allows admins to run bulk invoicing.
+      const fallbackTemplate =
+        this.buildDefaultRegularFeeTemplateByResidence(allFees);
+      if (!fallbackTemplate.size) {
+        throw new BadRequestException(
+          `No configured bills were found for class ${className} in term ${termNum}/${termYear}. Also missing default tuition fees. Create at least one day and one boarder tuition fee (${FeesNames.oLevelTuitionDay}/${FeesNames.aLevelTuitionDay} and ${FeesNames.oLevelTuitionBoarder}/${FeesNames.aLevelTuitionBoarder}).`,
+        );
+      }
+
+      logStructured(
+        this.logger,
+        'warn',
+        'payment.bulkInvoiceClass.fallbackTemplate',
+        'Using fallback class template because configured bills were missing',
+        {
+          className,
+          termNum,
+          termYear,
+          fallbackResidences: Array.from(fallbackTemplate.keys()),
+        },
+      );
+      fallbackTemplate.forEach((feeIds, residence) =>
+        templateByResidence.set(residence, feeIds),
       );
     }
 
     const results: BulkClassInvoiceStudentResultDto[] = [];
 
-    for (const enrol of enrolments) {
+    for (const enrol of targetEnrolments) {
       const student = enrol.student;
       const studentNumber = student?.studentNumber;
       if (!studentNumber) continue;
@@ -798,7 +874,10 @@ export class PaymentService {
           ? `${student?.surname ?? ''} ${student?.name ?? ''}`.trim()
           : undefined;
       const normalizedResidence = this.normalizeResidence(enrol.residence);
-      const templateFeeIds = templateByResidence.get(normalizedResidence);
+      const templateFeeIds =
+        templateByResidence.get(normalizedResidence) ??
+        templateByResidence.get(Residence.Day) ??
+        templateByResidence.get(Residence.Boarder);
 
       if (!templateFeeIds || templateFeeIds.size === 0) {
         results.push({
@@ -881,6 +960,7 @@ export class PaymentService {
       termNum,
       year: termYear,
       termType,
+      requestedStudentNumber,
       totalStudents: results.length,
       successCount,
       failureCount: results.length - successCount,

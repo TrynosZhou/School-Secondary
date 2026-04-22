@@ -18,11 +18,11 @@ export class FinanceService {
   constructor(private httpClient: HttpClient) {}
 
   getAllFees(): Observable<FeesModel[]> {
-    return this.httpClient.get<FeesModel[]>(`${this.baseURL}fees/`);
+    return this.httpClient.get<FeesModel[]>(`${this.baseURL}fees`);
   }
 
   createFee(fee: FeesModel): Observable<FeesModel> {
-    return this.httpClient.post<FeesModel>(`${this.baseURL}fees/`, fee);
+    return this.httpClient.post<FeesModel>(`${this.baseURL}fees`, fee);
   }
 
   editFees(id: number, fee: FeesModel): Observable<FeesModel> {

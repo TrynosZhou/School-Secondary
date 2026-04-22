@@ -5,7 +5,7 @@
       Bulk Class Invoicing
     </mat-card-title>
     <mat-card-subtitle>
-      Run class-wide invoicing for a selected term in a dedicated workflow.
+      Run invoicing for a whole class, or enter one student number to target a single student.
     </mat-card-subtitle>
   </mat-card-header>
 
@@ -29,6 +29,14 @@
         </mat-select>
       </mat-form-field>
 
+      <mat-form-field appearance="outline">
+        <mat-label>Student Number (Optional)</mat-label>
+        <input
+          matInput
+          [(ngModel)]="selectedStudentNumber"
+          placeholder="Leave blank to invoice whole class" />
+      </mat-form-field>
+
       <button
         mat-raised-button
         color="primary"
@@ -48,6 +56,12 @@
       <span>
         Class {{ bulkResult.className }} - Term {{ bulkResult.termNum }} {{ bulkResult.year }}
         ({{ bulkResult.termType }})
+      </span>
+      <span *ngIf="bulkResult.requestedStudentNumber">
+        Mode: Single student ({{ bulkResult.requestedStudentNumber }})
+      </span>
+      <span *ngIf="!bulkResult.requestedStudentNumber">
+        Mode: Full class
       </span>
 
       <div *ngIf="bulkResult.failureCount > 0" class="bulk-failures">

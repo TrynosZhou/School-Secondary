@@ -1,6 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
-import { Residence } from 'src/enrolment/models/residence.model';
+import { Type } from 'class-transformer';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 import { FeesNames } from '../models/fees-names.enum';
 
 export class CreateFeesDto {
@@ -9,17 +16,19 @@ export class CreateFeesDto {
   id?: number;
 
   @ApiProperty()
+  @Type(() => Number)
   @IsNumber()
+  @Min(0)
   @IsNotEmpty()
   amount: number;
 
   @ApiProperty()
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   description?: string;
 
   @ApiProperty()
-  @IsString()
-  @IsOptional()
+  @IsEnum(FeesNames)
+  @IsNotEmpty()
   name: FeesNames;
 }

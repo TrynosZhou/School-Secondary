@@ -104,6 +104,17 @@ export class ReceiptService {
     }
   }
 
+  private resolveServedBy(
+    profile: TeachersEntity | StudentsEntity | ParentsEntity,
+  ): string {
+    const identity =
+      profile?.email?.trim() ||
+      (profile as unknown as { username?: string })?.username?.trim() ||
+      (profile as unknown as { id?: string })?.id?.trim();
+
+    return identity || 'system';
+  }
+
   async voidReceipt(
     receiptId: number,
     voidedByEmail: string,
@@ -419,7 +430,7 @@ export class ReceiptService {
       'Receipt amount paid',
     );
 
-    const allowedRoles = [ROLES.reception, ROLES.auditor, ROLES.dev];
+    const allowedRoles = [ROLES.reception, ROLES.auditor, ROLES.admin, ROLES.dev];
     if (!allowedRoles.includes(profile.role as ROLES)) {
       throw new UnauthorizedException('You are not allowed to generate receipts');
     }
@@ -433,6 +444,8 @@ export class ReceiptService {
       );
     }
 
+    const servedBy = this.resolveServedBy(profile);
+
     if (createReceiptDto.paymentMethod === PaymentMethods.cash) {
       const largeCashThreshold = 10000;
       if (createReceiptDto.amountPaid > largeCashThreshold) {
@@ -445,7 +458,7 @@ export class ReceiptService {
             studentNumber,
             amountPaid: createReceiptDto.amountPaid,
             paymentMethod: createReceiptDto.paymentMethod,
-            servedBy: profile.email,
+            servedBy,
             threshold: largeCashThreshold,
           },
         );
@@ -479,7 +492,7 @@ export class ReceiptService {
         studentNumber,
         amountPaid: createReceiptDto.amountPaid,
         paymentMethod: createReceiptDto.paymentMethod,
-        servedBy: profile.email,
+        servedBy,
       },
     );
 
@@ -510,7 +523,7 @@ export class ReceiptService {
       paymentDate: new Date(), // Set payment date explicitly for validation
       student: student,
       receiptNumber: await this.generateReceiptNumber(),
-      servedBy: profile.email,
+      servedBy,
       enrol: latestEnrol,
       isVoided: false,
       voidedAt: null,
@@ -1438,6 +1451,9 @@ export class ReceiptService {
       case ROLES.reception:
       case ROLES.student:
       case ROLES.teacher: {
+        if (profile.role === ROLES.admin) {
+          break;
+        }
         throw new UnauthorizedException(
           'You are not allowed to approve payments',
         );
